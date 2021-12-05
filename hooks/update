@@ -1,0 +1,23 @@
+#!/bin/bash
+
+REFNAME=${ARGV[0]}
+OLDREV=${ARGV[1]}
+NEWREV=${ARGV[2]}
+
+
+function enforce_commit_msg()
+{
+  revs=$(git rev-list "$OLDREV".."$NEWREV")
+
+  for rev in "${revs[@]}"; do
+    # sed '1,/^$/d' go to the first blank line and take everything after that.
+    cmtmsg=$(git cat-file commit "$rev" | sed '1,/^$/d')
+
+    if [[ $cmtmsg != \[KNI\]* ]]; then
+      echo "commit message $cmtmsg not formatted correctly, please refer to <put link to README.md here>"
+      exit 1
+    fi
+  done
+}
+
+enforce_commit_msg
