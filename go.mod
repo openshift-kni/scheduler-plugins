@@ -1,4 +1,4 @@
-module sigs.k8s.io/scheduler-plugins
+module github.com/openshift-kni/scheduler-plugins
 
 go 1.16
 
@@ -26,6 +26,7 @@ require (
 	k8s.io/kube-scheduler v0.22.3
 	k8s.io/kubernetes v1.22.3
 	k8s.io/utils v0.0.0-20210819203725-bdf08cb9a70a
+	sigs.k8s.io/scheduler-plugins v0.21.6
 	sigs.k8s.io/yaml v1.2.0
 )
 
@@ -57,3 +58,5 @@ replace (
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.22.3
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.22.3
 )
+
+replace sigs.k8s.io/scheduler-plugins => sigs.k8s.io/scheduler-plugins v0.21.7-0.20211124123620-b8d13e17a3e1
