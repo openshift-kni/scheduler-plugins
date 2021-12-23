@@ -26,5 +26,5 @@ source "${SCRIPT_ROOT}/hack/lib/init.sh"
 
 # TODO: make args customizable.
 go test -mod=vendor \
-  github.com/openshift-kni/scheduler-plugins/cmd/noderesourcetopology-plugin/... \
-  github.com/openshift-kni/scheduler-plugins/pkg/noderesourcetopology/...
+  ./../scheduler-plugins/cmd/noderesourcetopology-plugin/... \
+  ./../scheduler-plugins/pkg/noderesourcetopology/...
