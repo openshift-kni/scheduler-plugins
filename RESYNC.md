@@ -39,8 +39,9 @@ at the beginning of the commit message.
 
 For the sake of transparency, for every resync process we should update the following table:
 
-| Resync Date | Merge With Upstream Tag/Commit                                                                       | Author |
-|-------------|------------------------------------------------------------------------------------------------------|--------|
-| 12.11.2021  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/b8d13e17a3e1f633d72d71276a3da6fecf89f2e3 | Tal-or |
+| Resync Date | Merge With Upstream Tag/Commit                                                                       | Author    |
+|-------------|------------------------------------------------------------------------------------------------------|-----------|
+| 12.23.2021  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/da8c3d19e692b194f74cec72d40abcd80a3b1fd6 | fromanirh |
+| 12.11.2021  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/b8d13e17a3e1f633d72d71276a3da6fecf89f2e3 | Tal-or    |
 
 The newest resync should appear in the first row. 
