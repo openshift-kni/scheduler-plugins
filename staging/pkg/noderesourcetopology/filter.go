@@ -130,7 +130,7 @@ func (tm *TopologyMatch) Filter(ctx context.Context, cycleState *framework.Cycle
 	}
 
 	nodeName := nodeInfo.Node().Name
-	nodeTopology := findNodeTopology(nodeName, tm.lister)
+	nodeTopology := tm.getNodeTopology(nodeName)
 
 	if nodeTopology == nil {
 		ulog.V(6, pod).InfoS("Missing NodeResourceTopology", "node", nodeName)
