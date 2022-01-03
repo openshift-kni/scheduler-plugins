@@ -28,6 +28,7 @@ import (
 	topologyv1alpha1 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha1"
 	topoclientset "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/generated/clientset/versioned"
 	topologyinformers "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/generated/informers/externalversions"
+	informerv1alpha1 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/generated/informers/externalversions/topology/v1alpha1"
 	listerv1alpha1 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/generated/listers/topology/v1alpha1"
 )
 
@@ -41,7 +42,7 @@ func findNodeTopology(nodeName string, lister listerv1alpha1.NodeResourceTopolog
 	return nodeTopology
 }
 
-func initNodeTopologyInformer(kubeConfig *restclient.Config) (listerv1alpha1.NodeResourceTopologyLister, error) {
+func initNodeTopologyInformer(kubeConfig *restclient.Config) (informerv1alpha1.NodeResourceTopologyInformer, error) {
 	topoClient, err := topoclientset.NewForConfig(kubeConfig)
 	if err != nil {
 		klog.ErrorS(err, "Cannot create clientset for NodeTopologyResource", "kubeConfig", kubeConfig)
@@ -50,14 +51,13 @@ func initNodeTopologyInformer(kubeConfig *restclient.Config) (listerv1alpha1.Nod
 
 	topologyInformerFactory := topologyinformers.NewSharedInformerFactory(topoClient, 0)
 	nodeTopologyInformer := topologyInformerFactory.Topology().V1alpha1().NodeResourceTopologies()
-	nodeResourceTopologyLister := nodeTopologyInformer.Lister()
 
 	klog.V(5).InfoS("Start nodeTopologyInformer")
 	ctx := context.Background()
 	topologyInformerFactory.Start(ctx.Done())
 	topologyInformerFactory.WaitForCacheSync(ctx.Done())
 
-	return nodeResourceTopologyLister, nil
+	return nodeTopologyInformer, nil
 }
 
 func createNUMANodeList(zones topologyv1alpha1.ZoneList) NUMANodeList {

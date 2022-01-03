@@ -86,10 +86,11 @@ func New(args runtime.Object, handle framework.Handle) (framework.Plugin, error)
 	if !ok {
 		return nil, fmt.Errorf("want args to be of type NodeResourceTopologyMatchArgs, got %T", args)
 	}
-	lister, err := initNodeTopologyInformer(handle.KubeConfig())
+	informer, err := initNodeTopologyInformer(handle.KubeConfig())
 	if err != nil {
 		return nil, err
 	}
+	lister := informer.Lister()
 
 	scoringFunction, err := getScoringStrategyFunction(tcfg.ScoringStrategy.Type)
 	if err != nil {
