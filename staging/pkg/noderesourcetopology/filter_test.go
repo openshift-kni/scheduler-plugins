@@ -253,8 +253,9 @@ func TestNodeResourceTopology(t *testing.T) {
 	lister := fakeInformer.Lister()
 
 	tm := TopologyMatch{
-		lister:         lister,
-		policyHandlers: newPolicyHandlerMap(),
+		lister:           lister,
+		policyHandlers:   newPolicyHandlerMap(),
+		pendingResources: newNodeResourceCounters(),
 	}
 
 	for _, tt := range tests {

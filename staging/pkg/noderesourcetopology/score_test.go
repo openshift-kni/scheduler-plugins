@@ -196,9 +196,10 @@ func TestNodeResourceScorePlugin(t *testing.T) {
 			}
 
 			tm := &TopologyMatch{
-				lister:         lister,
-				policyHandlers: newPolicyHandlerMap(),
-				scorerFn:       scoringFunction,
+				lister:           lister,
+				policyHandlers:   newPolicyHandlerMap(),
+				scorerFn:         scoringFunction,
+				pendingResources: newNodeResourceCounters(),
 			}
 
 			for _, req := range test.requests {

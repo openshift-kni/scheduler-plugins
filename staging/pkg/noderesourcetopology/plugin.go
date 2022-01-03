@@ -63,9 +63,11 @@ type TopologyMatch struct {
 	policyHandlers      PolicyHandlerMap
 	scorerFn            scoreStrategy
 	resourceToWeightMap resourceToWeightMap
+	pendingResources    *nodeResourceCounters
 }
 
 var _ framework.FilterPlugin = &TopologyMatch{}
+var _ framework.ReservePlugin = &TopologyMatch{}
 var _ framework.ScorePlugin = &TopologyMatch{}
 var _ framework.EnqueueExtensions = &TopologyMatch{}
 
@@ -92,6 +94,9 @@ func New(args runtime.Object, handle framework.Handle) (framework.Plugin, error)
 	}
 	lister := informer.Lister()
 
+	nodeResourceCounters := newNodeResourceCounters()
+	setupNodeResourceCountersWithInformer(informer, nodeResourceCounters)
+
 	scoringFunction, err := getScoringStrategyFunction(tcfg.ScoringStrategy.Type)
 	if err != nil {
 		return nil, err
@@ -107,6 +112,7 @@ func New(args runtime.Object, handle framework.Handle) (framework.Plugin, error)
 		policyHandlers:      newPolicyHandlerMap(),
 		scorerFn:            scoringFunction,
 		resourceToWeightMap: resToWeightMap,
+		pendingResources:    nodeResourceCounters,
 	}
 
 	return topologyMatch, nil
