@@ -22,9 +22,12 @@ import (
 	"time"
 
 	"k8s.io/component-base/logs"
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
+	kninoderesourcetopology "sigs.k8s.io/scheduler-plugins/pkg-kni/noderesourcetopology"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology"
+
 	// Ensure scheme package is initialized.
 	_ "sigs.k8s.io/scheduler-plugins/pkg/apis/config/scheme"
 )
@@ -32,12 +35,19 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
+	var opt app.Option
+	if _, ok := os.LookupEnv("KNI"); ok {
+		klog.Infof("Starting staging node resource topolog plugin")
+		opt = app.WithPlugin(kninoderesourcetopology.Name, kninoderesourcetopology.New)
+	} else {
+		klog.Infof("Starting stable node resource topolog plugin")
+		opt = app.WithPlugin(noderesourcetopology.Name, noderesourcetopology.New)
+	}
+
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence
 	// used by various kinds of workloads.
-	command := app.NewSchedulerCommand(
-		app.WithPlugin(noderesourcetopology.Name, noderesourcetopology.New),
-	)
+	command := app.NewSchedulerCommand(opt)
 
 	// TODO: once we switch everything over to Cobra commands, we can go back to calling
 	// utilflag.InitFlags() (by removing its pflag.Parse() call). For now, we have to set the
