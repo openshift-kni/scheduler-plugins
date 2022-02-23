@@ -141,6 +141,30 @@ func TestNodeResourceTopology(t *testing.T) {
 				},
 			},
 		},
+		&topologyv1alpha1.NodeResourceTopology{
+			ObjectMeta:       metav1.ObjectMeta{Name: "node5"},
+			TopologyPolicies: []string{string(topologyv1alpha1.SingleNUMANodeContainerLevel)},
+			Zones: topologyv1alpha1.ZoneList{
+				{
+					Name: "node-0",
+					Type: "Node",
+					Resources: topologyv1alpha1.ResourceInfoList{
+						MakeTopologyResInfo(cpu, "20", "2"),
+						MakeTopologyResInfo(memory, "8Gi", "4Gi"),
+						MakeTopologyResInfo(nicResourceName, "30", "5"),
+					},
+				},
+				{
+					Name: "node-1",
+					Type: "Node",
+					Resources: topologyv1alpha1.ResourceInfoList{
+						MakeTopologyResInfo(cpu, "30", "4"),
+						MakeTopologyResInfo(memory, "8Gi", "4Gi"),
+						MakeTopologyResInfo(nicResourceName, "30", "2"),
+					},
+				},
+			},
+		},
 	}
 
 	nodes := make([]*v1.Node, len(nodeTopologies))
