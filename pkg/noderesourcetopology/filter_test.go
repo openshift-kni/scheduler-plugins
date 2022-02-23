@@ -333,6 +333,15 @@ func TestNodeResourceTopology(t *testing.T) {
 			node:       nodes[3],
 			wantStatus: framework.NewStatus(framework.Unschedulable, "cannot align pod: "),
 		},
+		{
+			name: "Guaranteed QoS Topology Container Scope, pod fit",
+			pod: makePodByResourceListWithManyContainers(&v1.ResourceList{
+				v1.ResourceCPU:             *resource.NewQuantity(3, resource.DecimalSI),
+				v1.ResourceMemory:          resource.MustParse("1Gi"),
+				notExistingNICResourceName: *resource.NewQuantity(0, resource.DecimalSI)}, 3),
+			node:       nodes[4],
+			wantStatus: framework.NewStatus(framework.Unschedulable, "cannot align pod: "),
+		},
 	}
 
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
@@ -547,6 +556,136 @@ func TestNodeResourceTopologyMultiContainerPodScope(t *testing.T) {
 			},
 			avail:      []resourceDescriptor{},
 			wantStatus: framework.NewStatus(framework.Unschedulable, "cannot align pod: testpod"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fakeClient := faketopologyv1alpha1.NewSimpleClientset()
+			fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
+			for _, obj := range nodeTopologies {
+				fakeInformer.Informer().GetStore().Add(obj)
+			}
+
+			tm := TopologyMatch{
+				lister:         fakeInformer.Lister(),
+				policyHandlers: newPolicyHandlerMap(),
+			}
+
+			nodeInfo := framework.NewNodeInfo()
+			nodeInfo.SetNode(tt.node)
+			if len(tt.pod.Spec.Containers) > 0 {
+				tt.pod.Spec.Containers[0].Name = containerName
+			}
+			gotStatus := tm.Filter(context.Background(), framework.NewCycleState(), tt.pod, nodeInfo)
+
+			if !reflect.DeepEqual(gotStatus, tt.wantStatus) {
+				t.Errorf("status does not match: %v, want: %v", gotStatus, tt.wantStatus)
+			}
+		})
+	}
+}
+
+func TestNodeResourceTopologyMultiContainerContainerScope(t *testing.T) {
+	nodeTopologies := []*topologyv1alpha1.NodeResourceTopology{
+		{
+			ObjectMeta:       metav1.ObjectMeta{Name: "host0"},
+			TopologyPolicies: []string{string(topologyv1alpha1.SingleNUMANodeContainerLevel)},
+			Zones: topologyv1alpha1.ZoneList{
+				{
+					Name: "node-0",
+					Type: "Node",
+					Resources: topologyv1alpha1.ResourceInfoList{
+						MakeTopologyResInfo(cpu, "32", "30"),
+						MakeTopologyResInfo(memory, "64Gi", "60Gi"),
+						MakeTopologyResInfo(hugepages2Mi, "384Mi", "384Mi"),
+						MakeTopologyResInfo(nicResourceName, "16", "16"),
+					},
+				},
+				{
+					Name: "node-1",
+					Type: "Node",
+					Resources: topologyv1alpha1.ResourceInfoList{
+						MakeTopologyResInfo(cpu, "32", "32"),
+						MakeTopologyResInfo(memory, "64Gi", "64Gi"),
+						MakeTopologyResInfo(hugepages2Mi, "512Mi", "512Mi"),
+						MakeTopologyResInfo(nicResourceName, "32", "32"),
+					},
+				},
+			},
+		},
+	}
+
+	nodes := make([]*v1.Node, len(nodeTopologies))
+	for i := range nodes {
+		nodes[i] = makeNodeFromNodeResourceTopology(nodeTopologies[i])
+	}
+
+	tests := []struct {
+		name       string
+		pod        *v1.Pod
+		node       *v1.Node
+		nrts       []*topologyv1alpha1.NodeResourceTopology
+		avail      []resourceDescriptor
+		wantStatus *framework.Status
+	}{
+		{
+			name: "gu pod, overallocation",
+			pod: makeMultiContainerPodWithResourceList("testpod1",
+				[]v1.ResourceList{
+					{
+						v1.ResourceCPU:                   resource.MustParse("24"),
+						v1.ResourceMemory:                resource.MustParse("48Gi"),
+						v1.ResourceName(hugepages2Mi):    resource.MustParse("384Mi"),
+						v1.ResourceName(nicResourceName): resource.MustParse("24"),
+					},
+					{
+						v1.ResourceCPU:                   resource.MustParse("24"),
+						v1.ResourceMemory:                resource.MustParse("48Gi"),
+						v1.ResourceName(hugepages2Mi):    resource.MustParse("384Mi"),
+						v1.ResourceName(nicResourceName): resource.MustParse("24"),
+					},
+					{
+						v1.ResourceCPU:                   resource.MustParse("24"),
+						v1.ResourceMemory:                resource.MustParse("48Gi"),
+						v1.ResourceName(hugepages2Mi):    resource.MustParse("384Mi"),
+						v1.ResourceName(nicResourceName): resource.MustParse("24"),
+					},
+				},
+			),
+			node: nodes[0],
+			nrts: []*topologyv1alpha1.NodeResourceTopology{
+				nodeTopologies[0],
+			},
+			avail:      []resourceDescriptor{},
+			wantStatus: framework.NewStatus(framework.Unschedulable, "cannot align pod: testpod1"),
+		},
+		{
+			name: "gu pod, 1 container does not fit on NUMA node",
+			pod: makeMultiContainerPodWithResourceList("testpod2",
+				[]v1.ResourceList{
+					{
+						v1.ResourceCPU:    resource.MustParse("16"),
+						v1.ResourceMemory: resource.MustParse("16Gi"),
+					},
+					{
+						v1.ResourceCPU:    resource.MustParse("16"),
+						v1.ResourceMemory: resource.MustParse("16Gi"),
+					},
+					{
+						v1.ResourceCPU:                   resource.MustParse("32"),
+						v1.ResourceMemory:                resource.MustParse("48Gi"),
+						v1.ResourceName(hugepages2Mi):    resource.MustParse("256Mi"),
+						v1.ResourceName(nicResourceName): resource.MustParse("32"),
+					},
+				},
+			),
+			node: nodes[0],
+			nrts: []*topologyv1alpha1.NodeResourceTopology{
+				nodeTopologies[0],
+			},
+			avail:      []resourceDescriptor{},
+			wantStatus: framework.NewStatus(framework.Unschedulable, "cannot align pod: testpod2"),
 		},
 	}
 
