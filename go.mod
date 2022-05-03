@@ -3,6 +3,7 @@ module sigs.k8s.io/scheduler-plugins
 go 1.16
 
 require (
+	github.com/dustin/go-humanize v1.0.0
 	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.1.2
 	github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.0.12
