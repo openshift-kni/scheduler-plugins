@@ -12,25 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARCHS = amd64 arm64
 COMMONENVVAR=GOOS=$(shell uname -s | tr A-Z a-z)
 BUILDENVVAR=CGO_ENABLED=0
 
-LOCAL_REGISTRY?=localhost:5000/scheduler-plugins
-LOCAL_IMAGE?=kube-scheduler:latest
-LOCAL_CONTROLLER_IMAGE?=controller:latest
+CONTAINER_REGISTRY?="quay.io/openshift-kni"
+CONTAINER_IMAGE?="scheduler-plugins"
 
-# RELEASE_REGISTRY is the container registry to push
-# into. The default is to push to the staging
-# registry, not production(k8s.gcr.io).
-RELEASE_REGISTRY?=gcr.io/k8s-staging-scheduler-plugins
-RELEASE_VERSION?=v$(shell date +%Y%m%d)-$(shell git describe --tags --match "v*")
-RELEASE_IMAGE:=kube-scheduler:$(RELEASE_VERSION)
-RELEASE_CONTROLLER_IMAGE:=controller:$(RELEASE_VERSION)
+RELEASE_SEQUENTIAL?=01
+RELEASE_VERSION?=devel-v0.0.$(shell date +%Y%m%d)$(RELEASE_SEQUENTIAL)
 
 # VERSION is the scheduler's version
 #
-# The RELEASE_VERSION variable can have one of two formats:
+# The RELEASE_VERSION variable can have one of the following formats:
 # v20201009-v0.18.800-46-g939c1c0 - automated build for a commit(not a tag) and also a local build
 # v20200521-v0.18.800             - automated build for a tag
 VERSION=$(shell echo $(RELEASE_VERSION) | awk -F - '{print $$2}')
@@ -40,6 +33,9 @@ all: build
 
 .PHONY: build
 build: build-noderesourcetopology-plugin
+
+.PHONY: image
+image: build-noderesourcetopology-image
 
 .PHONY: build.amd64
 build.amd64: build-scheduler.amd64 build-noderesourcetopology-plugin.amd64
@@ -53,8 +49,8 @@ build-noderesourcetopology-plugin.amd64: update-vendor
 	$(COMMONENVVAR) $(BUILDENVVAR) GOARCH=amd64 go build -ldflags '-X k8s.io/component-base/version.gitVersion=$(VERSION) -w' -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
 .PHONY: local-noderesourcetopology-image
-local-noderesourcetopology-image: clean
-	podman build -f ./build/noderesourcetopology-plugin/Dockerfile --build-arg ARCH="amd64" --build-arg RELEASE_VERSION="$(RELEASE_VERSION)" -t $(LOCAL_REGISTRY)/$(LOCAL_IMAGE) .
+build-noderesourcetopology-image: clean
+	podman build -f ./build/noderesourcetopology-plugin/Dockerfile --build-arg ARCH="amd64" --build-arg RELEASE_VERSION="$(RELEASE_VERSION)" -t $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION) .
 
 .PHONY: update-vendor
 update-vendor:
