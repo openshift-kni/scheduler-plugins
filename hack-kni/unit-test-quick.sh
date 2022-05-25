@@ -27,4 +27,5 @@ source "${SCRIPT_ROOT}/hack/lib/init.sh"
 # TODO: make args customizable.
 go test -mod=vendor \
   sigs.k8s.io/scheduler-plugins/cmd/noderesourcetopology-plugin/... \
-  sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/...
+  sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/... \
+  sigs.k8s.io/scheduler-plugins/pkg-kni/...
