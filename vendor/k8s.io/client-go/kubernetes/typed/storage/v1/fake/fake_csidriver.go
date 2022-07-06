@@ -102,7 +102,11 @@ func (c *FakeCSIDrivers) Update(ctx context.Context, cSIDriver *storagev1.CSIDri
 // Delete takes name of the cSIDriver and deletes it. Returns an error if one occurs.
 func (c *FakeCSIDrivers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
+<<<<<<< HEAD
 		Invokes(testing.NewRootDeleteAction(csidriversResource, name), &storagev1.CSIDriver{})
+=======
+		Invokes(testing.NewRootDeleteActionWithOptions(csidriversResource, name, opts), &storagev1.CSIDriver{})
+>>>>>>> upstream/master
 	return err
 }
 

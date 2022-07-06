@@ -9,7 +9,10 @@ package unix
 
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
 //sys	Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
+<<<<<<< HEAD
 //sys	dup2(oldfd int, newfd int) (err error)
+=======
+>>>>>>> upstream/master
 //sys	Fchown(fd int, uid int, gid int) (err error)
 //sys	Fstat(fd int, stat *Stat_t) (err error)
 //sys	Fstatat(dirfd int, path string, stat *Stat_t, flags int) (err error) = SYS_FSTATAT64
@@ -20,7 +23,10 @@ package unix
 //sysnb	Getgid() (gid int)
 //sysnb	Getrlimit(resource int, rlim *Rlimit) (err error)
 //sysnb	Getuid() (uid int)
+<<<<<<< HEAD
 //sysnb	InotifyInit() (fd int, err error)
+=======
+>>>>>>> upstream/master
 //sys	Lchown(path string, uid int, gid int) (err error)
 //sys	Listen(s int, n int) (err error)
 //sys	Lstat(path string, stat *Stat_t) (err error)
@@ -119,6 +125,7 @@ func (cmsg *Cmsghdr) SetLen(length int) {
 func (rsa *RawSockaddrNFCLLCP) SetServiceNameLen(length int) {
 	rsa.Service_name_len = uint64(length)
 }
+<<<<<<< HEAD
 
 //sysnb	pipe(p *[2]_C_int) (err error)
 
@@ -154,3 +161,5 @@ func Poll(fds []PollFd, timeout int) (n int, err error) {
 	}
 	return poll(&fds[0], len(fds), timeout)
 }
+=======
+>>>>>>> upstream/master

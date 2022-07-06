@@ -170,18 +170,8 @@ func isNUMANodeSuitable(qos v1.PodQOSClass, resource v1.ResourceName, quantity, 
 
 func singleNUMAPodLevelHandler(pod *v1.Pod, zones topologyv1alpha1.ZoneList, nodeInfo *framework.NodeInfo) *framework.Status {
 	klog.V(5).InfoS("Pod Level Resource handler")
-	resources := make(v1.ResourceList)
 
-	// We count here in the way TopologyManager is doing it, IOW we put InitContainers
-	// and normal containers in the one scope
-	for _, container := range append(pod.Spec.InitContainers, pod.Spec.Containers...) {
-		for resource, quantity := range container.Resources.Requests {
-			if q, ok := resources[resource]; ok {
-				quantity.Add(q)
-			}
-			resources[resource] = quantity
-		}
-	}
+	resources := util.GetPodEffectiveRequest(pod)
 
 	logKey := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
 	nodes := createNUMANodeList(zones)

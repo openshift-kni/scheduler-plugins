@@ -449,6 +449,11 @@ type VolumeHost interface {
 	// Returns the name of the node
 	GetNodeName() types.NodeName
 
+<<<<<<< HEAD
+=======
+	GetAttachedVolumesFromNodeStatus() (map[v1.UniqueVolumeName]string, error)
+
+>>>>>>> upstream/master
 	// Returns the event recorder of kubelet.
 	GetEventRecorder() record.EventRecorder
 

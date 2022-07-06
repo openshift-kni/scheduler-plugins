@@ -30,32 +30,60 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	auditinternal "k8s.io/apiserver/pkg/apis/audit"
 	"k8s.io/apiserver/pkg/audit"
+<<<<<<< HEAD
 	"k8s.io/apiserver/pkg/audit/policy"
 	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
 	"k8s.io/apiserver/pkg/endpoints/request"
+=======
+	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
+	"k8s.io/apiserver/pkg/endpoints/request"
+	"k8s.io/apiserver/pkg/endpoints/responsewriter"
+>>>>>>> upstream/master
 )
 
 // WithAudit decorates a http.Handler with audit logging information for all the
 // requests coming to the server. Audit level is decided according to requests'
 // attributes and audit policy. Logs are emitted to the audit sink to
 // process events. If sink or audit policy is nil, no decoration takes place.
+<<<<<<< HEAD
 func WithAudit(handler http.Handler, sink audit.Sink, policy policy.Checker, longRunningCheck request.LongRunningRequestCheck) http.Handler {
+=======
+func WithAudit(handler http.Handler, sink audit.Sink, policy audit.PolicyRuleEvaluator, longRunningCheck request.LongRunningRequestCheck) http.Handler {
+>>>>>>> upstream/master
 	if sink == nil || policy == nil {
 		return handler
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+<<<<<<< HEAD
 		req, ev, omitStages, err := createAuditEventAndAttachToContext(req, policy)
+=======
+		auditContext, err := evaluatePolicyAndCreateAuditEvent(req, policy)
+>>>>>>> upstream/master
 		if err != nil {
 			utilruntime.HandleError(fmt.Errorf("failed to create audit event: %v", err))
 			responsewriters.InternalError(w, req, errors.New("failed to create audit event"))
 			return
 		}
+<<<<<<< HEAD
 		ctx := req.Context()
 		if ev == nil || ctx == nil {
+=======
+
+		ev := auditContext.Event
+		if ev == nil || req.Context() == nil {
+>>>>>>> upstream/master
 			handler.ServeHTTP(w, req)
 			return
 		}
 
+<<<<<<< HEAD
+=======
+		req = req.WithContext(audit.WithAuditContext(req.Context(), auditContext))
+
+		ctx := req.Context()
+		omitStages := auditContext.RequestAuditConfig.OmitStages
+
+>>>>>>> upstream/master
 		ev.Stage = auditinternal.StageRequestReceived
 		if processed := processAuditEvent(ctx, sink, ev, omitStages); !processed {
 			audit.ApiserverAuditDroppedCounter.WithContext(ctx).Inc()
@@ -112,16 +140,25 @@ func WithAudit(handler http.Handler, sink audit.Sink, policy policy.Checker, lon
 	})
 }
 
+<<<<<<< HEAD
 // createAuditEventAndAttachToContext is responsible for creating the audit event
 // and attaching it to the appropriate request context. It returns:
 // - context with audit event attached to it
 // - created audit event
 // - error if anything bad happened
 func createAuditEventAndAttachToContext(req *http.Request, policy policy.Checker) (*http.Request, *auditinternal.Event, []auditinternal.Stage, error) {
+=======
+// evaluatePolicyAndCreateAuditEvent is responsible for evaluating the audit
+// policy configuration applicable to the request and create a new audit
+// event that will be written to the API audit log.
+// - error if anything bad happened
+func evaluatePolicyAndCreateAuditEvent(req *http.Request, policy audit.PolicyRuleEvaluator) (*audit.AuditContext, error) {
+>>>>>>> upstream/master
 	ctx := req.Context()
 
 	attribs, err := GetAuthorizerAttributes(ctx)
 	if err != nil {
+<<<<<<< HEAD
 		return req, nil, nil, fmt.Errorf("failed to GetAuthorizerAttributes: %v", err)
 	}
 
@@ -130,12 +167,25 @@ func createAuditEventAndAttachToContext(req *http.Request, policy policy.Checker
 	if level == auditinternal.LevelNone {
 		// Don't audit.
 		return req, nil, nil, nil
+=======
+		return nil, fmt.Errorf("failed to GetAuthorizerAttributes: %v", err)
+	}
+
+	ls := policy.EvaluatePolicyRule(attribs)
+	audit.ObservePolicyLevel(ctx, ls.Level)
+	if ls.Level == auditinternal.LevelNone {
+		// Don't audit.
+		return &audit.AuditContext{
+			RequestAuditConfig: ls.RequestAuditConfig,
+		}, nil
+>>>>>>> upstream/master
 	}
 
 	requestReceivedTimestamp, ok := request.ReceivedTimestampFrom(ctx)
 	if !ok {
 		requestReceivedTimestamp = time.Now()
 	}
+<<<<<<< HEAD
 	ev, err := audit.NewEventFromRequest(req, requestReceivedTimestamp, level, attribs)
 	if err != nil {
 		return req, nil, nil, fmt.Errorf("failed to complete audit event from request: %v", err)
@@ -144,6 +194,17 @@ func createAuditEventAndAttachToContext(req *http.Request, policy policy.Checker
 	req = req.WithContext(request.WithAuditEvent(ctx, ev))
 
 	return req, ev, omitStages, nil
+=======
+	ev, err := audit.NewEventFromRequest(req, requestReceivedTimestamp, ls.Level, attribs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to complete audit event from request: %v", err)
+	}
+
+	return &audit.AuditContext{
+		RequestAuditConfig: ls.RequestAuditConfig,
+		Event:              ev,
+	}, nil
+>>>>>>> upstream/master
 }
 
 func processAuditEvent(ctx context.Context, sink audit.Sink, ev *auditinternal.Event, omitStages []auditinternal.Stage) bool {
@@ -171,6 +232,7 @@ func decorateResponseWriter(ctx context.Context, responseWriter http.ResponseWri
 		omitStages:     omitStages,
 	}
 
+<<<<<<< HEAD
 	// check if the ResponseWriter we're wrapping is the fancy one we need
 	// or if the basic is sufficient
 	//lint:file-ignore SA1019 Keep supporting deprecated http.CloseNotifier
@@ -184,6 +246,13 @@ func decorateResponseWriter(ctx context.Context, responseWriter http.ResponseWri
 }
 
 var _ http.ResponseWriter = &auditResponseWriter{}
+=======
+	return responsewriter.WrapForHTTP1Or2(delegate)
+}
+
+var _ http.ResponseWriter = &auditResponseWriter{}
+var _ responsewriter.UserProvidedDecorator = &auditResponseWriter{}
+>>>>>>> upstream/master
 
 // auditResponseWriter intercepts WriteHeader, sets it in the event. If the sink is set, it will
 // create immediately an event (for long running requests).
@@ -196,6 +265,13 @@ type auditResponseWriter struct {
 	omitStages []auditinternal.Stage
 }
 
+<<<<<<< HEAD
+=======
+func (a *auditResponseWriter) Unwrap() http.ResponseWriter {
+	return a.ResponseWriter
+}
+
+>>>>>>> upstream/master
 func (a *auditResponseWriter) processCode(code int) {
 	a.once.Do(func() {
 		if a.event.ResponseStatus == nil {
@@ -221,6 +297,7 @@ func (a *auditResponseWriter) WriteHeader(code int) {
 	a.ResponseWriter.WriteHeader(code)
 }
 
+<<<<<<< HEAD
 // fancyResponseWriterDelegator implements http.CloseNotifier, http.Flusher and
 // http.Hijacker which are needed to make certain http operation (e.g. watch, rsh, etc)
 // working.
@@ -246,3 +323,13 @@ func (f *fancyResponseWriterDelegator) Hijack() (net.Conn, *bufio.ReadWriter, er
 var _ http.CloseNotifier = &fancyResponseWriterDelegator{}
 var _ http.Flusher = &fancyResponseWriterDelegator{}
 var _ http.Hijacker = &fancyResponseWriterDelegator{}
+=======
+func (a *auditResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	// fake a response status before protocol switch happens
+	a.processCode(http.StatusSwitchingProtocols)
+
+	// the outer ResponseWriter object returned by WrapForHTTP1Or2 implements
+	// http.Hijacker if the inner object (a.ResponseWriter) implements http.Hijacker.
+	return a.ResponseWriter.(http.Hijacker).Hijack()
+}
+>>>>>>> upstream/master

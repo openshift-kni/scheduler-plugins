@@ -44,6 +44,7 @@ type Converter struct {
 	generatedConversionFuncs ConversionFuncs
 
 	// Set of conversions that should be treated as a no-op
+<<<<<<< HEAD
 	ignoredConversions        map[typePair]struct{}
 	ignoredUntypedConversions map[typePair]struct{}
 
@@ -61,6 +62,18 @@ func NewConverter(nameFn NameFunc) *Converter {
 		ignoredConversions:        make(map[typePair]struct{}),
 		ignoredUntypedConversions: make(map[typePair]struct{}),
 		nameFunc:                  nameFn,
+=======
+	ignoredUntypedConversions map[typePair]struct{}
+}
+
+// NewConverter creates a new Converter object.
+// Arg NameFunc is just for backward compatibility.
+func NewConverter(NameFunc) *Converter {
+	c := &Converter{
+		conversionFuncs:           NewConversionFuncs(),
+		generatedConversionFuncs:  NewConversionFuncs(),
+		ignoredUntypedConversions: make(map[typePair]struct{}),
+>>>>>>> upstream/master
 	}
 	c.RegisterUntypedConversionFunc(
 		(*[]byte)(nil), (*[]byte)(nil),
@@ -192,7 +205,10 @@ func (c *Converter) RegisterIgnoredConversion(from, to interface{}) error {
 	if typeTo.Kind() != reflect.Ptr {
 		return fmt.Errorf("expected pointer arg for 'to' param 1, got: %v", typeTo)
 	}
+<<<<<<< HEAD
 	c.ignoredConversions[typePair{typeFrom.Elem(), typeTo.Elem()}] = struct{}{}
+=======
+>>>>>>> upstream/master
 	c.ignoredUntypedConversions[typePair{typeFrom, typeTo}] = struct{}{}
 	return nil
 }

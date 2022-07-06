@@ -54,6 +54,18 @@ type ServerRunOptions struct {
 	// apiserver library can wire it to a flag.
 	MaxRequestBodyBytes       int64
 	EnablePriorityAndFairness bool
+<<<<<<< HEAD
+=======
+
+	// ShutdownSendRetryAfter dictates when to initiate shutdown of the HTTP
+	// Server during the graceful termination of the apiserver. If true, we wait
+	// for non longrunning requests in flight to be drained and then initiate a
+	// shutdown of the HTTP Server. If false, we initiate a shutdown of the HTTP
+	// Server as soon as ShutdownDelayDuration has elapsed.
+	// If enabled, after ShutdownDelayDuration elapses, any incoming request is
+	// rejected with a 429 status code and a 'Retry-After' response.
+	ShutdownSendRetryAfter bool
+>>>>>>> upstream/master
 }
 
 func NewServerRunOptions() *ServerRunOptions {
@@ -68,6 +80,10 @@ func NewServerRunOptions() *ServerRunOptions {
 		JSONPatchMaxCopyBytes:       defaults.JSONPatchMaxCopyBytes,
 		MaxRequestBodyBytes:         defaults.MaxRequestBodyBytes,
 		EnablePriorityAndFairness:   true,
+<<<<<<< HEAD
+=======
+		ShutdownSendRetryAfter:      false,
+>>>>>>> upstream/master
 	}
 }
 
@@ -86,6 +102,10 @@ func (s *ServerRunOptions) ApplyTo(c *server.Config) error {
 	c.JSONPatchMaxCopyBytes = s.JSONPatchMaxCopyBytes
 	c.MaxRequestBodyBytes = s.MaxRequestBodyBytes
 	c.PublicAddress = s.AdvertiseAddress
+<<<<<<< HEAD
+=======
+	c.ShutdownSendRetryAfter = s.ShutdownSendRetryAfter
+>>>>>>> upstream/master
 
 	return nil
 }
@@ -245,5 +265,13 @@ func (s *ServerRunOptions) AddUniversalFlags(fs *pflag.FlagSet) {
 		"will return success, but /readyz immediately returns failure. Graceful termination starts after this delay "+
 		"has elapsed. This can be used to allow load balancer to stop sending traffic to this server.")
 
+<<<<<<< HEAD
+=======
+	fs.BoolVar(&s.ShutdownSendRetryAfter, "shutdown-send-retry-after", s.ShutdownSendRetryAfter, ""+
+		"If true the HTTP Server will continue listening until all non long running request(s) in flight have been drained, "+
+		"during this window all incoming requests will be rejected with a status code 429 and a 'Retry-After' response header, "+
+		"in addition 'Connection: close' response header is set in order to tear down the TCP connection when idle.")
+
+>>>>>>> upstream/master
 	utilfeature.DefaultMutableFeatureGate.AddFlag(fs)
 }

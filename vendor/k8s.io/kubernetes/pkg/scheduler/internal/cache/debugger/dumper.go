@@ -44,7 +44,11 @@ func (d *CacheDumper) DumpAll() {
 // dumpNodes writes NodeInfo to the scheduler logs.
 func (d *CacheDumper) dumpNodes() {
 	dump := d.cache.Dump()
+<<<<<<< HEAD
 	klog.Info("Dump of cached NodeInfo")
+=======
+	klog.InfoS("Dump of cached NodeInfo")
+>>>>>>> upstream/master
 	for name, nodeInfo := range dump.Nodes {
 		klog.Info(d.printNodeInfo(name, nodeInfo))
 	}

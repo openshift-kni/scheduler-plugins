@@ -46,6 +46,11 @@ import (
 	fakeauthorizationv1beta1 "k8s.io/client-go/kubernetes/typed/authorization/v1beta1/fake"
 	autoscalingv1 "k8s.io/client-go/kubernetes/typed/autoscaling/v1"
 	fakeautoscalingv1 "k8s.io/client-go/kubernetes/typed/autoscaling/v1/fake"
+<<<<<<< HEAD
+=======
+	autoscalingv2 "k8s.io/client-go/kubernetes/typed/autoscaling/v2"
+	fakeautoscalingv2 "k8s.io/client-go/kubernetes/typed/autoscaling/v2/fake"
+>>>>>>> upstream/master
 	autoscalingv2beta1 "k8s.io/client-go/kubernetes/typed/autoscaling/v2beta1"
 	fakeautoscalingv2beta1 "k8s.io/client-go/kubernetes/typed/autoscaling/v2beta1/fake"
 	autoscalingv2beta2 "k8s.io/client-go/kubernetes/typed/autoscaling/v2beta2"
@@ -78,6 +83,11 @@ import (
 	fakeflowcontrolv1alpha1 "k8s.io/client-go/kubernetes/typed/flowcontrol/v1alpha1/fake"
 	flowcontrolv1beta1 "k8s.io/client-go/kubernetes/typed/flowcontrol/v1beta1"
 	fakeflowcontrolv1beta1 "k8s.io/client-go/kubernetes/typed/flowcontrol/v1beta1/fake"
+<<<<<<< HEAD
+=======
+	flowcontrolv1beta2 "k8s.io/client-go/kubernetes/typed/flowcontrol/v1beta2"
+	fakeflowcontrolv1beta2 "k8s.io/client-go/kubernetes/typed/flowcontrol/v1beta2/fake"
+>>>>>>> upstream/master
 	networkingv1 "k8s.io/client-go/kubernetes/typed/networking/v1"
 	fakenetworkingv1 "k8s.io/client-go/kubernetes/typed/networking/v1/fake"
 	networkingv1beta1 "k8s.io/client-go/kubernetes/typed/networking/v1beta1"
@@ -218,6 +228,14 @@ func (c *Clientset) AutoscalingV1() autoscalingv1.AutoscalingV1Interface {
 	return &fakeautoscalingv1.FakeAutoscalingV1{Fake: &c.Fake}
 }
 
+<<<<<<< HEAD
+=======
+// AutoscalingV2 retrieves the AutoscalingV2Client
+func (c *Clientset) AutoscalingV2() autoscalingv2.AutoscalingV2Interface {
+	return &fakeautoscalingv2.FakeAutoscalingV2{Fake: &c.Fake}
+}
+
+>>>>>>> upstream/master
 // AutoscalingV2beta1 retrieves the AutoscalingV2beta1Client
 func (c *Clientset) AutoscalingV2beta1() autoscalingv2beta1.AutoscalingV2beta1Interface {
 	return &fakeautoscalingv2beta1.FakeAutoscalingV2beta1{Fake: &c.Fake}
@@ -298,6 +316,14 @@ func (c *Clientset) FlowcontrolV1beta1() flowcontrolv1beta1.FlowcontrolV1beta1In
 	return &fakeflowcontrolv1beta1.FakeFlowcontrolV1beta1{Fake: &c.Fake}
 }
 
+<<<<<<< HEAD
+=======
+// FlowcontrolV1beta2 retrieves the FlowcontrolV1beta2Client
+func (c *Clientset) FlowcontrolV1beta2() flowcontrolv1beta2.FlowcontrolV1beta2Interface {
+	return &fakeflowcontrolv1beta2.FakeFlowcontrolV1beta2{Fake: &c.Fake}
+}
+
+>>>>>>> upstream/master
 // NetworkingV1 retrieves the NetworkingV1Client
 func (c *Clientset) NetworkingV1() networkingv1.NetworkingV1Interface {
 	return &fakenetworkingv1.FakeNetworkingV1{Fake: &c.Fake}

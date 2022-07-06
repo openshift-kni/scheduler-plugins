@@ -99,7 +99,11 @@ func NewScheme() *Scheme {
 		versionPriority:           map[string][]string{},
 		schemeName:                naming.GetNameFromCallsite(internalPackages...),
 	}
+<<<<<<< HEAD
 	s.converter = conversion.NewConverter(s.nameFunc)
+=======
+	s.converter = conversion.NewConverter(nil)
+>>>>>>> upstream/master
 
 	// Enable couple default conversions by default.
 	utilruntime.Must(RegisterEmbeddedConversions(s))
@@ -107,6 +111,7 @@ func NewScheme() *Scheme {
 	return s
 }
 
+<<<<<<< HEAD
 // nameFunc returns the name of the type that we wish to use to determine when two types attempt
 // a conversion. Defaults to the go name of the type if the type is not registered.
 func (s *Scheme) nameFunc(t reflect.Type) string {
@@ -129,6 +134,8 @@ func (s *Scheme) nameFunc(t reflect.Type) string {
 	return gvks[0].Kind
 }
 
+=======
+>>>>>>> upstream/master
 // Converter allows access to the converter for the scheme
 func (s *Scheme) Converter() *conversion.Converter {
 	return s.converter

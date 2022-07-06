@@ -482,8 +482,13 @@ var schemaYAML = typed.YAMLObject(`types:
         elementRelationship: atomic
       map:
         elementType:
+<<<<<<< HEAD
           namedType: __untyped_atomic_
         elementRelationship: atomic
+=======
+          namedType: __untyped_deduced_
+        elementRelationship: separable
+>>>>>>> upstream/master
 - name: io.k8s.api.apiserverinternal.v1alpha1.StorageVersionStatus
   map:
     fields:
@@ -907,12 +912,30 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+=======
+- name: io.k8s.api.apps.v1.StatefulSetPersistentVolumeClaimRetentionPolicy
+  map:
+    fields:
+    - name: whenDeleted
+      type:
+        scalar: string
+    - name: whenScaled
+      type:
+        scalar: string
+>>>>>>> upstream/master
 - name: io.k8s.api.apps.v1.StatefulSetSpec
   map:
     fields:
     - name: minReadySeconds
       type:
         scalar: numeric
+<<<<<<< HEAD
+=======
+    - name: persistentVolumeClaimRetentionPolicy
+      type:
+        namedType: io.k8s.api.apps.v1.StatefulSetPersistentVolumeClaimRetentionPolicy
+>>>>>>> upstream/master
     - name: podManagementPolicy
       type:
         scalar: string
@@ -949,6 +972,10 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: availableReplicas
       type:
         scalar: numeric
+<<<<<<< HEAD
+=======
+      default: 0
+>>>>>>> upstream/master
     - name: collisionCount
       type:
         scalar: numeric
@@ -1194,12 +1221,30 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+=======
+- name: io.k8s.api.apps.v1beta1.StatefulSetPersistentVolumeClaimRetentionPolicy
+  map:
+    fields:
+    - name: whenDeleted
+      type:
+        scalar: string
+    - name: whenScaled
+      type:
+        scalar: string
+>>>>>>> upstream/master
 - name: io.k8s.api.apps.v1beta1.StatefulSetSpec
   map:
     fields:
     - name: minReadySeconds
       type:
         scalar: numeric
+<<<<<<< HEAD
+=======
+    - name: persistentVolumeClaimRetentionPolicy
+      type:
+        namedType: io.k8s.api.apps.v1beta1.StatefulSetPersistentVolumeClaimRetentionPolicy
+>>>>>>> upstream/master
     - name: podManagementPolicy
       type:
         scalar: string
@@ -1236,6 +1281,10 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: availableReplicas
       type:
         scalar: numeric
+<<<<<<< HEAD
+=======
+      default: 0
+>>>>>>> upstream/master
     - name: collisionCount
       type:
         scalar: numeric
@@ -1679,12 +1728,30 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+=======
+- name: io.k8s.api.apps.v1beta2.StatefulSetPersistentVolumeClaimRetentionPolicy
+  map:
+    fields:
+    - name: whenDeleted
+      type:
+        scalar: string
+    - name: whenScaled
+      type:
+        scalar: string
+>>>>>>> upstream/master
 - name: io.k8s.api.apps.v1beta2.StatefulSetSpec
   map:
     fields:
     - name: minReadySeconds
       type:
         scalar: numeric
+<<<<<<< HEAD
+=======
+    - name: persistentVolumeClaimRetentionPolicy
+      type:
+        namedType: io.k8s.api.apps.v1beta2.StatefulSetPersistentVolumeClaimRetentionPolicy
+>>>>>>> upstream/master
     - name: podManagementPolicy
       type:
         scalar: string
@@ -1721,6 +1788,10 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: availableReplicas
       type:
         scalar: numeric
+<<<<<<< HEAD
+=======
+      default: 0
+>>>>>>> upstream/master
     - name: collisionCount
       type:
         scalar: numeric
@@ -1836,7 +1907,11 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: observedGeneration
       type:
         scalar: numeric
+<<<<<<< HEAD
 - name: io.k8s.api.autoscaling.v2beta1.ContainerResourceMetricSource
+=======
+- name: io.k8s.api.autoscaling.v2.ContainerResourceMetricSource
+>>>>>>> upstream/master
   map:
     fields:
     - name: container
@@ -1847,6 +1922,7 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
     - name: targetAverageUtilization
       type:
         scalar: numeric
@@ -1854,24 +1930,41 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
 - name: io.k8s.api.autoscaling.v2beta1.ContainerResourceMetricStatus
+=======
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2.ContainerResourceMetricStatus
+>>>>>>> upstream/master
   map:
     fields:
     - name: container
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
     - name: currentAverageUtilization
       type:
         scalar: numeric
     - name: currentAverageValue
       type:
         namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+=======
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricValueStatus
+>>>>>>> upstream/master
       default: {}
     - name: name
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
 - name: io.k8s.api.autoscaling.v2beta1.CrossVersionObjectReference
+=======
+- name: io.k8s.api.autoscaling.v2.CrossVersionObjectReference
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -1885,6 +1978,7 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
 - name: io.k8s.api.autoscaling.v2beta1.ExternalMetricSource
   map:
     fields:
@@ -1919,6 +2013,61 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
 - name: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscaler
+=======
+- name: io.k8s.api.autoscaling.v2.ExternalMetricSource
+  map:
+    fields:
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricIdentifier
+      default: {}
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2.ExternalMetricStatus
+  map:
+    fields:
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricValueStatus
+      default: {}
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricIdentifier
+      default: {}
+- name: io.k8s.api.autoscaling.v2.HPAScalingPolicy
+  map:
+    fields:
+    - name: periodSeconds
+      type:
+        scalar: numeric
+      default: 0
+    - name: type
+      type:
+        scalar: string
+      default: ""
+    - name: value
+      type:
+        scalar: numeric
+      default: 0
+- name: io.k8s.api.autoscaling.v2.HPAScalingRules
+  map:
+    fields:
+    - name: policies
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.autoscaling.v2.HPAScalingPolicy
+          elementRelationship: atomic
+    - name: selectPolicy
+      type:
+        scalar: string
+    - name: stabilizationWindowSeconds
+      type:
+        scalar: numeric
+- name: io.k8s.api.autoscaling.v2.HorizontalPodAutoscaler
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -1933,6 +2082,7 @@ var schemaYAML = typed.YAMLObject(`types:
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
         namedType: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerSpec
       default: {}
     - name: status
@@ -1940,6 +2090,24 @@ var schemaYAML = typed.YAMLObject(`types:
         namedType: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerStatus
       default: {}
 - name: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerCondition
+=======
+        namedType: io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerStatus
+      default: {}
+- name: io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerBehavior
+  map:
+    fields:
+    - name: scaleDown
+      type:
+        namedType: io.k8s.api.autoscaling.v2.HPAScalingRules
+    - name: scaleUp
+      type:
+        namedType: io.k8s.api.autoscaling.v2.HPAScalingRules
+- name: io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerCondition
+>>>>>>> upstream/master
   map:
     fields:
     - name: lastTransitionTime
@@ -1960,9 +2128,18 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
 - name: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerSpec
   map:
     fields:
+=======
+- name: io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerSpec
+  map:
+    fields:
+    - name: behavior
+      type:
+        namedType: io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerBehavior
+>>>>>>> upstream/master
     - name: maxReplicas
       type:
         scalar: numeric
@@ -1971,29 +2148,638 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         list:
           elementType:
+<<<<<<< HEAD
             namedType: io.k8s.api.autoscaling.v2beta1.MetricSpec
+=======
+            namedType: io.k8s.api.autoscaling.v2.MetricSpec
+>>>>>>> upstream/master
           elementRelationship: atomic
     - name: minReplicas
       type:
         scalar: numeric
     - name: scaleTargetRef
       type:
+<<<<<<< HEAD
         namedType: io.k8s.api.autoscaling.v2beta1.CrossVersionObjectReference
       default: {}
 - name: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerStatus
+=======
+        namedType: io.k8s.api.autoscaling.v2.CrossVersionObjectReference
+      default: {}
+- name: io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerStatus
+>>>>>>> upstream/master
   map:
     fields:
     - name: conditions
       type:
         list:
           elementType:
+<<<<<<< HEAD
             namedType: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerCondition
+          elementRelationship: atomic
+=======
+            namedType: io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerCondition
+          elementRelationship: associative
+          keys:
+          - type
+>>>>>>> upstream/master
+    - name: currentMetrics
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.autoscaling.v2beta1.MetricStatus
+=======
+            namedType: io.k8s.api.autoscaling.v2.MetricStatus
+>>>>>>> upstream/master
+          elementRelationship: atomic
+    - name: currentReplicas
+      type:
+        scalar: numeric
+<<<<<<< HEAD
+      default: 0
+=======
+>>>>>>> upstream/master
+    - name: desiredReplicas
+      type:
+        scalar: numeric
+      default: 0
+    - name: lastScaleTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+    - name: observedGeneration
+      type:
+        scalar: numeric
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta1.MetricSpec
+=======
+- name: io.k8s.api.autoscaling.v2.MetricIdentifier
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+    - name: selector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+- name: io.k8s.api.autoscaling.v2.MetricSpec
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: containerResource
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.autoscaling.v2beta1.ContainerResourceMetricSource
+    - name: external
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.ExternalMetricSource
+    - name: object
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.ObjectMetricSource
+    - name: pods
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.PodsMetricSource
+    - name: resource
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.ResourceMetricSource
+=======
+        namedType: io.k8s.api.autoscaling.v2.ContainerResourceMetricSource
+    - name: external
+      type:
+        namedType: io.k8s.api.autoscaling.v2.ExternalMetricSource
+    - name: object
+      type:
+        namedType: io.k8s.api.autoscaling.v2.ObjectMetricSource
+    - name: pods
+      type:
+        namedType: io.k8s.api.autoscaling.v2.PodsMetricSource
+    - name: resource
+      type:
+        namedType: io.k8s.api.autoscaling.v2.ResourceMetricSource
+>>>>>>> upstream/master
+    - name: type
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta1.MetricStatus
+=======
+- name: io.k8s.api.autoscaling.v2.MetricStatus
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: containerResource
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.autoscaling.v2beta1.ContainerResourceMetricStatus
+    - name: external
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.ExternalMetricStatus
+    - name: object
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.ObjectMetricStatus
+    - name: pods
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.PodsMetricStatus
+    - name: resource
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.ResourceMetricStatus
+=======
+        namedType: io.k8s.api.autoscaling.v2.ContainerResourceMetricStatus
+    - name: external
+      type:
+        namedType: io.k8s.api.autoscaling.v2.ExternalMetricStatus
+    - name: object
+      type:
+        namedType: io.k8s.api.autoscaling.v2.ObjectMetricStatus
+    - name: pods
+      type:
+        namedType: io.k8s.api.autoscaling.v2.PodsMetricStatus
+    - name: resource
+      type:
+        namedType: io.k8s.api.autoscaling.v2.ResourceMetricStatus
+>>>>>>> upstream/master
+    - name: type
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta1.ObjectMetricSource
+  map:
+    fields:
+    - name: averageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: metricName
+      type:
+        scalar: string
+      default: ""
+    - name: selector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.CrossVersionObjectReference
+      default: {}
+    - name: targetValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta1.ObjectMetricStatus
+  map:
+    fields:
+    - name: averageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: currentValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+      default: {}
+    - name: metricName
+      type:
+        scalar: string
+      default: ""
+    - name: selector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.CrossVersionObjectReference
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta1.PodsMetricSource
+  map:
+    fields:
+    - name: metricName
+      type:
+        scalar: string
+      default: ""
+    - name: selector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+    - name: targetAverageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta1.PodsMetricStatus
+  map:
+    fields:
+    - name: currentAverageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+      default: {}
+    - name: metricName
+      type:
+        scalar: string
+      default: ""
+    - name: selector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+- name: io.k8s.api.autoscaling.v2beta1.ResourceMetricSource
+=======
+- name: io.k8s.api.autoscaling.v2.MetricTarget
+  map:
+    fields:
+    - name: averageUtilization
+      type:
+        scalar: numeric
+    - name: averageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: type
+      type:
+        scalar: string
+      default: ""
+    - name: value
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+- name: io.k8s.api.autoscaling.v2.MetricValueStatus
+  map:
+    fields:
+    - name: averageUtilization
+      type:
+        scalar: numeric
+    - name: averageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: value
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+- name: io.k8s.api.autoscaling.v2.ObjectMetricSource
+  map:
+    fields:
+    - name: describedObject
+      type:
+        namedType: io.k8s.api.autoscaling.v2.CrossVersionObjectReference
+      default: {}
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricIdentifier
+      default: {}
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2.ObjectMetricStatus
+  map:
+    fields:
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricValueStatus
+      default: {}
+    - name: describedObject
+      type:
+        namedType: io.k8s.api.autoscaling.v2.CrossVersionObjectReference
+      default: {}
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricIdentifier
+      default: {}
+- name: io.k8s.api.autoscaling.v2.PodsMetricSource
+  map:
+    fields:
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricIdentifier
+      default: {}
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2.PodsMetricStatus
+  map:
+    fields:
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricValueStatus
+      default: {}
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricIdentifier
+      default: {}
+- name: io.k8s.api.autoscaling.v2.ResourceMetricSource
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+    - name: targetAverageUtilization
+      type:
+        scalar: numeric
+    - name: targetAverageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+- name: io.k8s.api.autoscaling.v2beta1.ResourceMetricStatus
+  map:
+    fields:
+    - name: currentAverageUtilization
+      type:
+        scalar: numeric
+    - name: currentAverageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+=======
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2.ResourceMetricStatus
+  map:
+    fields:
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2.MetricValueStatus
+>>>>>>> upstream/master
+      default: {}
+    - name: name
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta2.ContainerResourceMetricSource
+=======
+- name: io.k8s.api.autoscaling.v2beta1.ContainerResourceMetricSource
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: container
+      type:
+        scalar: string
+      default: ""
+    - name: name
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.ContainerResourceMetricStatus
+=======
+    - name: targetAverageUtilization
+      type:
+        scalar: numeric
+    - name: targetAverageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+- name: io.k8s.api.autoscaling.v2beta1.ContainerResourceMetricStatus
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: container
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricValueStatus
+=======
+    - name: currentAverageUtilization
+      type:
+        scalar: numeric
+    - name: currentAverageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+>>>>>>> upstream/master
+      default: {}
+    - name: name
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta2.CrossVersionObjectReference
+=======
+- name: io.k8s.api.autoscaling.v2beta1.CrossVersionObjectReference
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: apiVersion
+      type:
+        scalar: string
+    - name: kind
+      type:
+        scalar: string
+      default: ""
+    - name: name
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta2.ExternalMetricSource
+  map:
+    fields:
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricIdentifier
+      default: {}
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.ExternalMetricStatus
+  map:
+    fields:
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricValueStatus
+      default: {}
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricIdentifier
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.HPAScalingPolicy
+  map:
+    fields:
+    - name: periodSeconds
+      type:
+        scalar: numeric
+      default: 0
+    - name: type
+      type:
+        scalar: string
+      default: ""
+    - name: value
+      type:
+        scalar: numeric
+      default: 0
+- name: io.k8s.api.autoscaling.v2beta2.HPAScalingRules
+  map:
+    fields:
+    - name: policies
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.autoscaling.v2beta2.HPAScalingPolicy
+          elementRelationship: atomic
+    - name: selectPolicy
+      type:
+        scalar: string
+    - name: stabilizationWindowSeconds
+      type:
+        scalar: numeric
+- name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscaler
+=======
+- name: io.k8s.api.autoscaling.v2beta1.ExternalMetricSource
+  map:
+    fields:
+    - name: metricName
+      type:
+        scalar: string
+      default: ""
+    - name: metricSelector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+    - name: targetAverageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: targetValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+- name: io.k8s.api.autoscaling.v2beta1.ExternalMetricStatus
+  map:
+    fields:
+    - name: currentAverageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: currentValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+      default: {}
+    - name: metricName
+      type:
+        scalar: string
+      default: ""
+    - name: metricSelector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+- name: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscaler
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: apiVersion
+      type:
+        scalar: string
+    - name: kind
+      type:
+        scalar: string
+    - name: metadata
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
+      default: {}
+    - name: spec
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerStatus
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerBehavior
+  map:
+    fields:
+    - name: scaleDown
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.HPAScalingRules
+    - name: scaleUp
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.HPAScalingRules
+- name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerCondition
+=======
+        namedType: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerStatus
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerCondition
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: lastTransitionTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+      default: {}
+    - name: message
+      type:
+        scalar: string
+    - name: reason
+      type:
+        scalar: string
+    - name: status
+      type:
+        scalar: string
+      default: ""
+    - name: type
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerSpec
+  map:
+    fields:
+    - name: behavior
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerBehavior
+=======
+- name: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerSpec
+  map:
+    fields:
+>>>>>>> upstream/master
+    - name: maxReplicas
+      type:
+        scalar: numeric
+      default: 0
+    - name: metrics
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.autoscaling.v2beta2.MetricSpec
+=======
+            namedType: io.k8s.api.autoscaling.v2beta1.MetricSpec
+>>>>>>> upstream/master
+          elementRelationship: atomic
+    - name: minReplicas
+      type:
+        scalar: numeric
+    - name: scaleTargetRef
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.autoscaling.v2beta2.CrossVersionObjectReference
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerStatus
+=======
+        namedType: io.k8s.api.autoscaling.v2beta1.CrossVersionObjectReference
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerStatus
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: conditions
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerCondition
+=======
+            namedType: io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscalerCondition
+>>>>>>> upstream/master
           elementRelationship: atomic
     - name: currentMetrics
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.autoscaling.v2beta2.MetricStatus
+=======
             namedType: io.k8s.api.autoscaling.v2beta1.MetricStatus
+>>>>>>> upstream/master
           elementRelationship: atomic
     - name: currentReplicas
       type:
@@ -2009,11 +2795,40 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: observedGeneration
       type:
         scalar: numeric
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta2.MetricIdentifier
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+    - name: selector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+- name: io.k8s.api.autoscaling.v2beta2.MetricSpec
+=======
 - name: io.k8s.api.autoscaling.v2beta1.MetricSpec
+>>>>>>> upstream/master
   map:
     fields:
     - name: containerResource
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.autoscaling.v2beta2.ContainerResourceMetricSource
+    - name: external
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.ExternalMetricSource
+    - name: object
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.ObjectMetricSource
+    - name: pods
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.PodsMetricSource
+    - name: resource
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.ResourceMetricSource
+=======
         namedType: io.k8s.api.autoscaling.v2beta1.ContainerResourceMetricSource
     - name: external
       type:
@@ -2027,15 +2842,35 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: resource
       type:
         namedType: io.k8s.api.autoscaling.v2beta1.ResourceMetricSource
+>>>>>>> upstream/master
     - name: type
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta2.MetricStatus
+=======
 - name: io.k8s.api.autoscaling.v2beta1.MetricStatus
+>>>>>>> upstream/master
   map:
     fields:
     - name: containerResource
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.autoscaling.v2beta2.ContainerResourceMetricStatus
+    - name: external
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.ExternalMetricStatus
+    - name: object
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.ObjectMetricStatus
+    - name: pods
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.PodsMetricStatus
+    - name: resource
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.ResourceMetricStatus
+=======
         namedType: io.k8s.api.autoscaling.v2beta1.ContainerResourceMetricStatus
     - name: external
       type:
@@ -2049,10 +2884,96 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: resource
       type:
         namedType: io.k8s.api.autoscaling.v2beta1.ResourceMetricStatus
+>>>>>>> upstream/master
     - name: type
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta2.MetricTarget
+  map:
+    fields:
+    - name: averageUtilization
+      type:
+        scalar: numeric
+    - name: averageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: type
+      type:
+        scalar: string
+      default: ""
+    - name: value
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+- name: io.k8s.api.autoscaling.v2beta2.MetricValueStatus
+  map:
+    fields:
+    - name: averageUtilization
+      type:
+        scalar: numeric
+    - name: averageValue
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: value
+      type:
+        namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+- name: io.k8s.api.autoscaling.v2beta2.ObjectMetricSource
+  map:
+    fields:
+    - name: describedObject
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.CrossVersionObjectReference
+      default: {}
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricIdentifier
+      default: {}
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.ObjectMetricStatus
+  map:
+    fields:
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricValueStatus
+      default: {}
+    - name: describedObject
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.CrossVersionObjectReference
+      default: {}
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricIdentifier
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.PodsMetricSource
+  map:
+    fields:
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricIdentifier
+      default: {}
+    - name: target
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricTarget
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.PodsMetricStatus
+  map:
+    fields:
+    - name: current
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricValueStatus
+      default: {}
+    - name: metric
+      type:
+        namedType: io.k8s.api.autoscaling.v2beta2.MetricIdentifier
+      default: {}
+- name: io.k8s.api.autoscaling.v2beta2.ResourceMetricSource
+  map:
+    fields:
+=======
 - name: io.k8s.api.autoscaling.v2beta1.ObjectMetricSource
   map:
     fields:
@@ -2157,6 +3078,7 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+>>>>>>> upstream/master
     - name: name
       type:
         scalar: string
@@ -2165,6 +3087,11 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.api.autoscaling.v2beta2.MetricTarget
       default: {}
+<<<<<<< HEAD
+- name: io.k8s.api.autoscaling.v2beta2.ResourceMetricStatus
+  map:
+    fields:
+=======
 - name: io.k8s.api.autoscaling.v2beta2.ContainerResourceMetricStatus
   map:
     fields:
@@ -2172,6 +3099,7 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+>>>>>>> upstream/master
     - name: current
       type:
         namedType: io.k8s.api.autoscaling.v2beta2.MetricValueStatus
@@ -2180,7 +3108,11 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.batch.v1.CronJob
+=======
 - name: io.k8s.api.autoscaling.v2beta2.CrossVersionObjectReference
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -2189,6 +3121,62 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: kind
       type:
         scalar: string
+<<<<<<< HEAD
+    - name: metadata
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
+      default: {}
+    - name: spec
+      type:
+        namedType: io.k8s.api.batch.v1.CronJobSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.batch.v1.CronJobStatus
+      default: {}
+- name: io.k8s.api.batch.v1.CronJobSpec
+  map:
+    fields:
+    - name: concurrencyPolicy
+      type:
+        scalar: string
+    - name: failedJobsHistoryLimit
+      type:
+        scalar: numeric
+    - name: jobTemplate
+      type:
+        namedType: io.k8s.api.batch.v1.JobTemplateSpec
+      default: {}
+    - name: schedule
+      type:
+        scalar: string
+      default: ""
+    - name: startingDeadlineSeconds
+      type:
+        scalar: numeric
+    - name: successfulJobsHistoryLimit
+      type:
+        scalar: numeric
+    - name: suspend
+      type:
+        scalar: boolean
+- name: io.k8s.api.batch.v1.CronJobStatus
+  map:
+    fields:
+    - name: active
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.core.v1.ObjectReference
+          elementRelationship: atomic
+    - name: lastScheduleTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+    - name: lastSuccessfulTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+- name: io.k8s.api.batch.v1.Job
+=======
       default: ""
     - name: name
       type:
@@ -2247,6 +3235,7 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: numeric
 - name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscaler
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -2261,6 +3250,21 @@ var schemaYAML = typed.YAMLObject(`types:
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.batch.v1.JobSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.batch.v1.JobStatus
+      default: {}
+- name: io.k8s.api.batch.v1.JobCondition
+  map:
+    fields:
+    - name: lastProbeTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+      default: {}
+=======
         namedType: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerSpec
       default: {}
     - name: status
@@ -2279,6 +3283,7 @@ var schemaYAML = typed.YAMLObject(`types:
 - name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerCondition
   map:
     fields:
+>>>>>>> upstream/master
     - name: lastTransitionTime
       type:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
@@ -2297,6 +3302,54 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.batch.v1.JobSpec
+  map:
+    fields:
+    - name: activeDeadlineSeconds
+      type:
+        scalar: numeric
+    - name: backoffLimit
+      type:
+        scalar: numeric
+    - name: completionMode
+      type:
+        scalar: string
+    - name: completions
+      type:
+        scalar: numeric
+    - name: manualSelector
+      type:
+        scalar: boolean
+    - name: parallelism
+      type:
+        scalar: numeric
+    - name: selector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+    - name: suspend
+      type:
+        scalar: boolean
+    - name: template
+      type:
+        namedType: io.k8s.api.core.v1.PodTemplateSpec
+      default: {}
+    - name: ttlSecondsAfterFinished
+      type:
+        scalar: numeric
+- name: io.k8s.api.batch.v1.JobStatus
+  map:
+    fields:
+    - name: active
+      type:
+        scalar: numeric
+    - name: completedIndexes
+      type:
+        scalar: string
+    - name: completionTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+=======
 - name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerSpec
   map:
     fields:
@@ -2323,10 +3376,226 @@ var schemaYAML = typed.YAMLObject(`types:
 - name: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerStatus
   map:
     fields:
+>>>>>>> upstream/master
     - name: conditions
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.batch.v1.JobCondition
+          elementRelationship: atomic
+    - name: failed
+      type:
+        scalar: numeric
+    - name: startTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+    - name: succeeded
+      type:
+        scalar: numeric
+    - name: uncountedTerminatedPods
+      type:
+        namedType: io.k8s.api.batch.v1.UncountedTerminatedPods
+- name: io.k8s.api.batch.v1.JobTemplateSpec
+  map:
+    fields:
+    - name: metadata
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
+      default: {}
+    - name: spec
+      type:
+        namedType: io.k8s.api.batch.v1.JobSpec
+      default: {}
+- name: io.k8s.api.batch.v1.UncountedTerminatedPods
+  map:
+    fields:
+    - name: failed
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: associative
+    - name: succeeded
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: associative
+- name: io.k8s.api.batch.v1beta1.CronJob
+  map:
+    fields:
+    - name: apiVersion
+      type:
+        scalar: string
+    - name: kind
+      type:
+        scalar: string
+    - name: metadata
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
+      default: {}
+    - name: spec
+      type:
+        namedType: io.k8s.api.batch.v1beta1.CronJobSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.batch.v1beta1.CronJobStatus
+      default: {}
+- name: io.k8s.api.batch.v1beta1.CronJobSpec
+  map:
+    fields:
+    - name: concurrencyPolicy
+      type:
+        scalar: string
+    - name: failedJobsHistoryLimit
+      type:
+        scalar: numeric
+    - name: jobTemplate
+      type:
+        namedType: io.k8s.api.batch.v1beta1.JobTemplateSpec
+      default: {}
+    - name: schedule
+      type:
+        scalar: string
+      default: ""
+    - name: startingDeadlineSeconds
+      type:
+        scalar: numeric
+    - name: successfulJobsHistoryLimit
+      type:
+        scalar: numeric
+    - name: suspend
+      type:
+        scalar: boolean
+- name: io.k8s.api.batch.v1beta1.CronJobStatus
+  map:
+    fields:
+    - name: active
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.core.v1.ObjectReference
+          elementRelationship: atomic
+    - name: lastScheduleTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+    - name: lastSuccessfulTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+- name: io.k8s.api.batch.v1beta1.JobTemplateSpec
+  map:
+    fields:
+    - name: metadata
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
+      default: {}
+    - name: spec
+      type:
+        namedType: io.k8s.api.batch.v1.JobSpec
+      default: {}
+- name: io.k8s.api.certificates.v1.CertificateSigningRequest
+  map:
+    fields:
+    - name: apiVersion
+      type:
+        scalar: string
+    - name: kind
+      type:
+        scalar: string
+    - name: metadata
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
+      default: {}
+    - name: spec
+      type:
+        namedType: io.k8s.api.certificates.v1.CertificateSigningRequestSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.certificates.v1.CertificateSigningRequestStatus
+      default: {}
+- name: io.k8s.api.certificates.v1.CertificateSigningRequestCondition
+  map:
+    fields:
+    - name: lastTransitionTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+      default: {}
+    - name: lastUpdateTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+      default: {}
+    - name: message
+      type:
+        scalar: string
+    - name: reason
+      type:
+        scalar: string
+    - name: status
+      type:
+        scalar: string
+      default: ""
+    - name: type
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.certificates.v1.CertificateSigningRequestSpec
+  map:
+    fields:
+    - name: expirationSeconds
+      type:
+        scalar: numeric
+    - name: extra
+      type:
+        map:
+          elementType:
+            list:
+              elementType:
+                scalar: string
+              elementRelationship: atomic
+    - name: groups
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: request
+      type:
+        scalar: string
+    - name: signerName
+      type:
+        scalar: string
+      default: ""
+    - name: uid
+      type:
+        scalar: string
+    - name: usages
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: username
+      type:
+        scalar: string
+- name: io.k8s.api.certificates.v1.CertificateSigningRequestStatus
+  map:
+    fields:
+    - name: certificate
+      type:
+        scalar: string
+    - name: conditions
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.certificates.v1.CertificateSigningRequestCondition
+          elementRelationship: associative
+          keys:
+          - type
+- name: io.k8s.api.certificates.v1beta1.CertificateSigningRequest
+=======
             namedType: io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscalerCondition
           elementRelationship: atomic
     - name: currentMetrics
@@ -2568,6 +3837,7 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
 - name: io.k8s.api.batch.v1.Job
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -2582,6 +3852,22 @@ var schemaYAML = typed.YAMLObject(`types:
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.certificates.v1beta1.CertificateSigningRequestSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.certificates.v1beta1.CertificateSigningRequestStatus
+      default: {}
+- name: io.k8s.api.certificates.v1beta1.CertificateSigningRequestCondition
+  map:
+    fields:
+    - name: lastTransitionTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+      default: {}
+    - name: lastUpdateTime
+=======
         namedType: io.k8s.api.batch.v1.JobSpec
       default: {}
     - name: status
@@ -2596,6 +3882,7 @@ var schemaYAML = typed.YAMLObject(`types:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
       default: {}
     - name: lastTransitionTime
+>>>>>>> upstream/master
       type:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
       default: {}
@@ -2613,6 +3900,61 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.certificates.v1beta1.CertificateSigningRequestSpec
+  map:
+    fields:
+    - name: expirationSeconds
+      type:
+        scalar: numeric
+    - name: extra
+      type:
+        map:
+          elementType:
+            list:
+              elementType:
+                scalar: string
+              elementRelationship: atomic
+    - name: groups
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: request
+      type:
+        scalar: string
+    - name: signerName
+      type:
+        scalar: string
+    - name: uid
+      type:
+        scalar: string
+    - name: usages
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: username
+      type:
+        scalar: string
+- name: io.k8s.api.certificates.v1beta1.CertificateSigningRequestStatus
+  map:
+    fields:
+    - name: certificate
+      type:
+        scalar: string
+    - name: conditions
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.certificates.v1beta1.CertificateSigningRequestCondition
+          elementRelationship: associative
+          keys:
+          - type
+- name: io.k8s.api.coordination.v1.Lease
+=======
 - name: io.k8s.api.batch.v1.JobSpec
   map:
     fields:
@@ -2668,6 +4010,9 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: failed
       type:
         scalar: numeric
+    - name: ready
+      type:
+        scalar: numeric
     - name: startTime
       type:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
@@ -2704,6 +4049,7 @@ var schemaYAML = typed.YAMLObject(`types:
             scalar: string
           elementRelationship: associative
 - name: io.k8s.api.batch.v1beta1.CronJob
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -2718,6 +4064,37 @@ var schemaYAML = typed.YAMLObject(`types:
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.coordination.v1.LeaseSpec
+      default: {}
+- name: io.k8s.api.coordination.v1.LeaseSpec
+  map:
+    fields:
+    - name: acquireTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime
+    - name: holderIdentity
+      type:
+        scalar: string
+    - name: leaseDurationSeconds
+      type:
+        scalar: numeric
+    - name: leaseTransitions
+      type:
+        scalar: numeric
+    - name: renewTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime
+- name: io.k8s.api.coordination.v1beta1.Lease
+  map:
+    fields:
+    - name: apiVersion
+      type:
+        scalar: string
+    - name: kind
+      type:
+        scalar: string
+=======
         namedType: io.k8s.api.batch.v1beta1.CronJobSpec
       default: {}
     - name: status
@@ -2768,12 +4145,89 @@ var schemaYAML = typed.YAMLObject(`types:
 - name: io.k8s.api.batch.v1beta1.JobTemplateSpec
   map:
     fields:
+>>>>>>> upstream/master
     - name: metadata
       type:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.coordination.v1beta1.LeaseSpec
+      default: {}
+- name: io.k8s.api.coordination.v1beta1.LeaseSpec
+  map:
+    fields:
+    - name: acquireTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime
+    - name: holderIdentity
+      type:
+        scalar: string
+    - name: leaseDurationSeconds
+      type:
+        scalar: numeric
+    - name: leaseTransitions
+      type:
+        scalar: numeric
+    - name: renewTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime
+- name: io.k8s.api.core.v1.AWSElasticBlockStoreVolumeSource
+  map:
+    fields:
+    - name: fsType
+      type:
+        scalar: string
+    - name: partition
+      type:
+        scalar: numeric
+    - name: readOnly
+      type:
+        scalar: boolean
+    - name: volumeID
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.core.v1.Affinity
+  map:
+    fields:
+    - name: nodeAffinity
+      type:
+        namedType: io.k8s.api.core.v1.NodeAffinity
+    - name: podAffinity
+      type:
+        namedType: io.k8s.api.core.v1.PodAffinity
+    - name: podAntiAffinity
+      type:
+        namedType: io.k8s.api.core.v1.PodAntiAffinity
+- name: io.k8s.api.core.v1.AttachedVolume
+  map:
+    fields:
+    - name: devicePath
+      type:
+        scalar: string
+      default: ""
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.core.v1.AzureDiskVolumeSource
+  map:
+    fields:
+    - name: cachingMode
+      type:
+        scalar: string
+    - name: diskName
+      type:
+        scalar: string
+      default: ""
+    - name: diskURI
+      type:
+        scalar: string
+      default: ""
+    - name: fsType
+=======
         namedType: io.k8s.api.batch.v1.JobSpec
       default: {}
 - name: io.k8s.api.certificates.v1.CertificateSigningRequest
@@ -2879,11 +4333,96 @@ var schemaYAML = typed.YAMLObject(`types:
   map:
     fields:
     - name: apiVersion
+>>>>>>> upstream/master
       type:
         scalar: string
     - name: kind
       type:
         scalar: string
+<<<<<<< HEAD
+    - name: readOnly
+      type:
+        scalar: boolean
+- name: io.k8s.api.core.v1.AzureFilePersistentVolumeSource
+  map:
+    fields:
+    - name: readOnly
+      type:
+        scalar: boolean
+    - name: secretName
+      type:
+        scalar: string
+      default: ""
+    - name: secretNamespace
+      type:
+        scalar: string
+    - name: shareName
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.core.v1.AzureFileVolumeSource
+  map:
+    fields:
+    - name: readOnly
+      type:
+        scalar: boolean
+    - name: secretName
+      type:
+        scalar: string
+      default: ""
+    - name: shareName
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.core.v1.CSIPersistentVolumeSource
+  map:
+    fields:
+    - name: controllerExpandSecretRef
+      type:
+        namedType: io.k8s.api.core.v1.SecretReference
+    - name: controllerPublishSecretRef
+      type:
+        namedType: io.k8s.api.core.v1.SecretReference
+    - name: driver
+      type:
+        scalar: string
+      default: ""
+    - name: fsType
+      type:
+        scalar: string
+    - name: nodePublishSecretRef
+      type:
+        namedType: io.k8s.api.core.v1.SecretReference
+    - name: nodeStageSecretRef
+      type:
+        namedType: io.k8s.api.core.v1.SecretReference
+    - name: readOnly
+      type:
+        scalar: boolean
+    - name: volumeAttributes
+      type:
+        map:
+          elementType:
+            scalar: string
+    - name: volumeHandle
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.core.v1.CSIVolumeSource
+  map:
+    fields:
+    - name: driver
+      type:
+        scalar: string
+      default: ""
+    - name: fsType
+      type:
+        scalar: string
+    - name: nodePublishSecretRef
+      type:
+        namedType: io.k8s.api.core.v1.LocalObjectReference
+    - name: readOnly
+=======
     - name: metadata
       type:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
@@ -3184,6 +4723,7 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.api.core.v1.LocalObjectReference
     - name: readOnly
+>>>>>>> upstream/master
       type:
         scalar: boolean
     - name: volumeAttributes
@@ -3875,7 +5415,14 @@ var schemaYAML = typed.YAMLObject(`types:
         list:
           elementType:
             namedType: io.k8s.api.core.v1.ContainerPort
+<<<<<<< HEAD
           elementRelationship: atomic
+=======
+          elementRelationship: associative
+          keys:
+          - containerPort
+          - protocol
+>>>>>>> upstream/master
     - name: readinessProbe
       type:
         namedType: io.k8s.api.core.v1.Probe
@@ -4113,6 +5660,20 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: readOnly
       type:
         scalar: boolean
+<<<<<<< HEAD
+=======
+- name: io.k8s.api.core.v1.GRPCAction
+  map:
+    fields:
+    - name: port
+      type:
+        scalar: numeric
+      default: 0
+    - name: service
+      type:
+        scalar: string
+      default: ""
+>>>>>>> upstream/master
 - name: io.k8s.api.core.v1.GitRepoVolumeSource
   map:
     fields:
@@ -4190,6 +5751,7 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
 - name: io.k8s.api.core.v1.Handler
   map:
     fields:
@@ -4202,6 +5764,8 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: tcpSocket
       type:
         namedType: io.k8s.api.core.v1.TCPSocketAction
+=======
+>>>>>>> upstream/master
 - name: io.k8s.api.core.v1.HostAlias
   map:
     fields:
@@ -4327,10 +5891,29 @@ var schemaYAML = typed.YAMLObject(`types:
     fields:
     - name: postStart
       type:
+<<<<<<< HEAD
         namedType: io.k8s.api.core.v1.Handler
     - name: preStop
       type:
         namedType: io.k8s.api.core.v1.Handler
+=======
+        namedType: io.k8s.api.core.v1.LifecycleHandler
+    - name: preStop
+      type:
+        namedType: io.k8s.api.core.v1.LifecycleHandler
+- name: io.k8s.api.core.v1.LifecycleHandler
+  map:
+    fields:
+    - name: exec
+      type:
+        namedType: io.k8s.api.core.v1.ExecAction
+    - name: httpGet
+      type:
+        namedType: io.k8s.api.core.v1.HTTPGetAction
+    - name: tcpSocket
+      type:
+        namedType: io.k8s.api.core.v1.TCPSocketAction
+>>>>>>> upstream/master
 - name: io.k8s.api.core.v1.LimitRange
   map:
     fields:
@@ -4926,6 +6509,14 @@ var schemaYAML = typed.YAMLObject(`types:
           elementType:
             scalar: string
           elementRelationship: atomic
+<<<<<<< HEAD
+=======
+    - name: allocatedResources
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+>>>>>>> upstream/master
     - name: capacity
       type:
         map:
@@ -4942,6 +6533,12 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: phase
       type:
         scalar: string
+<<<<<<< HEAD
+=======
+    - name: resizeStatus
+      type:
+        scalar: string
+>>>>>>> upstream/master
 - name: io.k8s.api.core.v1.PersistentVolumeClaimTemplate
   map:
     fields:
@@ -5217,6 +6814,16 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: ip
       type:
         scalar: string
+<<<<<<< HEAD
+=======
+- name: io.k8s.api.core.v1.PodOS
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+>>>>>>> upstream/master
 - name: io.k8s.api.core.v1.PodReadinessGate
   map:
     fields:
@@ -5345,6 +6952,12 @@ var schemaYAML = typed.YAMLObject(`types:
           elementType:
             scalar: string
           elementRelationship: atomic
+<<<<<<< HEAD
+=======
+    - name: os
+      type:
+        namedType: io.k8s.api.core.v1.PodOS
+>>>>>>> upstream/master
     - name: overhead
       type:
         map:
@@ -5554,6 +7167,12 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: failureThreshold
       type:
         scalar: numeric
+<<<<<<< HEAD
+=======
+    - name: grpc
+      type:
+        namedType: io.k8s.api.core.v1.GRPCAction
+>>>>>>> upstream/master
     - name: httpGet
       type:
         namedType: io.k8s.api.core.v1.HTTPGetAction
@@ -7452,6 +9071,38 @@ var schemaYAML = typed.YAMLObject(`types:
         scalar: numeric
     - name: port
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.apimachinery.pkg.util.intstr.IntOrString
+    - name: protocol
+      type:
+        scalar: string
+- name: io.k8s.api.extensions.v1beta1.NetworkPolicySpec
+  map:
+    fields:
+    - name: egress
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.NetworkPolicyEgressRule
+          elementRelationship: atomic
+    - name: ingress
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.NetworkPolicyIngressRule
+          elementRelationship: atomic
+    - name: podSelector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+      default: {}
+    - name: policyTypes
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+- name: io.k8s.api.extensions.v1beta1.PodSecurityPolicy
+=======
         namedType: io.k8s.apimachinery.pkg.util.intstr.IntOrString
     - name: protocol
       type:
@@ -7787,6 +9438,7 @@ var schemaYAML = typed.YAMLObject(`types:
         scalar: string
       default: ""
 - name: io.k8s.api.flowcontrol.v1alpha1.FlowSchema
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -7801,6 +9453,53 @@ var schemaYAML = typed.YAMLObject(`types:
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.extensions.v1beta1.PodSecurityPolicySpec
+      default: {}
+- name: io.k8s.api.extensions.v1beta1.PodSecurityPolicySpec
+  map:
+    fields:
+    - name: allowPrivilegeEscalation
+      type:
+        scalar: boolean
+    - name: allowedCSIDrivers
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.AllowedCSIDriver
+          elementRelationship: atomic
+    - name: allowedCapabilities
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: allowedFlexVolumes
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.AllowedFlexVolume
+          elementRelationship: atomic
+    - name: allowedHostPaths
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.AllowedHostPath
+          elementRelationship: atomic
+    - name: allowedProcMountTypes
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: allowedUnsafeSysctls
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: defaultAddCapabilities
+=======
         namedType: io.k8s.api.flowcontrol.v1alpha1.FlowSchemaSpec
       default: {}
     - name: status
@@ -7894,16 +9593,84 @@ var schemaYAML = typed.YAMLObject(`types:
   map:
     fields:
     - name: nonResourceURLs
+>>>>>>> upstream/master
       type:
         list:
           elementType:
             scalar: string
+<<<<<<< HEAD
+          elementRelationship: atomic
+    - name: defaultAllowPrivilegeEscalation
+      type:
+        scalar: boolean
+    - name: forbiddenSysctls
+=======
           elementRelationship: associative
     - name: verbs
+>>>>>>> upstream/master
       type:
         list:
           elementType:
             scalar: string
+<<<<<<< HEAD
+          elementRelationship: atomic
+    - name: fsGroup
+      type:
+        namedType: io.k8s.api.extensions.v1beta1.FSGroupStrategyOptions
+      default: {}
+    - name: hostIPC
+      type:
+        scalar: boolean
+    - name: hostNetwork
+      type:
+        scalar: boolean
+    - name: hostPID
+      type:
+        scalar: boolean
+    - name: hostPorts
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.HostPortRange
+          elementRelationship: atomic
+    - name: privileged
+      type:
+        scalar: boolean
+    - name: readOnlyRootFilesystem
+      type:
+        scalar: boolean
+    - name: requiredDropCapabilities
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: runAsGroup
+      type:
+        namedType: io.k8s.api.extensions.v1beta1.RunAsGroupStrategyOptions
+    - name: runAsUser
+      type:
+        namedType: io.k8s.api.extensions.v1beta1.RunAsUserStrategyOptions
+      default: {}
+    - name: runtimeClass
+      type:
+        namedType: io.k8s.api.extensions.v1beta1.RuntimeClassStrategyOptions
+    - name: seLinux
+      type:
+        namedType: io.k8s.api.extensions.v1beta1.SELinuxStrategyOptions
+      default: {}
+    - name: supplementalGroups
+      type:
+        namedType: io.k8s.api.extensions.v1beta1.SupplementalGroupsStrategyOptions
+      default: {}
+    - name: volumes
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+- name: io.k8s.api.extensions.v1beta1.ReplicaSet
+=======
           elementRelationship: associative
 - name: io.k8s.api.flowcontrol.v1alpha1.PolicyRulesWithSubjects
   map:
@@ -7927,6 +9694,7 @@ var schemaYAML = typed.YAMLObject(`types:
             namedType: io.k8s.api.flowcontrol.v1alpha1.Subject
           elementRelationship: atomic
 - name: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfiguration
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -7941,6 +9709,15 @@ var schemaYAML = typed.YAMLObject(`types:
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.extensions.v1beta1.ReplicaSetSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.extensions.v1beta1.ReplicaSetStatus
+      default: {}
+- name: io.k8s.api.extensions.v1beta1.ReplicaSetCondition
+=======
         namedType: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationSpec
       default: {}
     - name: status
@@ -7948,6 +9725,7 @@ var schemaYAML = typed.YAMLObject(`types:
         namedType: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationStatus
       default: {}
 - name: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationCondition
+>>>>>>> upstream/master
   map:
     fields:
     - name: lastTransitionTime
@@ -7963,6 +9741,35 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: status
       type:
         scalar: string
+<<<<<<< HEAD
+      default: ""
+    - name: type
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.extensions.v1beta1.ReplicaSetSpec
+  map:
+    fields:
+    - name: minReadySeconds
+      type:
+        scalar: numeric
+    - name: replicas
+      type:
+        scalar: numeric
+    - name: selector
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+    - name: template
+      type:
+        namedType: io.k8s.api.core.v1.PodTemplateSpec
+      default: {}
+- name: io.k8s.api.extensions.v1beta1.ReplicaSetStatus
+  map:
+    fields:
+    - name: availableReplicas
+      type:
+        scalar: numeric
+=======
     - name: type
       type:
         scalar: string
@@ -7991,10 +9798,84 @@ var schemaYAML = typed.YAMLObject(`types:
 - name: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationStatus
   map:
     fields:
+>>>>>>> upstream/master
     - name: conditions
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.extensions.v1beta1.ReplicaSetCondition
+          elementRelationship: associative
+          keys:
+          - type
+    - name: fullyLabeledReplicas
+      type:
+        scalar: numeric
+    - name: observedGeneration
+      type:
+        scalar: numeric
+    - name: readyReplicas
+      type:
+        scalar: numeric
+    - name: replicas
+      type:
+        scalar: numeric
+      default: 0
+- name: io.k8s.api.extensions.v1beta1.RollbackConfig
+  map:
+    fields:
+    - name: revision
+      type:
+        scalar: numeric
+- name: io.k8s.api.extensions.v1beta1.RollingUpdateDaemonSet
+  map:
+    fields:
+    - name: maxSurge
+      type:
+        namedType: io.k8s.apimachinery.pkg.util.intstr.IntOrString
+    - name: maxUnavailable
+      type:
+        namedType: io.k8s.apimachinery.pkg.util.intstr.IntOrString
+- name: io.k8s.api.extensions.v1beta1.RollingUpdateDeployment
+  map:
+    fields:
+    - name: maxSurge
+      type:
+        namedType: io.k8s.apimachinery.pkg.util.intstr.IntOrString
+    - name: maxUnavailable
+      type:
+        namedType: io.k8s.apimachinery.pkg.util.intstr.IntOrString
+- name: io.k8s.api.extensions.v1beta1.RunAsGroupStrategyOptions
+  map:
+    fields:
+    - name: ranges
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.IDRange
+          elementRelationship: atomic
+    - name: rule
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.extensions.v1beta1.RunAsUserStrategyOptions
+  map:
+    fields:
+    - name: ranges
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.IDRange
+          elementRelationship: atomic
+    - name: rule
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.extensions.v1beta1.RuntimeClassStrategyOptions
+  map:
+    fields:
+    - name: allowedRuntimeClassNames
+=======
             namedType: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationCondition
           elementRelationship: associative
           keys:
@@ -8039,10 +9920,40 @@ var schemaYAML = typed.YAMLObject(`types:
             scalar: string
           elementRelationship: associative
     - name: verbs
+>>>>>>> upstream/master
       type:
         list:
           elementType:
             scalar: string
+<<<<<<< HEAD
+          elementRelationship: atomic
+    - name: defaultRuntimeClassName
+      type:
+        scalar: string
+- name: io.k8s.api.extensions.v1beta1.SELinuxStrategyOptions
+  map:
+    fields:
+    - name: rule
+      type:
+        scalar: string
+      default: ""
+    - name: seLinuxOptions
+      type:
+        namedType: io.k8s.api.core.v1.SELinuxOptions
+- name: io.k8s.api.extensions.v1beta1.SupplementalGroupsStrategyOptions
+  map:
+    fields:
+    - name: ranges
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.extensions.v1beta1.IDRange
+          elementRelationship: atomic
+    - name: rule
+      type:
+        scalar: string
+- name: io.k8s.api.flowcontrol.v1alpha1.FlowDistinguisherMethod
+=======
           elementRelationship: associative
 - name: io.k8s.api.flowcontrol.v1alpha1.ServiceAccountSubject
   map:
@@ -8088,13 +9999,18 @@ var schemaYAML = typed.YAMLObject(`types:
         scalar: string
       default: ""
 - name: io.k8s.api.flowcontrol.v1beta1.FlowDistinguisherMethod
+>>>>>>> upstream/master
   map:
     fields:
     - name: type
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.FlowSchema
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.FlowSchema
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -8109,6 +10025,15 @@ var schemaYAML = typed.YAMLObject(`types:
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.FlowSchemaSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.flowcontrol.v1alpha1.FlowSchemaStatus
+      default: {}
+- name: io.k8s.api.flowcontrol.v1alpha1.FlowSchemaCondition
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.FlowSchemaSpec
       default: {}
     - name: status
@@ -8116,6 +10041,7 @@ var schemaYAML = typed.YAMLObject(`types:
         namedType: io.k8s.api.flowcontrol.v1beta1.FlowSchemaStatus
       default: {}
 - name: io.k8s.api.flowcontrol.v1beta1.FlowSchemaCondition
+>>>>>>> upstream/master
   map:
     fields:
     - name: lastTransitionTime
@@ -8134,50 +10060,84 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: type
       type:
         scalar: string
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.FlowSchemaSpec
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.FlowSchemaSpec
+>>>>>>> upstream/master
   map:
     fields:
     - name: distinguisherMethod
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.FlowDistinguisherMethod
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.FlowDistinguisherMethod
+>>>>>>> upstream/master
     - name: matchingPrecedence
       type:
         scalar: numeric
       default: 0
     - name: priorityLevelConfiguration
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationReference
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationReference
+>>>>>>> upstream/master
       default: {}
     - name: rules
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1alpha1.PolicyRulesWithSubjects
+          elementRelationship: atomic
+- name: io.k8s.api.flowcontrol.v1alpha1.FlowSchemaStatus
+=======
             namedType: io.k8s.api.flowcontrol.v1beta1.PolicyRulesWithSubjects
           elementRelationship: atomic
 - name: io.k8s.api.flowcontrol.v1beta1.FlowSchemaStatus
+>>>>>>> upstream/master
   map:
     fields:
     - name: conditions
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1alpha1.FlowSchemaCondition
+          elementRelationship: associative
+          keys:
+          - type
+- name: io.k8s.api.flowcontrol.v1alpha1.GroupSubject
+=======
             namedType: io.k8s.api.flowcontrol.v1beta1.FlowSchemaCondition
           elementRelationship: associative
           keys:
           - type
 - name: io.k8s.api.flowcontrol.v1beta1.GroupSubject
+>>>>>>> upstream/master
   map:
     fields:
     - name: name
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.LimitResponse
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.LimitResponse
+>>>>>>> upstream/master
   map:
     fields:
     - name: queuing
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.QueuingConfiguration
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.QueuingConfiguration
+>>>>>>> upstream/master
     - name: type
       type:
         scalar: string
@@ -8187,7 +10147,11 @@ var schemaYAML = typed.YAMLObject(`types:
       fields:
       - fieldName: queuing
         discriminatorValue: Queuing
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.LimitedPriorityLevelConfiguration
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.LimitedPriorityLevelConfiguration
+>>>>>>> upstream/master
   map:
     fields:
     - name: assuredConcurrencyShares
@@ -8196,9 +10160,15 @@ var schemaYAML = typed.YAMLObject(`types:
       default: 0
     - name: limitResponse
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.LimitResponse
+      default: {}
+- name: io.k8s.api.flowcontrol.v1alpha1.NonResourcePolicyRule
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.LimitResponse
       default: {}
 - name: io.k8s.api.flowcontrol.v1beta1.NonResourcePolicyRule
+>>>>>>> upstream/master
   map:
     fields:
     - name: nonResourceURLs
@@ -8213,28 +10183,46 @@ var schemaYAML = typed.YAMLObject(`types:
           elementType:
             scalar: string
           elementRelationship: associative
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.PolicyRulesWithSubjects
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.PolicyRulesWithSubjects
+>>>>>>> upstream/master
   map:
     fields:
     - name: nonResourceRules
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1alpha1.NonResourcePolicyRule
+=======
             namedType: io.k8s.api.flowcontrol.v1beta1.NonResourcePolicyRule
+>>>>>>> upstream/master
           elementRelationship: atomic
     - name: resourceRules
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1alpha1.ResourcePolicyRule
+=======
             namedType: io.k8s.api.flowcontrol.v1beta1.ResourcePolicyRule
+>>>>>>> upstream/master
           elementRelationship: atomic
     - name: subjects
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1alpha1.Subject
+          elementRelationship: atomic
+- name: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfiguration
+=======
             namedType: io.k8s.api.flowcontrol.v1beta1.Subject
           elementRelationship: atomic
 - name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfiguration
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiVersion
@@ -8249,6 +10237,15 @@ var schemaYAML = typed.YAMLObject(`types:
       default: {}
     - name: spec
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationStatus
+      default: {}
+- name: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationCondition
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationSpec
       default: {}
     - name: status
@@ -8256,6 +10253,7 @@ var schemaYAML = typed.YAMLObject(`types:
         namedType: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationStatus
       default: {}
 - name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationCondition
+>>>>>>> upstream/master
   map:
     fields:
     - name: lastTransitionTime
@@ -8274,19 +10272,31 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: type
       type:
         scalar: string
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationReference
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationReference
+>>>>>>> upstream/master
   map:
     fields:
     - name: name
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationSpec
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationSpec
+>>>>>>> upstream/master
   map:
     fields:
     - name: limited
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.LimitedPriorityLevelConfiguration
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.LimitedPriorityLevelConfiguration
+>>>>>>> upstream/master
     - name: type
       type:
         scalar: string
@@ -8296,18 +10306,30 @@ var schemaYAML = typed.YAMLObject(`types:
       fields:
       - fieldName: limited
         discriminatorValue: Limited
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationStatus
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationStatus
+>>>>>>> upstream/master
   map:
     fields:
     - name: conditions
       type:
         list:
           elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1alpha1.PriorityLevelConfigurationCondition
+          elementRelationship: associative
+          keys:
+          - type
+- name: io.k8s.api.flowcontrol.v1alpha1.QueuingConfiguration
+=======
             namedType: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationCondition
           elementRelationship: associative
           keys:
           - type
 - name: io.k8s.api.flowcontrol.v1beta1.QueuingConfiguration
+>>>>>>> upstream/master
   map:
     fields:
     - name: handSize
@@ -8322,7 +10344,11 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: numeric
       default: 0
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.ResourcePolicyRule
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.ResourcePolicyRule
+>>>>>>> upstream/master
   map:
     fields:
     - name: apiGroups
@@ -8352,7 +10378,11 @@ var schemaYAML = typed.YAMLObject(`types:
           elementType:
             scalar: string
           elementRelationship: associative
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.ServiceAccountSubject
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.ServiceAccountSubject
+>>>>>>> upstream/master
   map:
     fields:
     - name: name
@@ -8363,22 +10393,37 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.Subject
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.Subject
+>>>>>>> upstream/master
   map:
     fields:
     - name: group
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.GroupSubject
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.GroupSubject
+>>>>>>> upstream/master
     - name: kind
       type:
         scalar: string
       default: ""
     - name: serviceAccount
       type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1alpha1.ServiceAccountSubject
+    - name: user
+      type:
+        namedType: io.k8s.api.flowcontrol.v1alpha1.UserSubject
+=======
         namedType: io.k8s.api.flowcontrol.v1beta1.ServiceAccountSubject
     - name: user
       type:
         namedType: io.k8s.api.flowcontrol.v1beta1.UserSubject
+>>>>>>> upstream/master
     unions:
     - discriminator: kind
       fields:
@@ -8388,7 +10433,460 @@ var schemaYAML = typed.YAMLObject(`types:
         discriminatorValue: ServiceAccount
       - fieldName: user
         discriminatorValue: User
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1alpha1.UserSubject
+=======
 - name: io.k8s.api.flowcontrol.v1beta1.UserSubject
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.FlowDistinguisherMethod
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.FlowDistinguisherMethod
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: type
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.FlowSchema
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.FlowSchema
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: apiVersion
+      type:
+        scalar: string
+    - name: kind
+      type:
+        scalar: string
+    - name: metadata
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
+      default: {}
+    - name: spec
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.FlowSchemaSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.flowcontrol.v1beta1.FlowSchemaStatus
+      default: {}
+- name: io.k8s.api.flowcontrol.v1beta1.FlowSchemaCondition
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.FlowSchemaSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.flowcontrol.v1beta2.FlowSchemaStatus
+      default: {}
+- name: io.k8s.api.flowcontrol.v1beta2.FlowSchemaCondition
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: lastTransitionTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+      default: {}
+    - name: message
+      type:
+        scalar: string
+    - name: reason
+      type:
+        scalar: string
+    - name: status
+      type:
+        scalar: string
+    - name: type
+      type:
+        scalar: string
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.FlowSchemaSpec
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.FlowSchemaSpec
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: distinguisherMethod
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.FlowDistinguisherMethod
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.FlowDistinguisherMethod
+>>>>>>> upstream/master
+    - name: matchingPrecedence
+      type:
+        scalar: numeric
+      default: 0
+    - name: priorityLevelConfiguration
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationReference
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfigurationReference
+>>>>>>> upstream/master
+      default: {}
+    - name: rules
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1beta1.PolicyRulesWithSubjects
+          elementRelationship: atomic
+- name: io.k8s.api.flowcontrol.v1beta1.FlowSchemaStatus
+=======
+            namedType: io.k8s.api.flowcontrol.v1beta2.PolicyRulesWithSubjects
+          elementRelationship: atomic
+- name: io.k8s.api.flowcontrol.v1beta2.FlowSchemaStatus
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: conditions
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1beta1.FlowSchemaCondition
+          elementRelationship: associative
+          keys:
+          - type
+- name: io.k8s.api.flowcontrol.v1beta1.GroupSubject
+=======
+            namedType: io.k8s.api.flowcontrol.v1beta2.FlowSchemaCondition
+          elementRelationship: associative
+          keys:
+          - type
+- name: io.k8s.api.flowcontrol.v1beta2.GroupSubject
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.LimitResponse
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.LimitResponse
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: queuing
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.QueuingConfiguration
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.QueuingConfiguration
+>>>>>>> upstream/master
+    - name: type
+      type:
+        scalar: string
+      default: ""
+    unions:
+    - discriminator: type
+      fields:
+      - fieldName: queuing
+        discriminatorValue: Queuing
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.LimitedPriorityLevelConfiguration
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.LimitedPriorityLevelConfiguration
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: assuredConcurrencyShares
+      type:
+        scalar: numeric
+      default: 0
+    - name: limitResponse
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.LimitResponse
+      default: {}
+- name: io.k8s.api.flowcontrol.v1beta1.NonResourcePolicyRule
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.LimitResponse
+      default: {}
+- name: io.k8s.api.flowcontrol.v1beta2.NonResourcePolicyRule
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: nonResourceURLs
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: associative
+    - name: verbs
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: associative
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.PolicyRulesWithSubjects
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.PolicyRulesWithSubjects
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: nonResourceRules
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1beta1.NonResourcePolicyRule
+=======
+            namedType: io.k8s.api.flowcontrol.v1beta2.NonResourcePolicyRule
+>>>>>>> upstream/master
+          elementRelationship: atomic
+    - name: resourceRules
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1beta1.ResourcePolicyRule
+=======
+            namedType: io.k8s.api.flowcontrol.v1beta2.ResourcePolicyRule
+>>>>>>> upstream/master
+          elementRelationship: atomic
+    - name: subjects
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1beta1.Subject
+          elementRelationship: atomic
+- name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfiguration
+=======
+            namedType: io.k8s.api.flowcontrol.v1beta2.Subject
+          elementRelationship: atomic
+- name: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfiguration
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: apiVersion
+      type:
+        scalar: string
+    - name: kind
+      type:
+        scalar: string
+    - name: metadata
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta
+      default: {}
+    - name: spec
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationStatus
+      default: {}
+- name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationCondition
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfigurationSpec
+      default: {}
+    - name: status
+      type:
+        namedType: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfigurationStatus
+      default: {}
+- name: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfigurationCondition
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: lastTransitionTime
+      type:
+        namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Time
+      default: {}
+    - name: message
+      type:
+        scalar: string
+    - name: reason
+      type:
+        scalar: string
+    - name: status
+      type:
+        scalar: string
+    - name: type
+      type:
+        scalar: string
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationReference
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfigurationReference
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationSpec
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfigurationSpec
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: limited
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.LimitedPriorityLevelConfiguration
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.LimitedPriorityLevelConfiguration
+>>>>>>> upstream/master
+    - name: type
+      type:
+        scalar: string
+      default: ""
+    unions:
+    - discriminator: type
+      fields:
+      - fieldName: limited
+        discriminatorValue: Limited
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationStatus
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfigurationStatus
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: conditions
+      type:
+        list:
+          elementType:
+<<<<<<< HEAD
+            namedType: io.k8s.api.flowcontrol.v1beta1.PriorityLevelConfigurationCondition
+          elementRelationship: associative
+          keys:
+          - type
+- name: io.k8s.api.flowcontrol.v1beta1.QueuingConfiguration
+=======
+            namedType: io.k8s.api.flowcontrol.v1beta2.PriorityLevelConfigurationCondition
+          elementRelationship: associative
+          keys:
+          - type
+- name: io.k8s.api.flowcontrol.v1beta2.QueuingConfiguration
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: handSize
+      type:
+        scalar: numeric
+      default: 0
+    - name: queueLengthLimit
+      type:
+        scalar: numeric
+      default: 0
+    - name: queues
+      type:
+        scalar: numeric
+      default: 0
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.ResourcePolicyRule
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.ResourcePolicyRule
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: apiGroups
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: associative
+    - name: clusterScope
+      type:
+        scalar: boolean
+    - name: namespaces
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: associative
+    - name: resources
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: associative
+    - name: verbs
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: associative
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.ServiceAccountSubject
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.ServiceAccountSubject
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+    - name: namespace
+      type:
+        scalar: string
+      default: ""
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.Subject
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.Subject
+>>>>>>> upstream/master
+  map:
+    fields:
+    - name: group
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.GroupSubject
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.GroupSubject
+>>>>>>> upstream/master
+    - name: kind
+      type:
+        scalar: string
+      default: ""
+    - name: serviceAccount
+      type:
+<<<<<<< HEAD
+        namedType: io.k8s.api.flowcontrol.v1beta1.ServiceAccountSubject
+    - name: user
+      type:
+        namedType: io.k8s.api.flowcontrol.v1beta1.UserSubject
+=======
+        namedType: io.k8s.api.flowcontrol.v1beta2.ServiceAccountSubject
+    - name: user
+      type:
+        namedType: io.k8s.api.flowcontrol.v1beta2.UserSubject
+>>>>>>> upstream/master
+    unions:
+    - discriminator: kind
+      fields:
+      - fieldName: group
+        discriminatorValue: Group
+      - fieldName: serviceAccount
+        discriminatorValue: ServiceAccount
+      - fieldName: user
+        discriminatorValue: User
+<<<<<<< HEAD
+- name: io.k8s.api.flowcontrol.v1beta1.UserSubject
+=======
+- name: io.k8s.api.flowcontrol.v1beta2.UserSubject
+>>>>>>> upstream/master
   map:
     fields:
     - name: name
@@ -10647,8 +13145,13 @@ var schemaYAML = typed.YAMLObject(`types:
         elementRelationship: atomic
       map:
         elementType:
+<<<<<<< HEAD
           namedType: __untyped_atomic_
         elementRelationship: atomic
+=======
+          namedType: __untyped_deduced_
+        elementRelationship: separable
+>>>>>>> upstream/master
 - name: io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
   map:
     fields:
@@ -10821,8 +13324,13 @@ var schemaYAML = typed.YAMLObject(`types:
         elementRelationship: atomic
       map:
         elementType:
+<<<<<<< HEAD
           namedType: __untyped_atomic_
         elementRelationship: atomic
+=======
+          namedType: __untyped_deduced_
+        elementRelationship: separable
+>>>>>>> upstream/master
 - name: io.k8s.apimachinery.pkg.util.intstr.IntOrString
   scalar: untyped
 - name: __untyped_atomic_

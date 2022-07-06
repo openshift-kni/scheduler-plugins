@@ -23,10 +23,17 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
+<<<<<<< HEAD
 	"k8s.io/apimachinery/pkg/util/clock"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/utils/buffer"
+=======
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/utils/buffer"
+	"k8s.io/utils/clock"
+>>>>>>> upstream/master
 
 	"k8s.io/klog/v2"
 )
@@ -368,6 +375,13 @@ func (s *sharedIndexInformer) SetWatchErrorHandler(handler WatchErrorHandler) er
 func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 
+<<<<<<< HEAD
+=======
+	if s.HasStarted() {
+		klog.Warningf("The sharedIndexInformer has started, run more than once is not allowed")
+		return
+	}
+>>>>>>> upstream/master
 	fifo := NewDeltaFIFOWithOptions(DeltaFIFOOptions{
 		KnownObjects:          s.indexer,
 		EmitDeltaTypeReplaced: true,
@@ -410,6 +424,15 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 	s.controller.Run(stopCh)
 }
 
+<<<<<<< HEAD
+=======
+func (s *sharedIndexInformer) HasStarted() bool {
+	s.startedLock.Lock()
+	defer s.startedLock.Unlock()
+	return s.started
+}
+
+>>>>>>> upstream/master
 func (s *sharedIndexInformer) HasSynced() bool {
 	s.startedLock.Lock()
 	defer s.startedLock.Unlock()
@@ -694,9 +717,15 @@ type processorListener struct {
 	// full resync from the shared informer, but modified by two
 	// adjustments.  One is imposing a lower bound,
 	// `minimumResyncPeriod`.  The other is another lower bound, the
+<<<<<<< HEAD
 	// sharedProcessor's `resyncCheckPeriod`, that is imposed (a) only
 	// in AddEventHandlerWithResyncPeriod invocations made after the
 	// sharedProcessor starts and (b) only if the informer does
+=======
+	// sharedIndexInformer's `resyncCheckPeriod`, that is imposed (a) only
+	// in AddEventHandlerWithResyncPeriod invocations made after the
+	// sharedIndexInformer starts and (b) only if the informer does
+>>>>>>> upstream/master
 	// resyncs at all.
 	requestedResyncPeriod time.Duration
 	// resyncPeriod is the threshold that will be used in the logic

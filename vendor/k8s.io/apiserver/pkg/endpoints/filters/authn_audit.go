@@ -26,33 +26,58 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	auditinternal "k8s.io/apiserver/pkg/apis/audit"
 	"k8s.io/apiserver/pkg/audit"
+<<<<<<< HEAD
 	"k8s.io/apiserver/pkg/audit/policy"
+=======
+>>>>>>> upstream/master
 	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
 )
 
 // WithFailedAuthenticationAudit decorates a failed http.Handler used in WithAuthentication handler.
 // It is meant to log only failed authentication requests.
+<<<<<<< HEAD
 func WithFailedAuthenticationAudit(failedHandler http.Handler, sink audit.Sink, policy policy.Checker) http.Handler {
+=======
+func WithFailedAuthenticationAudit(failedHandler http.Handler, sink audit.Sink, policy audit.PolicyRuleEvaluator) http.Handler {
+>>>>>>> upstream/master
 	if sink == nil || policy == nil {
 		return failedHandler
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+<<<<<<< HEAD
 		req, ev, omitStages, err := createAuditEventAndAttachToContext(req, policy)
+=======
+		a, err := evaluatePolicyAndCreateAuditEvent(req, policy)
+>>>>>>> upstream/master
 		if err != nil {
 			utilruntime.HandleError(fmt.Errorf("failed to create audit event: %v", err))
 			responsewriters.InternalError(w, req, errors.New("failed to create audit event"))
 			return
 		}
+<<<<<<< HEAD
+=======
+
+		ev := a.Event
+>>>>>>> upstream/master
 		if ev == nil {
 			failedHandler.ServeHTTP(w, req)
 			return
 		}
 
+<<<<<<< HEAD
+=======
+		req = req.WithContext(audit.WithAuditContext(req.Context(), a))
+
+>>>>>>> upstream/master
 		ev.ResponseStatus = &metav1.Status{}
 		ev.ResponseStatus.Message = getAuthMethods(req)
 		ev.Stage = auditinternal.StageResponseStarted
 
+<<<<<<< HEAD
 		rw := decorateResponseWriter(req.Context(), w, ev, sink, omitStages)
+=======
+		rw := decorateResponseWriter(req.Context(), w, ev, sink, a.RequestAuditConfig.OmitStages)
+>>>>>>> upstream/master
 		failedHandler.ServeHTTP(rw, req)
 	})
 }

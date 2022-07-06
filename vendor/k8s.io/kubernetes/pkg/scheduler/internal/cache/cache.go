@@ -18,6 +18,10 @@ package cache
 
 import (
 	"fmt"
+<<<<<<< HEAD
+=======
+	"os"
+>>>>>>> upstream/master
 	"sync"
 	"time"
 
@@ -123,7 +127,11 @@ func newNodeInfoListItem(ni *framework.NodeInfo) *nodeInfoListItem {
 func (cache *schedulerCache) moveNodeInfoToHead(name string) {
 	ni, ok := cache.nodes[name]
 	if !ok {
+<<<<<<< HEAD
 		klog.Errorf("No NodeInfo with name %v found in the cache", name)
+=======
+		klog.ErrorS(nil, "No node info with given name found in the cache", "node", klog.KRef("", name))
+>>>>>>> upstream/master
 		return
 	}
 	// if the node info list item is already at the head, we are done.
@@ -151,7 +159,11 @@ func (cache *schedulerCache) moveNodeInfoToHead(name string) {
 func (cache *schedulerCache) removeNodeInfoFromList(name string) {
 	ni, ok := cache.nodes[name]
 	if !ok {
+<<<<<<< HEAD
 		klog.Errorf("No NodeInfo with name %v found in the cache", name)
+=======
+		klog.ErrorS(nil, "No node info with given name found in the cache", "node", klog.KRef("", name))
+>>>>>>> upstream/master
 		return
 	}
 
@@ -264,7 +276,11 @@ func (cache *schedulerCache) UpdateSnapshot(nodeSnapshot *Snapshot) error {
 			", trying to recover",
 			len(nodeSnapshot.nodeInfoList), cache.nodeTree.numNodes,
 			len(nodeSnapshot.nodeInfoMap), len(cache.nodes))
+<<<<<<< HEAD
 		klog.Error(errMsg)
+=======
+		klog.ErrorS(nil, errMsg)
+>>>>>>> upstream/master
 		// We will try to recover by re-creating the lists for the next scheduling cycle, but still return an
 		// error to surface the problem, the error will likely cause a failure to the current scheduling cycle.
 		cache.updateNodeInfoSnapshotList(nodeSnapshot, true)
@@ -282,7 +298,11 @@ func (cache *schedulerCache) updateNodeInfoSnapshotList(snapshot *Snapshot, upda
 		snapshot.nodeInfoList = make([]*framework.NodeInfo, 0, cache.nodeTree.numNodes)
 		nodesList, err := cache.nodeTree.list()
 		if err != nil {
+<<<<<<< HEAD
 			klog.Error(err)
+=======
+			klog.ErrorS(err, "Error occurred while retrieving the list of names of the nodes from node tree")
+>>>>>>> upstream/master
 		}
 		for _, nodeName := range nodesList {
 			if nodeInfo := snapshot.nodeInfoMap[nodeName]; nodeInfo != nil {
@@ -294,7 +314,11 @@ func (cache *schedulerCache) updateNodeInfoSnapshotList(snapshot *Snapshot, upda
 					snapshot.havePodsWithRequiredAntiAffinityNodeInfoList = append(snapshot.havePodsWithRequiredAntiAffinityNodeInfoList, nodeInfo)
 				}
 			} else {
+<<<<<<< HEAD
 				klog.Errorf("node %q exist in nodeTree but not in NodeInfoMap, this should not happen.", nodeName)
+=======
+				klog.ErrorS(nil, "Node exists in nodeTree but not in NodeInfoMap, this should not happen", "node", klog.KRef("", nodeName))
+>>>>>>> upstream/master
 			}
 		}
 	} else {
@@ -381,7 +405,11 @@ func (cache *schedulerCache) finishBinding(pod *v1.Pod, now time.Time) error {
 	cache.mu.RLock()
 	defer cache.mu.RUnlock()
 
+<<<<<<< HEAD
 	klog.V(5).Infof("Finished binding for pod %v. Can be expired.", key)
+=======
+	klog.V(5).InfoS("Finished binding for pod, can be expired", "pod", klog.KObj(pod))
+>>>>>>> upstream/master
 	currState, ok := cache.podStates[key]
 	if ok && cache.assumedPods.Has(key) {
 		dl := now.Add(cache.ttl)
@@ -447,7 +475,11 @@ func (cache *schedulerCache) updatePod(oldPod, newPod *v1.Pod) error {
 func (cache *schedulerCache) removePod(pod *v1.Pod) error {
 	n, ok := cache.nodes[pod.Spec.NodeName]
 	if !ok {
+<<<<<<< HEAD
 		klog.Errorf("node %v not found when trying to remove pod %v", pod.Spec.NodeName, pod.Name)
+=======
+		klog.ErrorS(nil, "Node not found when trying to remove pod", "node", klog.KRef("", pod.Spec.NodeName), "pod", klog.KObj(pod))
+>>>>>>> upstream/master
 		return nil
 	}
 	if err := n.info.RemovePod(pod); err != nil {
@@ -475,10 +507,17 @@ func (cache *schedulerCache) AddPod(pod *v1.Pod) error {
 	case ok && cache.assumedPods.Has(key):
 		if currState.pod.Spec.NodeName != pod.Spec.NodeName {
 			// The pod was added to a different node than it was assumed to.
+<<<<<<< HEAD
 			klog.Warningf("Pod %v was assumed to be on %v but got added to %v", key, pod.Spec.NodeName, currState.pod.Spec.NodeName)
 			// Clean this up.
 			if err = cache.removePod(currState.pod); err != nil {
 				klog.Errorf("removing pod error: %v", err)
+=======
+			klog.InfoS("Pod was added to a different node than it was assumed", "pod", klog.KObj(pod), "assumedNode", klog.KRef("", pod.Spec.NodeName), "currentNode", klog.KRef("", currState.pod.Spec.NodeName))
+			// Clean this up.
+			if err = cache.removePod(currState.pod); err != nil {
+				klog.ErrorS(err, "Error occurred while removing pod")
+>>>>>>> upstream/master
 			}
 			cache.addPod(pod)
 		}
@@ -513,8 +552,14 @@ func (cache *schedulerCache) UpdatePod(oldPod, newPod *v1.Pod) error {
 	// before Update event, in which case the state would change from Assumed to Added.
 	case ok && !cache.assumedPods.Has(key):
 		if currState.pod.Spec.NodeName != newPod.Spec.NodeName {
+<<<<<<< HEAD
 			klog.Errorf("Pod %v updated on a different node than previously added to.", key)
 			klog.Fatalf("Schedulercache is corrupted and can badly affect scheduling decisions")
+=======
+			klog.ErrorS(nil, "Pod updated on a different node than previously added to", "pod", klog.KObj(oldPod))
+			klog.ErrorS(nil, "SchedulerCache is corrupted and can badly affect scheduling decisions")
+			os.Exit(1)
+>>>>>>> upstream/master
 		}
 		if err := cache.updatePod(oldPod, newPod); err != nil {
 			return err
@@ -537,6 +582,7 @@ func (cache *schedulerCache) RemovePod(pod *v1.Pod) error {
 
 	currState, ok := cache.podStates[key]
 	switch {
+<<<<<<< HEAD
 	// An assumed pod won't have Delete/Remove event. It needs to have Add event
 	// before Remove event, in which case the state would change from Assumed to Added.
 	case ok && !cache.assumedPods.Has(key):
@@ -553,6 +599,22 @@ func (cache *schedulerCache) RemovePod(pod *v1.Pod) error {
 		return fmt.Errorf("pod %v is not found in scheduler cache, so cannot be removed from it", key)
 	}
 	return nil
+=======
+	case ok:
+		if currState.pod.Spec.NodeName != pod.Spec.NodeName {
+			klog.ErrorS(nil, "Pod was added to a different node than it was assumed", "pod", klog.KObj(pod), "assumedNode", klog.KRef("", pod.Spec.NodeName), "currentNode", klog.KRef("", currState.pod.Spec.NodeName))
+			if pod.Spec.NodeName != "" {
+				// An empty NodeName is possible when the scheduler misses a Delete
+				// event and it gets the last known state from the informer cache.
+				klog.ErrorS(nil, "SchedulerCache is corrupted and can badly affect scheduling decisions")
+				os.Exit(1)
+			}
+		}
+		return cache.expirePod(key, currState)
+	default:
+		return fmt.Errorf("pod %v is not found in scheduler cache, so cannot be removed from it", key)
+	}
+>>>>>>> upstream/master
 }
 
 func (cache *schedulerCache) IsAssumedPod(pod *v1.Pod) (bool, error) {
@@ -726,6 +788,7 @@ func (cache *schedulerCache) cleanupAssumedPods(now time.Time) {
 	for key := range cache.assumedPods {
 		ps, ok := cache.podStates[key]
 		if !ok {
+<<<<<<< HEAD
 			klog.Fatal("Key found in assumed set but not in podStates. Potentially a logical error.")
 		}
 		if !ps.bindingFinished {
@@ -737,6 +800,20 @@ func (cache *schedulerCache) cleanupAssumedPods(now time.Time) {
 			klog.Warningf("Pod %s/%s expired", ps.pod.Namespace, ps.pod.Name)
 			if err := cache.expirePod(key, ps); err != nil {
 				klog.Errorf("ExpirePod failed for %s: %v", key, err)
+=======
+			klog.ErrorS(nil, "Key found in assumed set but not in podStates, potentially a logical error")
+			os.Exit(1)
+		}
+		if !ps.bindingFinished {
+			klog.V(5).InfoS("Could not expire cache for pod as binding is still in progress",
+				"pod", klog.KObj(ps.pod))
+			continue
+		}
+		if now.After(*ps.deadline) {
+			klog.InfoS("Pod expired", "pod", klog.KObj(ps.pod))
+			if err := cache.expirePod(key, ps); err != nil {
+				klog.ErrorS(err, "ExpirePod failed", "pod", klog.KObj(ps.pod))
+>>>>>>> upstream/master
 			}
 		}
 	}

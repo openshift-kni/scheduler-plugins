@@ -102,7 +102,11 @@ func (c *FakeRuntimeClasses) Update(ctx context.Context, runtimeClass *v1alpha1.
 // Delete takes name of the runtimeClass and deletes it. Returns an error if one occurs.
 func (c *FakeRuntimeClasses) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
+<<<<<<< HEAD
 		Invokes(testing.NewRootDeleteAction(runtimeclassesResource, name), &v1alpha1.RuntimeClass{})
+=======
+		Invokes(testing.NewRootDeleteActionWithOptions(runtimeclassesResource, name, opts), &v1alpha1.RuntimeClass{})
+>>>>>>> upstream/master
 	return err
 }
 

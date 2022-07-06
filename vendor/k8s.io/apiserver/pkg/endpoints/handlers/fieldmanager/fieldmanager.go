@@ -56,10 +56,24 @@ type Manager interface {
 	// Update is used when the object has already been merged (non-apply
 	// use-case), and simply updates the managed fields in the output
 	// object.
+<<<<<<< HEAD
+=======
+	//  * `liveObj` is not mutated by this function
+	//  * `newObj` may be mutated by this function
+	// Returns the new object with managedFields removed, and the object's new
+	// proposed managedFields separately.
+>>>>>>> upstream/master
 	Update(liveObj, newObj runtime.Object, managed Managed, manager string) (runtime.Object, Managed, error)
 
 	// Apply is used when server-side apply is called, as it merges the
 	// object and updates the managed fields.
+<<<<<<< HEAD
+=======
+	//  * `liveObj` is not mutated by this function
+	//  * `newObj` may be mutated by this function
+	// Returns the new object with managedFields removed, and the object's new
+	// proposed managedFields separately.
+>>>>>>> upstream/master
 	Apply(liveObj, appliedObj runtime.Object, managed Managed, fieldManager string, force bool) (runtime.Object, Managed, error)
 }
 
@@ -173,7 +187,10 @@ func (f *FieldManager) Update(liveObj, newObj runtime.Object, manager string) (o
 		return newObj, nil
 	}
 
+<<<<<<< HEAD
 	internal.RemoveObjectManagedFields(liveObj)
+=======
+>>>>>>> upstream/master
 	internal.RemoveObjectManagedFields(newObj)
 
 	if object, managed, err = f.fieldManager.Update(liveObj, newObj, managed, manager); err != nil {
@@ -194,8 +211,20 @@ func (f *FieldManager) UpdateNoErrors(liveObj, newObj runtime.Object, manager st
 	obj, err := f.Update(liveObj, newObj, manager)
 	if err != nil {
 		atMostEverySecond.Do(func() {
+<<<<<<< HEAD
 			klog.ErrorS(err, "[SHOULD NOT HAPPEN] failed to update managedFields", "VersionKind",
 				newObj.GetObjectKind().GroupVersionKind())
+=======
+			ns, name := "unknown", "unknown"
+			accessor, err := meta.Accessor(newObj)
+			if err == nil {
+				ns = accessor.GetNamespace()
+				name = accessor.GetName()
+			}
+
+			klog.ErrorS(err, "[SHOULD NOT HAPPEN] failed to update managedFields", "VersionKind",
+				newObj.GetObjectKind().GroupVersionKind(), "namespace", ns, "name", name)
+>>>>>>> upstream/master
 		})
 		// Explicitly remove managedFields on failure, so that
 		// we can't have garbage in it.
@@ -235,8 +264,11 @@ func (f *FieldManager) Apply(liveObj, appliedObj runtime.Object, manager string,
 		return nil, fmt.Errorf("failed to decode managed fields: %v", err)
 	}
 
+<<<<<<< HEAD
 	internal.RemoveObjectManagedFields(liveObj)
 
+=======
+>>>>>>> upstream/master
 	object, managed, err = f.fieldManager.Apply(liveObj, appliedObj, managed, manager, force)
 	if err != nil {
 		if conflicts, ok := err.(merge.Conflicts); ok {

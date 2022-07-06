@@ -17,6 +17,7 @@ limitations under the License.
 package noderesources
 
 import (
+<<<<<<< HEAD
 	"context"
 	"fmt"
 
@@ -92,6 +93,17 @@ func NewLeastAllocated(laArgs runtime.Object, h framework.Handle, fts feature.Fe
 	}, nil
 }
 
+=======
+	"k8s.io/kubernetes/pkg/scheduler/framework"
+)
+
+// leastResourceScorer favors nodes with fewer requested resources.
+// It calculates the percentage of memory and CPU requested by pods scheduled on the node, and
+// prioritizes based on the minimum of the average of the fraction of requested to capacity.
+//
+// Details:
+// (cpu((capacity-sum(requested))*MaxNodeScore/capacity) + memory((capacity-sum(requested))*MaxNodeScore/capacity))/weightSum
+>>>>>>> upstream/master
 func leastResourceScorer(resToWeightMap resourceToWeightMap) func(resourceToValueMap, resourceToValueMap) int64 {
 	return func(requested, allocable resourceToValueMap) int64 {
 		var nodeScore, weightSum int64

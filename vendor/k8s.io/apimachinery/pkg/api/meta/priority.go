@@ -29,6 +29,13 @@ const (
 	AnyKind     = "*"
 )
 
+<<<<<<< HEAD
+=======
+var (
+	_ ResettableRESTMapper = PriorityRESTMapper{}
+)
+
+>>>>>>> upstream/master
 // PriorityRESTMapper is a wrapper for automatically choosing a particular Resource or Kind
 // when multiple matches are possible
 type PriorityRESTMapper struct {
@@ -220,3 +227,10 @@ func (m PriorityRESTMapper) ResourcesFor(partiallySpecifiedResource schema.Group
 func (m PriorityRESTMapper) KindsFor(partiallySpecifiedResource schema.GroupVersionResource) (gvk []schema.GroupVersionKind, err error) {
 	return m.Delegate.KindsFor(partiallySpecifiedResource)
 }
+<<<<<<< HEAD
+=======
+
+func (m PriorityRESTMapper) Reset() {
+	MaybeResetRESTMapper(m.Delegate)
+}
+>>>>>>> upstream/master

@@ -17,9 +17,12 @@ limitations under the License.
 package v1beta2
 
 import (
+<<<<<<< HEAD
 	"net"
 	"strconv"
 
+=======
+>>>>>>> upstream/master
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -123,6 +126,7 @@ func SetDefaults_KubeSchedulerConfiguration(obj *v1beta2.KubeSchedulerConfigurat
 		setDefaults_KubeSchedulerProfile(prof)
 	}
 
+<<<<<<< HEAD
 	// For Healthz and Metrics bind addresses, we want to check:
 	// 1. If the value is nil, default to 0.0.0.0 and default scheduler port
 	// 2. If there is a value set, attempt to split it. If it's just a port (ie, ":1234"), default to 0.0.0.0 with that port
@@ -167,6 +171,8 @@ func SetDefaults_KubeSchedulerConfiguration(obj *v1beta2.KubeSchedulerConfigurat
 		}
 	}
 
+=======
+>>>>>>> upstream/master
 	if obj.PercentageOfNodesToScore == nil {
 		percentageOfNodesToScore := int32(config.DefaultPercentageOfNodesToScore)
 		obj.PercentageOfNodesToScore = &percentageOfNodesToScore

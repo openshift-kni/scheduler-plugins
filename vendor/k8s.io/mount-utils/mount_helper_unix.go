@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+//go:build !windows
+>>>>>>> upstream/master
 // +build !windows
 
 /*
@@ -19,12 +23,22 @@ limitations under the License.
 package mount
 
 import (
+<<<<<<< HEAD
 	"fmt"
+=======
+	"errors"
+	"fmt"
+	"io/fs"
+>>>>>>> upstream/master
 	"os"
 	"strconv"
 	"strings"
 	"syscall"
 
+<<<<<<< HEAD
+=======
+	"k8s.io/klog/v2"
+>>>>>>> upstream/master
 	utilio "k8s.io/utils/io"
 )
 
@@ -50,6 +64,11 @@ func IsCorruptedMnt(err error) bool {
 		underlyingError = pe.Err
 	case *os.SyscallError:
 		underlyingError = pe.Err
+<<<<<<< HEAD
+=======
+	case syscall.Errno:
+		underlyingError = err
+>>>>>>> upstream/master
 	}
 
 	return underlyingError == syscall.ENOTCONN || underlyingError == syscall.ESTALE || underlyingError == syscall.EIO || underlyingError == syscall.EACCES || underlyingError == syscall.EHOSTDOWN
@@ -156,3 +175,29 @@ func isMountPointMatch(mp MountPoint, dir string) bool {
 	deletedDir := fmt.Sprintf("%s\\040(deleted)", dir)
 	return ((mp.Path == dir) || (mp.Path == deletedDir))
 }
+<<<<<<< HEAD
+=======
+
+// PathExists returns true if the specified path exists.
+// TODO: clean this up to use pkg/util/file/FileExists
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	} else if errors.Is(err, fs.ErrNotExist) {
+		err = syscall.Access(path, syscall.F_OK)
+		if err == nil {
+			// The access syscall says the file exists, the stat syscall says it
+			// doesn't. This was observed on CIFS when the path was removed at
+			// the server somehow. POSIX calls this a stale file handle, let's fake
+			// that error and treat the path as existing but corrupted.
+			klog.Warningf("Potential stale file handle detected: %s", path)
+			return true, syscall.ESTALE
+		}
+		return false, nil
+	} else if IsCorruptedMnt(err) {
+		return true, err
+	}
+	return false, err
+}
+>>>>>>> upstream/master

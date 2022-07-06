@@ -51,7 +51,11 @@ var nodeResourceStrategyTypeMap = map[config.ScoringStrategyType]scorer{
 	config.LeastAllocated: func(args *config.NodeResourcesFitArgs) *resourceAllocationScorer {
 		resToWeightMap := resourcesToWeightMap(args.ScoringStrategy.Resources)
 		return &resourceAllocationScorer{
+<<<<<<< HEAD
 			Name:                LeastAllocatedName,
+=======
+			Name:                string(config.LeastAllocated),
+>>>>>>> upstream/master
 			scorer:              leastResourceScorer(resToWeightMap),
 			resourceToWeightMap: resToWeightMap,
 		}
@@ -59,7 +63,11 @@ var nodeResourceStrategyTypeMap = map[config.ScoringStrategyType]scorer{
 	config.MostAllocated: func(args *config.NodeResourcesFitArgs) *resourceAllocationScorer {
 		resToWeightMap := resourcesToWeightMap(args.ScoringStrategy.Resources)
 		return &resourceAllocationScorer{
+<<<<<<< HEAD
 			Name:                MostAllocatedName,
+=======
+			Name:                string(config.MostAllocated),
+>>>>>>> upstream/master
 			scorer:              mostResourceScorer(resToWeightMap),
 			resourceToWeightMap: resToWeightMap,
 		}
@@ -67,7 +75,11 @@ var nodeResourceStrategyTypeMap = map[config.ScoringStrategyType]scorer{
 	config.RequestedToCapacityRatio: func(args *config.NodeResourcesFitArgs) *resourceAllocationScorer {
 		resToWeightMap := resourcesToWeightMap(args.ScoringStrategy.Resources)
 		return &resourceAllocationScorer{
+<<<<<<< HEAD
 			Name:                RequestedToCapacityRatioName,
+=======
+			Name:                string(config.RequestedToCapacityRatio),
+>>>>>>> upstream/master
 			scorer:              requestedToCapacityRatioScorer(resToWeightMap, args.ScoringStrategy.RequestedToCapacityRatio.Shape),
 			resourceToWeightMap: resToWeightMap,
 		}
@@ -118,8 +130,13 @@ func NewFit(plArgs runtime.Object, h framework.Handle, fts feature.Features) (fr
 	}
 
 	strategy := args.ScoringStrategy.Type
+<<<<<<< HEAD
 	scorePlugin, ok := nodeResourceStrategyTypeMap[strategy]
 	if !ok {
+=======
+	scorePlugin, exists := nodeResourceStrategyTypeMap[strategy]
+	if !exists {
+>>>>>>> upstream/master
 		return nil, fmt.Errorf("scoring strategy %s is not supported", strategy)
 	}
 
@@ -229,8 +246,13 @@ func (f *Fit) Filter(ctx context.Context, cycleState *framework.CycleState, pod 
 	if len(insufficientResources) != 0 {
 		// We will keep all failure reasons.
 		failureReasons := make([]string, 0, len(insufficientResources))
+<<<<<<< HEAD
 		for _, r := range insufficientResources {
 			failureReasons = append(failureReasons, r.Reason)
+=======
+		for i := range insufficientResources {
+			failureReasons = append(failureReasons, insufficientResources[i].Reason)
+>>>>>>> upstream/master
 		}
 		return framework.NewStatus(framework.Unschedulable, failureReasons...)
 	}

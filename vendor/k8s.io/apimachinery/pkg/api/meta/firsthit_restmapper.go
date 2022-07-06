@@ -23,6 +23,13 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 )
 
+<<<<<<< HEAD
+=======
+var (
+	_ ResettableRESTMapper = &FirstHitRESTMapper{}
+)
+
+>>>>>>> upstream/master
 // FirstHitRESTMapper is a wrapper for multiple RESTMappers which returns the
 // first successful result for the singular requests
 type FirstHitRESTMapper struct {
@@ -75,6 +82,13 @@ func (m FirstHitRESTMapper) RESTMapping(gk schema.GroupKind, versions ...string)
 	return nil, collapseAggregateErrors(errors)
 }
 
+<<<<<<< HEAD
+=======
+func (m FirstHitRESTMapper) Reset() {
+	m.MultiRESTMapper.Reset()
+}
+
+>>>>>>> upstream/master
 // collapseAggregateErrors returns the minimal errors.  it handles empty as nil, handles one item in a list
 // by returning the item, and collapses all NoMatchErrors to a single one (since they should all be the same)
 func collapseAggregateErrors(errors []error) error {

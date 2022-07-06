@@ -239,6 +239,12 @@ func NewErrorTypeMatcher(t ErrorType) utilerrors.Matcher {
 
 // ToAggregate converts the ErrorList into an errors.Aggregate.
 func (list ErrorList) ToAggregate() utilerrors.Aggregate {
+<<<<<<< HEAD
+=======
+	if len(list) == 0 {
+		return nil
+	}
+>>>>>>> upstream/master
 	errs := make([]error, 0, len(list))
 	errorMsgs := sets.NewString()
 	for _, err := range list {

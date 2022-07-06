@@ -135,6 +135,7 @@ func removePathIfNotMountPoint(mountPath string, mounter Interface, extensiveMou
 	}
 	return notMnt, nil
 }
+<<<<<<< HEAD
 
 // PathExists returns true if the specified path exists.
 // TODO: clean this up to use pkg/util/file/FileExists
@@ -149,3 +150,5 @@ func PathExists(path string) (bool, error) {
 	}
 	return false, err
 }
+=======
+>>>>>>> upstream/master

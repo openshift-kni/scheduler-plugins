@@ -97,6 +97,43 @@ type RollingUpdateStatefulSetStrategy struct {
 	Partition int32
 }
 
+<<<<<<< HEAD
+=======
+// PersistentVolumeClaimRetentionPolicyType is a string enumeration of the policies that will determine
+// when volumes from the VolumeClaimTemplates will be deleted when the controlling StatefulSet is
+// deleted or scaled down.
+type PersistentVolumeClaimRetentionPolicyType string
+
+const (
+	// RetainPersistentVolumeClaimRetentionPolicyType is the default
+	// PersistentVolumeClaimRetentionPolicy and specifies that
+	// PersistentVolumeClaims associated with StatefulSet VolumeClaimTemplates
+	// will not be deleted.
+	RetainPersistentVolumeClaimRetentionPolicyType PersistentVolumeClaimRetentionPolicyType = "Retain"
+	// DeletePersistentVolumeClaimRetentionPolicyType specifies that
+	// PersistentVolumeClaims associated with StatefulSet VolumeClaimTemplates
+	// will be deleted in the scenario specified in
+	// StatefulSetPersistentVolumeClaimPolicy.
+	DeletePersistentVolumeClaimRetentionPolicyType PersistentVolumeClaimRetentionPolicyType = "Delete"
+)
+
+// StatefulSetPersistentVolumeClaimRetentionPolicy describes the policy used for PVCs
+// created from the StatefulSet VolumeClaimTemplates.
+type StatefulSetPersistentVolumeClaimRetentionPolicy struct {
+	// WhenDeleted specifies what happens to PVCs created from StatefulSet
+	// VolumeClaimTemplates when the StatefulSet is deleted. The default policy
+	// of `Retain` causes PVCs to not be affected by StatefulSet deletion. The
+	// `Delete` policy causes those PVCs to be deleted.
+	WhenDeleted PersistentVolumeClaimRetentionPolicyType
+	// WhenScaled specifies what happens to PVCs created from StatefulSet
+	// VolumeClaimTemplates when the StatefulSet is scaled down. The default
+	// policy of `Retain` causes PVCs to not be affected by a scaledown. The
+	// `Delete` policy causes the associated PVCs for any excess pods above
+	// the replica count to be deleted.
+	WhenScaled PersistentVolumeClaimRetentionPolicyType
+}
+
+>>>>>>> upstream/master
 // A StatefulSetSpec is the specification of a StatefulSet.
 type StatefulSetSpec struct {
 	// Replicas is the desired number of replicas of the given Template.
@@ -164,6 +201,15 @@ type StatefulSetSpec struct {
 	// This is an alpha field and requires enabling StatefulSetMinReadySeconds feature gate.
 	// +optional
 	MinReadySeconds int32
+<<<<<<< HEAD
+=======
+
+	// PersistentVolumeClaimRetentionPolicy describes the policy used for PVCs created from
+	// the StatefulSet VolumeClaimTemplates. This requires the
+	// StatefulSetAutoDeletePVC feature gate to be enabled, which is alpha.
+	// +optional
+	PersistentVolumeClaimRetentionPolicy *StatefulSetPersistentVolumeClaimRetentionPolicy
+>>>>>>> upstream/master
 }
 
 // StatefulSetStatus represents the current state of a StatefulSet.
@@ -205,9 +251,13 @@ type StatefulSetStatus struct {
 	Conditions []StatefulSetCondition
 
 	// Total number of available pods (ready for at least minReadySeconds) targeted by this statefulset.
+<<<<<<< HEAD
 	// This is an alpha field and requires enabling StatefulSetMinReadySeconds feature gate.
 	// Remove omitempty when graduating to beta
 	// +optional
+=======
+	// This is a beta field and requires enabling StatefulSetMinReadySeconds feature gate.
+>>>>>>> upstream/master
 	AvailableReplicas int32
 }
 
@@ -572,7 +622,11 @@ type RollingUpdateDaemonSet struct {
 	// pod is available (Ready for at least minReadySeconds) the old DaemonSet pod
 	// on that node is marked deleted. If the old pod becomes unavailable for any
 	// reason (Ready transitions to false, is evicted, or is drained) an updated
+<<<<<<< HEAD
 	// pod is immediatedly created on that node without considering surge limits.
+=======
+	// pod is immediately created on that node without considering surge limits.
+>>>>>>> upstream/master
 	// Allowing surge implies the possibility that the resources consumed by the
 	// daemonset on any given node can double if the readiness check fails, and
 	// so resource intensive daemonsets should take into account that they may

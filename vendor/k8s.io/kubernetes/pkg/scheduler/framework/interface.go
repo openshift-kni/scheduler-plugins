@@ -35,7 +35,11 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/events"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config"
+<<<<<<< HEAD
 	"k8s.io/kubernetes/pkg/scheduler/internal/parallelize"
+=======
+	"k8s.io/kubernetes/pkg/scheduler/framework/parallelize"
+>>>>>>> upstream/master
 )
 
 // NodeScoreList declares a list of nodes and their scores.
@@ -131,8 +135,14 @@ func NewPodsToActivate() *PodsToActivate {
 }
 
 // Status indicates the result of running a plugin. It consists of a code, a
+<<<<<<< HEAD
 // message, (optionally) an error and an plugin name it fails by. When the status
 // code is not `Success`, the reasons should explain why.
+=======
+// message, (optionally) an error, and a plugin name it fails by.
+// When the status code is not Success, the reasons should explain why.
+// And, when code is Success, all the other fields should be empty.
+>>>>>>> upstream/master
 // NOTE: A nil Status is also considered as Success.
 type Status struct {
 	code    Code
@@ -307,10 +317,20 @@ type QueueSortPlugin interface {
 }
 
 // EnqueueExtensions is an optional interface that plugins can implement to efficiently
+<<<<<<< HEAD
 // move unschedulable Pods in internal scheduling queues.
 type EnqueueExtensions interface {
 	// EventsToRegister returns a series of interested events that
 	// will be registered when instantiating the internal scheduling queue.
+=======
+// move unschedulable Pods in internal scheduling queues. Plugins
+// that fail pod scheduling (e.g., Filter plugins) are expected to implement this interface.
+type EnqueueExtensions interface {
+	// EventsToRegister returns a series of possible events that may cause a Pod
+	// failed by this plugin schedulable.
+	// The events will be registered when instantiating the internal scheduling queue,
+	// and leveraged to build event handlers dynamically.
+>>>>>>> upstream/master
 	// Note: the returned list needs to be static (not depend on configuration parameters);
 	// otherwise it would lead to undefined behavior.
 	EventsToRegister() []ClusterEvent
@@ -580,7 +600,12 @@ type Handle interface {
 	GetWaitingPod(uid types.UID) WaitingPod
 
 	// RejectWaitingPod rejects a waiting pod given its UID.
+<<<<<<< HEAD
 	RejectWaitingPod(uid types.UID)
+=======
+	// The return value indicates if the pod is waiting or not.
+	RejectWaitingPod(uid types.UID) bool
+>>>>>>> upstream/master
 
 	// ClientSet returns a kubernetes clientSet.
 	ClientSet() clientset.Interface
@@ -603,16 +628,54 @@ type Handle interface {
 	Parallelizer() parallelize.Parallelizer
 }
 
+<<<<<<< HEAD
 // PostFilterResult wraps needed info for scheduler framework to act upon PostFilter phase.
 type PostFilterResult struct {
 	NominatedNodeName string
+=======
+type NominatingMode int
+
+const (
+	ModeNoop NominatingMode = iota
+	ModeOverride
+)
+
+type NominatingInfo struct {
+	NominatedNodeName string
+	NominatingMode    NominatingMode
+}
+
+// PostFilterResult wraps needed info for scheduler framework to act upon PostFilter phase.
+type PostFilterResult struct {
+	*NominatingInfo
+}
+
+func NewPostFilterResultWithNominatedNode(name string) *PostFilterResult {
+	return &PostFilterResult{
+		NominatingInfo: &NominatingInfo{
+			NominatedNodeName: name,
+			NominatingMode:    ModeOverride,
+		},
+	}
+}
+
+func (ni *NominatingInfo) Mode() NominatingMode {
+	if ni == nil {
+		return ModeNoop
+	}
+	return ni.NominatingMode
+>>>>>>> upstream/master
 }
 
 // PodNominator abstracts operations to maintain nominated Pods.
 type PodNominator interface {
 	// AddNominatedPod adds the given pod to the nominator or
 	// updates it if it already exists.
+<<<<<<< HEAD
 	AddNominatedPod(pod *PodInfo, nodeName string)
+=======
+	AddNominatedPod(pod *PodInfo, nominatingInfo *NominatingInfo)
+>>>>>>> upstream/master
 	// DeleteNominatedPodIfExists deletes nominatedPod from internal cache. It's a no-op if it doesn't exist.
 	DeleteNominatedPodIfExists(pod *v1.Pod)
 	// UpdateNominatedPod updates the <oldPod> with <newPod>.

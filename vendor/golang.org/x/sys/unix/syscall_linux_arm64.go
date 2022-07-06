@@ -9,6 +9,7 @@ package unix
 
 import "unsafe"
 
+<<<<<<< HEAD
 func EpollCreate(size int) (fd int, err error) {
 	if size <= 0 {
 		return -1, EINVAL
@@ -16,6 +17,8 @@ func EpollCreate(size int) (fd int, err error) {
 	return EpollCreate1(0)
 }
 
+=======
+>>>>>>> upstream/master
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error) = SYS_EPOLL_PWAIT
 //sys	Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
 //sys	Fchown(fd int, uid int, gid int) (err error)
@@ -145,6 +148,7 @@ func utimes(path string, tv *[2]Timeval) (err error) {
 	return utimensat(AT_FDCWD, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])), 0)
 }
 
+<<<<<<< HEAD
 func Pipe(p []int) (err error) {
 	if len(p) != 2 {
 		return EINVAL
@@ -172,6 +176,11 @@ func Pipe2(p []int, flags int) (err error) {
 // Getrlimit prefers the prlimit64 system call. See issue 38604.
 func Getrlimit(resource int, rlim *Rlimit) error {
 	err := prlimit(0, resource, nil, rlim)
+=======
+// Getrlimit prefers the prlimit64 system call. See issue 38604.
+func Getrlimit(resource int, rlim *Rlimit) error {
+	err := Prlimit(0, resource, nil, rlim)
+>>>>>>> upstream/master
 	if err != ENOSYS {
 		return err
 	}
@@ -180,7 +189,11 @@ func Getrlimit(resource int, rlim *Rlimit) error {
 
 // Setrlimit prefers the prlimit64 system call. See issue 38604.
 func Setrlimit(resource int, rlim *Rlimit) error {
+<<<<<<< HEAD
 	err := prlimit(0, resource, rlim, nil)
+=======
+	err := Prlimit(0, resource, rlim, nil)
+>>>>>>> upstream/master
 	if err != ENOSYS {
 		return err
 	}
@@ -211,6 +224,7 @@ func (rsa *RawSockaddrNFCLLCP) SetServiceNameLen(length int) {
 	rsa.Service_name_len = uint64(length)
 }
 
+<<<<<<< HEAD
 func InotifyInit() (fd int, err error) {
 	return InotifyInit1(0)
 }
@@ -219,11 +233,14 @@ func InotifyInit() (fd int, err error) {
 // it in an unreachable path. dup2 isn't available on arm64.
 func dup2(oldfd int, newfd int) error
 
+=======
+>>>>>>> upstream/master
 func Pause() error {
 	_, err := ppoll(nil, 0, nil, nil)
 	return err
 }
 
+<<<<<<< HEAD
 func Poll(fds []PollFd, timeout int) (n int, err error) {
 	var ts *Timespec
 	if timeout >= 0 {
@@ -236,6 +253,8 @@ func Poll(fds []PollFd, timeout int) (n int, err error) {
 	return ppoll(&fds[0], len(fds), ts, nil)
 }
 
+=======
+>>>>>>> upstream/master
 //sys	kexecFileLoad(kernelFd int, initrdFd int, cmdlineLen int, cmdline string, flags int) (err error)
 
 func KexecFileLoad(kernelFd int, initrdFd int, cmdline string, flags int) error {

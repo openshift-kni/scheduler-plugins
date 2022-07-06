@@ -18,12 +18,18 @@ package main
 
 import (
 	"flag"
+<<<<<<< HEAD
 	"path/filepath"
+=======
+>>>>>>> upstream/master
 
 	"github.com/spf13/pflag"
 	"k8s.io/code-generator/cmd/lister-gen/generators"
 	"k8s.io/code-generator/pkg/util"
+<<<<<<< HEAD
 	"k8s.io/gengo/args"
+=======
+>>>>>>> upstream/master
 	"k8s.io/klog/v2"
 
 	generatorargs "k8s.io/code-generator/cmd/lister-gen/args"
@@ -35,7 +41,11 @@ func main() {
 
 	// Override defaults.
 	// TODO: move this out of lister-gen
+<<<<<<< HEAD
 	genericArgs.GoHeaderFilePath = filepath.Join(args.DefaultSourceTree(), util.BoilerplatePath())
+=======
+	genericArgs.GoHeaderFilePath = util.BoilerplatePath()
+>>>>>>> upstream/master
 	genericArgs.OutputPackagePath = "k8s.io/kubernetes/pkg/client/listers"
 
 	genericArgs.AddFlags(pflag.CommandLine)

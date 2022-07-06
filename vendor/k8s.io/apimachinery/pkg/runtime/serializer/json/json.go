@@ -20,10 +20,15 @@ import (
 	"encoding/json"
 	"io"
 	"strconv"
+<<<<<<< HEAD
 	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/modern-go/reflect2"
+=======
+
+	kjson "sigs.k8s.io/json"
+>>>>>>> upstream/master
 	"sigs.k8s.io/yaml"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,6 +73,10 @@ func identifier(options SerializerOptions) runtime.Identifier {
 		"name":   "json",
 		"yaml":   strconv.FormatBool(options.Yaml),
 		"pretty": strconv.FormatBool(options.Pretty),
+<<<<<<< HEAD
+=======
+		"strict": strconv.FormatBool(options.Strict),
+>>>>>>> upstream/master
 	}
 	identifier, err := json.Marshal(result)
 	if err != nil {
@@ -110,6 +119,7 @@ type Serializer struct {
 var _ runtime.Serializer = &Serializer{}
 var _ recognizer.RecognizingDecoder = &Serializer{}
 
+<<<<<<< HEAD
 type customNumberExtension struct {
 	jsoniter.DummyExtension
 }
@@ -183,6 +193,8 @@ func StrictCaseSensitiveJSONIterator() jsoniter.API {
 var caseSensitiveJSONIterator = CaseSensitiveJSONIterator()
 var strictCaseSensitiveJSONIterator = StrictCaseSensitiveJSONIterator()
 
+=======
+>>>>>>> upstream/master
 // gvkWithDefaults returns group kind and version defaulting from provided default
 func gvkWithDefaults(actual, defaultGVK schema.GroupVersionKind) schema.GroupVersionKind {
 	if len(actual.Kind) == 0 {
@@ -237,8 +249,16 @@ func (s *Serializer) Decode(originalData []byte, gvk *schema.GroupVersionKind, i
 		types, _, err := s.typer.ObjectKinds(into)
 		switch {
 		case runtime.IsNotRegisteredError(err), isUnstructured:
+<<<<<<< HEAD
 			if err := caseSensitiveJSONIterator.Unmarshal(data, into); err != nil {
 				return nil, actual, err
+=======
+			strictErrs, err := s.unmarshal(into, data, originalData)
+			if err != nil {
+				return nil, actual, err
+			} else if len(strictErrs) > 0 {
+				return into, actual, runtime.NewStrictDecodingError(strictErrs)
+>>>>>>> upstream/master
 			}
 			return into, actual, nil
 		case err != nil:
@@ -261,6 +281,7 @@ func (s *Serializer) Decode(originalData []byte, gvk *schema.GroupVersionKind, i
 		return nil, actual, err
 	}
 
+<<<<<<< HEAD
 	if err := caseSensitiveJSONIterator.Unmarshal(data, obj); err != nil {
 		return nil, actual, err
 	}
@@ -290,6 +311,14 @@ func (s *Serializer) Decode(originalData []byte, gvk *schema.GroupVersionKind, i
 		return nil, actual, runtime.NewStrictDecodingError(err.Error(), string(originalData))
 	}
 	// Always return the same object as the non-strict serializer to avoid any deviations.
+=======
+	strictErrs, err := s.unmarshal(obj, data, originalData)
+	if err != nil {
+		return nil, actual, err
+	} else if len(strictErrs) > 0 {
+		return obj, actual, runtime.NewStrictDecodingError(strictErrs)
+	}
+>>>>>>> upstream/master
 	return obj, actual, nil
 }
 
@@ -303,7 +332,11 @@ func (s *Serializer) Encode(obj runtime.Object, w io.Writer) error {
 
 func (s *Serializer) doEncode(obj runtime.Object, w io.Writer) error {
 	if s.options.Yaml {
+<<<<<<< HEAD
 		json, err := caseSensitiveJSONIterator.Marshal(obj)
+=======
+		json, err := json.Marshal(obj)
+>>>>>>> upstream/master
 		if err != nil {
 			return err
 		}
@@ -316,7 +349,11 @@ func (s *Serializer) doEncode(obj runtime.Object, w io.Writer) error {
 	}
 
 	if s.options.Pretty {
+<<<<<<< HEAD
 		data, err := caseSensitiveJSONIterator.MarshalIndent(obj, "", "  ")
+=======
+		data, err := json.MarshalIndent(obj, "", "  ")
+>>>>>>> upstream/master
 		if err != nil {
 			return err
 		}
@@ -327,6 +364,53 @@ func (s *Serializer) doEncode(obj runtime.Object, w io.Writer) error {
 	return encoder.Encode(obj)
 }
 
+<<<<<<< HEAD
+=======
+// IsStrict indicates whether the serializer
+// uses strict decoding or not
+func (s *Serializer) IsStrict() bool {
+	return s.options.Strict
+}
+
+func (s *Serializer) unmarshal(into runtime.Object, data, originalData []byte) (strictErrs []error, err error) {
+	// If the deserializer is non-strict, return here.
+	if !s.options.Strict {
+		if err := kjson.UnmarshalCaseSensitivePreserveInts(data, into); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+
+	if s.options.Yaml {
+		// In strict mode pass the original data through the YAMLToJSONStrict converter.
+		// This is done to catch duplicate fields in YAML that would have been dropped in the original YAMLToJSON conversion.
+		// TODO: rework YAMLToJSONStrict to return warnings about duplicate fields without terminating so we don't have to do this twice.
+		_, err := yaml.YAMLToJSONStrict(originalData)
+		if err != nil {
+			strictErrs = append(strictErrs, err)
+		}
+	}
+
+	var strictJSONErrs []error
+	if u, isUnstructured := into.(runtime.Unstructured); isUnstructured {
+		// Unstructured is a custom unmarshaler that gets delegated
+		// to, so inorder to detect strict JSON errors we need
+		// to unmarshal directly into the object.
+		m := u.UnstructuredContent()
+		strictJSONErrs, err = kjson.UnmarshalStrict(data, &m)
+		u.SetUnstructuredContent(m)
+	} else {
+		strictJSONErrs, err = kjson.UnmarshalStrict(data, into)
+	}
+	if err != nil {
+		// fatal decoding error, not due to strictness
+		return nil, err
+	}
+	strictErrs = append(strictErrs, strictJSONErrs...)
+	return strictErrs, nil
+}
+
+>>>>>>> upstream/master
 // Identifier implements runtime.Encoder interface.
 func (s *Serializer) Identifier() runtime.Identifier {
 	return s.identifier

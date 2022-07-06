@@ -40,8 +40,8 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
-	pluginConfig "sigs.k8s.io/scheduler-plugins/pkg/apis/config"
-	"sigs.k8s.io/scheduler-plugins/pkg/apis/config/v1beta2"
+	pluginConfig "sigs.k8s.io/scheduler-plugins/apis/config"
+	"sigs.k8s.io/scheduler-plugins/apis/config/v1beta2"
 	"sigs.k8s.io/scheduler-plugins/pkg/trimaran"
 )
 
@@ -83,7 +83,12 @@ func New(obj runtime.Object, handle framework.Handle) (framework.Plugin, error) 
 	if args.WatcherAddress != "" {
 		client, err = loadwatcherapi.NewServiceClient(args.WatcherAddress)
 	} else {
-		opts := watcher.MetricsProviderOpts{string(args.MetricProvider.Type), args.MetricProvider.Address, args.MetricProvider.Token}
+		opts := watcher.MetricsProviderOpts{
+			Name:               string(args.MetricProvider.Type),
+			Address:            args.MetricProvider.Address,
+			AuthToken:          args.MetricProvider.Token,
+			InsecureSkipVerify: args.MetricProvider.InsecureSkipVerify,
+		}
 		client, err = loadwatcherapi.NewLibraryClient(opts)
 	}
 	if err != nil {
@@ -253,7 +258,7 @@ func (pl *TargetLoadPacking) Score(ctx context.Context, cycleState *framework.Cy
 		if predictedCPUUsage > 100 {
 			return framework.MinNodeScore, framework.NewStatus(framework.Success, "")
 		}
-		penalisedScore := int64(math.Round(50 * (100 - predictedCPUUsage) / (100 - float64(hostTargetUtilizationPercent))))
+		penalisedScore := int64(math.Round(float64(hostTargetUtilizationPercent) * (100 - predictedCPUUsage) / (100 - float64(hostTargetUtilizationPercent))))
 		klog.V(6).InfoS("Penalised score for host", "nodeName", nodeName, "penalisedScore", penalisedScore)
 		return penalisedScore, framework.NewStatus(framework.Success, "")
 	}

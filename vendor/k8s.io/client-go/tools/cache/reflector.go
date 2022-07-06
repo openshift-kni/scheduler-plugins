@@ -32,7 +32,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+<<<<<<< HEAD
 	"k8s.io/apimachinery/pkg/util/clock"
+=======
+>>>>>>> upstream/master
 	"k8s.io/apimachinery/pkg/util/naming"
 	utilnet "k8s.io/apimachinery/pkg/util/net"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -40,6 +43,10 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/pager"
 	"k8s.io/klog/v2"
+<<<<<<< HEAD
+=======
+	"k8s.io/utils/clock"
+>>>>>>> upstream/master
 	"k8s.io/utils/trace"
 )
 
@@ -69,7 +76,11 @@ type Reflector struct {
 
 	// backoff manages backoff of ListWatch
 	backoffManager wait.BackoffManager
+<<<<<<< HEAD
 	// initConnBackoffManager manages backoff the initial connection with the Watch calll of ListAndWatch.
+=======
+	// initConnBackoffManager manages backoff the initial connection with the Watch call of ListAndWatch.
+>>>>>>> upstream/master
 	initConnBackoffManager wait.BackoffManager
 
 	resyncPeriod time.Duration
@@ -319,7 +330,13 @@ func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 			panic(r)
 		case <-listCh:
 		}
+<<<<<<< HEAD
 		if err != nil {
+=======
+		initTrace.Step("Objects listed", trace.Field{"error", err})
+		if err != nil {
+			klog.Warningf("%s: failed to list %v: %v", r.name, r.expectedTypeName, err)
+>>>>>>> upstream/master
 			return fmt.Errorf("failed to list %v: %v", r.expectedTypeName, err)
 		}
 
@@ -338,7 +355,10 @@ func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 		}
 
 		r.setIsLastSyncResourceVersionUnavailable(false) // list was successful
+<<<<<<< HEAD
 		initTrace.Step("Objects listed")
+=======
+>>>>>>> upstream/master
 		listMetaInterface, err := meta.ListAccessor(list)
 		if err != nil {
 			return fmt.Errorf("unable to understand list result %#v: %v", list, err)

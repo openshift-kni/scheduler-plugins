@@ -27,10 +27,17 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+<<<<<<< HEAD
 	"k8s.io/apimachinery/pkg/util/clock"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	"k8s.io/client-go/util/flowcontrol"
+=======
+	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/apimachinery/pkg/util/strategicpatch"
+	"k8s.io/client-go/util/flowcontrol"
+	"k8s.io/utils/clock"
+>>>>>>> upstream/master
 )
 
 const (
@@ -81,6 +88,12 @@ func getSpamKey(event *v1.Event) string {
 		"")
 }
 
+<<<<<<< HEAD
+=======
+// EventSpamKeyFunc is a function that returns unique key based on provided event
+type EventSpamKeyFunc func(event *v1.Event) string
+
+>>>>>>> upstream/master
 // EventFilterFunc is a function that returns true if the event should be skipped
 type EventFilterFunc func(event *v1.Event) bool
 
@@ -99,6 +112,7 @@ type EventSourceObjectSpamFilter struct {
 	qps float32
 
 	// clock is used to allow for testing over a time interval
+<<<<<<< HEAD
 	clock clock.Clock
 }
 
@@ -109,21 +123,46 @@ func NewEventSourceObjectSpamFilter(lruCacheSize, burst int, qps float32, clock 
 		burst: burst,
 		qps:   qps,
 		clock: clock,
+=======
+	clock clock.PassiveClock
+
+	// spamKeyFunc is a func used to create a key based on an event, which is later used to filter spam events.
+	spamKeyFunc EventSpamKeyFunc
+}
+
+// NewEventSourceObjectSpamFilter allows burst events from a source about an object with the specified qps refill.
+func NewEventSourceObjectSpamFilter(lruCacheSize, burst int, qps float32, clock clock.PassiveClock, spamKeyFunc EventSpamKeyFunc) *EventSourceObjectSpamFilter {
+	return &EventSourceObjectSpamFilter{
+		cache:       lru.New(lruCacheSize),
+		burst:       burst,
+		qps:         qps,
+		clock:       clock,
+		spamKeyFunc: spamKeyFunc,
+>>>>>>> upstream/master
 	}
 }
 
 // spamRecord holds data used to perform spam filtering decisions.
 type spamRecord struct {
 	// rateLimiter controls the rate of events about this object
+<<<<<<< HEAD
 	rateLimiter flowcontrol.RateLimiter
+=======
+	rateLimiter flowcontrol.PassiveRateLimiter
+>>>>>>> upstream/master
 }
 
 // Filter controls that a given source+object are not exceeding the allowed rate.
 func (f *EventSourceObjectSpamFilter) Filter(event *v1.Event) bool {
 	var record spamRecord
 
+<<<<<<< HEAD
 	// controls our cached information about this event (source+object)
 	eventKey := getSpamKey(event)
+=======
+	// controls our cached information about this event
+	eventKey := f.spamKeyFunc(event)
+>>>>>>> upstream/master
 
 	// do we have a record of similar events in our cache?
 	f.Lock()
@@ -135,7 +174,11 @@ func (f *EventSourceObjectSpamFilter) Filter(event *v1.Event) bool {
 
 	// verify we have a rate limiter for this record
 	if record.rateLimiter == nil {
+<<<<<<< HEAD
 		record.rateLimiter = flowcontrol.NewTokenBucketRateLimiterWithClock(f.qps, f.burst, f.clock)
+=======
+		record.rateLimiter = flowcontrol.NewTokenBucketPassiveRateLimiterWithClock(f.qps, f.burst, f.clock)
+>>>>>>> upstream/master
 	}
 
 	// ensure we have available rate
@@ -200,12 +243,20 @@ type EventAggregator struct {
 	maxIntervalInSeconds uint
 
 	// clock is used to allow for testing over a time interval
+<<<<<<< HEAD
 	clock clock.Clock
+=======
+	clock clock.PassiveClock
+>>>>>>> upstream/master
 }
 
 // NewEventAggregator returns a new instance of an EventAggregator
 func NewEventAggregator(lruCacheSize int, keyFunc EventAggregatorKeyFunc, messageFunc EventAggregatorMessageFunc,
+<<<<<<< HEAD
 	maxEvents int, maxIntervalInSeconds int, clock clock.Clock) *EventAggregator {
+=======
+	maxEvents int, maxIntervalInSeconds int, clock clock.PassiveClock) *EventAggregator {
+>>>>>>> upstream/master
 	return &EventAggregator{
 		cache:                lru.New(lruCacheSize),
 		keyFunc:              keyFunc,
@@ -308,11 +359,19 @@ type eventLog struct {
 type eventLogger struct {
 	sync.RWMutex
 	cache *lru.Cache
+<<<<<<< HEAD
 	clock clock.Clock
 }
 
 // newEventLogger observes events and counts their frequencies
 func newEventLogger(lruCacheEntries int, clock clock.Clock) *eventLogger {
+=======
+	clock clock.PassiveClock
+}
+
+// newEventLogger observes events and counts their frequencies
+func newEventLogger(lruCacheEntries int, clock clock.PassiveClock) *eventLogger {
+>>>>>>> upstream/master
 	return &eventLogger{cache: lru.New(lruCacheEntries), clock: clock}
 }
 
@@ -429,9 +488,15 @@ type EventCorrelateResult struct {
 //     times.
 //   * A source may burst 25 events about an object, but has a refill rate budget
 //     per object of 1 event every 5 minutes to control long-tail of spam.
+<<<<<<< HEAD
 func NewEventCorrelator(clock clock.Clock) *EventCorrelator {
 	cacheSize := maxLruCacheEntries
 	spamFilter := NewEventSourceObjectSpamFilter(cacheSize, defaultSpamBurst, defaultSpamQPS, clock)
+=======
+func NewEventCorrelator(clock clock.PassiveClock) *EventCorrelator {
+	cacheSize := maxLruCacheEntries
+	spamFilter := NewEventSourceObjectSpamFilter(cacheSize, defaultSpamBurst, defaultSpamQPS, clock, getSpamKey)
+>>>>>>> upstream/master
 	return &EventCorrelator{
 		filterFunc: spamFilter.Filter,
 		aggregator: NewEventAggregator(
@@ -448,8 +513,17 @@ func NewEventCorrelator(clock clock.Clock) *EventCorrelator {
 
 func NewEventCorrelatorWithOptions(options CorrelatorOptions) *EventCorrelator {
 	optionsWithDefaults := populateDefaults(options)
+<<<<<<< HEAD
 	spamFilter := NewEventSourceObjectSpamFilter(optionsWithDefaults.LRUCacheSize,
 		optionsWithDefaults.BurstSize, optionsWithDefaults.QPS, optionsWithDefaults.Clock)
+=======
+	spamFilter := NewEventSourceObjectSpamFilter(
+		optionsWithDefaults.LRUCacheSize,
+		optionsWithDefaults.BurstSize,
+		optionsWithDefaults.QPS,
+		optionsWithDefaults.Clock,
+		optionsWithDefaults.SpamKeyFunc)
+>>>>>>> upstream/master
 	return &EventCorrelator{
 		filterFunc: spamFilter.Filter,
 		aggregator: NewEventAggregator(
@@ -489,6 +563,12 @@ func populateDefaults(options CorrelatorOptions) CorrelatorOptions {
 	if options.Clock == nil {
 		options.Clock = clock.RealClock{}
 	}
+<<<<<<< HEAD
+=======
+	if options.SpamKeyFunc == nil {
+		options.SpamKeyFunc = getSpamKey
+	}
+>>>>>>> upstream/master
 	return options
 }
 

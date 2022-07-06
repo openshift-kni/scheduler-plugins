@@ -16,6 +16,7 @@ limitations under the License.
 
 package promise
 
+<<<<<<< HEAD
 // This file defines interfaces for promises and futures and related
 // things.  These are about coordination among multiple goroutines and
 // so are safe for concurrent calls --- although moderated in some
@@ -57,6 +58,17 @@ type LockingReadable interface {
 // WriteOnceOnly represents a variable that is initially not set and
 // can be set once.
 type WriteOnceOnly interface {
+=======
+// WriteOnce represents a variable that is initially not set and can
+// be set once and is readable.  This is the common meaning for
+// "promise".
+type WriteOnce interface {
+	// Get reads the current value of this variable.  If this
+	// variable is not set yet then this call blocks until this
+	// variable gets a value.
+	Get() interface{}
+
+>>>>>>> upstream/master
 	// Set normally writes a value into this variable, unblocks every
 	// goroutine waiting for this variable to have a value, and
 	// returns true.  In the unhappy case that this variable is
@@ -64,6 +76,7 @@ type WriteOnceOnly interface {
 	// variable's value.
 	Set(interface{}) bool
 }
+<<<<<<< HEAD
 
 // WriteOnce represents a variable that is initially not set and can
 // be set once and is readable.  This is the common meaning for
@@ -127,3 +140,5 @@ type LockingWriteMultiple interface {
 	LockingReadable
 	LockingWriteMultipleOnly
 }
+=======
+>>>>>>> upstream/master

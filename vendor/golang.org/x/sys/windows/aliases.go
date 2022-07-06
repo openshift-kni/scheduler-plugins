@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+<<<<<<< HEAD
 // +build windows
 // +build go1.9
+=======
+//go:build windows && go1.9
+// +build windows,go1.9
+>>>>>>> upstream/master
 
 package windows
 

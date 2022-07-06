@@ -58,7 +58,11 @@ func (s *APIEnablementOptions) AddFlags(fs *pflag.FlagSet) {
 // But in the advanced (and usually not recommended) case of delegated apiservers there can be more.
 // Validate will filter out the known groups of each registry.
 // If anything is left over after that, an error is returned.
+<<<<<<< HEAD
 func (s *APIEnablementOptions) Validate(registries ...GroupRegisty) []error {
+=======
+func (s *APIEnablementOptions) Validate(registries ...GroupRegistry) []error {
+>>>>>>> upstream/master
 	if s == nil {
 		return nil
 	}
@@ -98,7 +102,11 @@ func (s *APIEnablementOptions) ApplyTo(c *server.Config, defaultResourceConfig *
 	return err
 }
 
+<<<<<<< HEAD
 func unknownGroups(groups []string, registry GroupRegisty) []string {
+=======
+func unknownGroups(groups []string, registry GroupRegistry) []string {
+>>>>>>> upstream/master
 	unknownGroups := []string{}
 	for _, group := range groups {
 		if !registry.IsGroupRegistered(group) {
@@ -108,8 +116,13 @@ func unknownGroups(groups []string, registry GroupRegisty) []string {
 	return unknownGroups
 }
 
+<<<<<<< HEAD
 // GroupRegisty provides a method to check whether given group is registered.
 type GroupRegisty interface {
+=======
+// GroupRegistry provides a method to check whether given group is registered.
+type GroupRegistry interface {
+>>>>>>> upstream/master
 	// IsRegistered returns true if given group is registered.
 	IsGroupRegistered(group string) bool
 }

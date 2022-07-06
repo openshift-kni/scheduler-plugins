@@ -39,8 +39,13 @@ type CacheComparer struct {
 
 // Compare compares the nodes and pods of NodeLister with Cache.Snapshot.
 func (c *CacheComparer) Compare() error {
+<<<<<<< HEAD
 	klog.V(3).Info("cache comparer started")
 	defer klog.V(3).Info("cache comparer finished")
+=======
+	klog.V(3).InfoS("Cache comparer started")
+	defer klog.V(3).InfoS("Cache comparer finished")
+>>>>>>> upstream/master
 
 	nodes, err := c.NodeLister.List(labels.Everything())
 	if err != nil {
@@ -57,11 +62,19 @@ func (c *CacheComparer) Compare() error {
 	pendingPods := c.PodQueue.PendingPods()
 
 	if missed, redundant := c.CompareNodes(nodes, dump.Nodes); len(missed)+len(redundant) != 0 {
+<<<<<<< HEAD
 		klog.InfoS("cache mismatch", "missed nodes", missed, "redundant nodes", redundant)
 	}
 
 	if missed, redundant := c.ComparePods(pods, pendingPods, dump.Nodes); len(missed)+len(redundant) != 0 {
 		klog.InfoS("cache mismatch", "missed pods", missed, "redundant pods", redundant)
+=======
+		klog.InfoS("Cache mismatch", "missedNodes", missed, "redundantNodes", redundant)
+	}
+
+	if missed, redundant := c.ComparePods(pods, pendingPods, dump.Nodes); len(missed)+len(redundant) != 0 {
+		klog.InfoS("Cache mismatch", "missedPods", missed, "redundantPods", redundant)
+>>>>>>> upstream/master
 	}
 
 	return nil

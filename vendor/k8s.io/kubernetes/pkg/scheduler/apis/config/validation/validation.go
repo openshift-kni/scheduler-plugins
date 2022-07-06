@@ -18,7 +18,14 @@ package validation
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"reflect"
+=======
+	"net"
+	"reflect"
+	"strconv"
+	"strings"
+>>>>>>> upstream/master
 
 	"github.com/google/go-cmp/cmp"
 	v1 "k8s.io/api/core/v1"
@@ -30,8 +37,13 @@ import (
 	componentbasevalidation "k8s.io/component-base/config/validation"
 	v1helper "k8s.io/kubernetes/pkg/apis/core/v1/helper"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config"
+<<<<<<< HEAD
 	"k8s.io/kubernetes/pkg/scheduler/apis/config/v1beta1"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config/v1beta2"
+=======
+	"k8s.io/kubernetes/pkg/scheduler/apis/config/v1beta2"
+	"k8s.io/kubernetes/pkg/scheduler/apis/config/v1beta3"
+>>>>>>> upstream/master
 )
 
 // ValidateKubeSchedulerConfiguration ensures validation of the KubeSchedulerConfiguration struct
@@ -59,11 +71,39 @@ func ValidateKubeSchedulerConfiguration(cc *config.KubeSchedulerConfiguration) u
 		}
 		errs = append(errs, validateCommonQueueSort(profilesPath, cc.Profiles)...)
 	}
+<<<<<<< HEAD
 	for _, msg := range validation.IsValidSocketAddr(cc.HealthzBindAddress) {
 		errs = append(errs, field.Invalid(field.NewPath("healthzBindAddress"), cc.HealthzBindAddress, msg))
 	}
 	for _, msg := range validation.IsValidSocketAddr(cc.MetricsBindAddress) {
 		errs = append(errs, field.Invalid(field.NewPath("metricsBindAddress"), cc.MetricsBindAddress, msg))
+=======
+	if len(cc.HealthzBindAddress) > 0 {
+		host, port, err := splitHostIntPort(cc.HealthzBindAddress)
+		if err != nil {
+			errs = append(errs, field.Invalid(field.NewPath("healthzBindAddress"), cc.HealthzBindAddress, err.Error()))
+		} else {
+			if errMsgs := validation.IsValidIP(host); errMsgs != nil {
+				errs = append(errs, field.Invalid(field.NewPath("healthzBindAddress"), cc.HealthzBindAddress, strings.Join(errMsgs, ",")))
+			}
+			if port != 0 {
+				errs = append(errs, field.Invalid(field.NewPath("healthzBindAddress"), cc.HealthzBindAddress, "must be empty or with an explicit 0 port"))
+			}
+		}
+	}
+	if len(cc.MetricsBindAddress) > 0 {
+		host, port, err := splitHostIntPort(cc.MetricsBindAddress)
+		if err != nil {
+			errs = append(errs, field.Invalid(field.NewPath("metricsBindAddress"), cc.MetricsBindAddress, err.Error()))
+		} else {
+			if errMsgs := validation.IsValidIP(host); errMsgs != nil {
+				errs = append(errs, field.Invalid(field.NewPath("metricsBindAddress"), cc.MetricsBindAddress, strings.Join(errMsgs, ",")))
+			}
+			if port != 0 {
+				errs = append(errs, field.Invalid(field.NewPath("metricsBindAddress"), cc.MetricsBindAddress, "must be empty or with an explicit 0 port"))
+			}
+		}
+>>>>>>> upstream/master
 	}
 	if cc.PercentageOfNodesToScore < 0 || cc.PercentageOfNodesToScore > 100 {
 		errs = append(errs, field.Invalid(field.NewPath("percentageOfNodesToScore"),
@@ -82,6 +122,21 @@ func ValidateKubeSchedulerConfiguration(cc *config.KubeSchedulerConfiguration) u
 	return utilerrors.Flatten(utilerrors.NewAggregate(errs))
 }
 
+<<<<<<< HEAD
+=======
+func splitHostIntPort(s string) (string, int, error) {
+	host, port, err := net.SplitHostPort(s)
+	if err != nil {
+		return "", 0, err
+	}
+	portInt, err := strconv.Atoi(port)
+	if err != nil {
+		return "", 0, err
+	}
+	return host, portInt, err
+}
+
+>>>>>>> upstream/master
 type removedPlugins struct {
 	schemeGroupVersion string
 	plugins            []string
@@ -92,6 +147,7 @@ type removedPlugins struct {
 // version (even if the list of removed plugins is empty).
 var removedPluginsByVersion = []removedPlugins{
 	{
+<<<<<<< HEAD
 		schemeGroupVersion: v1beta1.SchemeGroupVersion.String(),
 		plugins:            []string{},
 	},
@@ -139,6 +195,15 @@ func isScorePluginConflict(apiVersion string, name string, profile *config.KubeS
 		}
 	}
 	return conflictPlugins
+=======
+		schemeGroupVersion: v1beta2.SchemeGroupVersion.String(),
+		plugins:            []string{},
+	},
+	{
+		schemeGroupVersion: v1beta3.SchemeGroupVersion.String(),
+		plugins:            []string{},
+	},
+>>>>>>> upstream/master
 }
 
 // isPluginRemoved checks if a given plugin was removed in the given component
@@ -167,6 +232,7 @@ func validatePluginSetForRemovedPlugins(path *field.Path, apiVersion string, ps 
 	return errs
 }
 
+<<<<<<< HEAD
 func validateScorePluginSetForConflictPlugins(path *field.Path, apiVersion string, profile *config.KubeSchedulerProfile) []error {
 	var errs []error
 	for i, plugin := range profile.Plugins.Score.Enabled {
@@ -177,6 +243,8 @@ func validateScorePluginSetForConflictPlugins(path *field.Path, apiVersion strin
 	return errs
 }
 
+=======
+>>>>>>> upstream/master
 func validateKubeSchedulerProfile(path *field.Path, apiVersion string, profile *config.KubeSchedulerProfile) []error {
 	var errs []error
 	if len(profile.SchedulerName) == 0 {
@@ -192,6 +260,7 @@ func validatePluginConfig(path *field.Path, apiVersion string, profile *config.K
 		"DefaultPreemption":               ValidateDefaultPreemptionArgs,
 		"InterPodAffinity":                ValidateInterPodAffinityArgs,
 		"NodeAffinity":                    ValidateNodeAffinityArgs,
+<<<<<<< HEAD
 		"NodeLabel":                       ValidateNodeLabelArgs,
 		"NodeResourcesBalancedAllocation": ValidateNodeResourcesBalancedAllocationArgs,
 		"NodeResourcesFitArgs":            ValidateNodeResourcesFitArgs,
@@ -199,6 +268,11 @@ func validatePluginConfig(path *field.Path, apiVersion string, profile *config.K
 		"NodeResourcesMostAllocated":      ValidateNodeResourcesMostAllocatedArgs,
 		"PodTopologySpread":               ValidatePodTopologySpreadArgs,
 		"RequestedToCapacityRatio":        ValidateRequestedToCapacityRatioArgs,
+=======
+		"NodeResourcesBalancedAllocation": ValidateNodeResourcesBalancedAllocationArgs,
+		"NodeResourcesFitArgs":            ValidateNodeResourcesFitArgs,
+		"PodTopologySpread":               ValidatePodTopologySpreadArgs,
+>>>>>>> upstream/master
 		"VolumeBinding":                   ValidateVolumeBindingArgs,
 	}
 
@@ -222,8 +296,11 @@ func validatePluginConfig(path *field.Path, apiVersion string, profile *config.K
 			errs = append(errs, validatePluginSetForRemovedPlugins(
 				pluginsPath.Child(s), apiVersion, p)...)
 		}
+<<<<<<< HEAD
 		errs = append(errs, validateScorePluginSetForConflictPlugins(
 			pluginsPath.Child("score"), apiVersion, profile)...)
+=======
+>>>>>>> upstream/master
 	}
 
 	seenPluginConfig := make(sets.String)
@@ -293,6 +370,7 @@ func validateCommonQueueSort(path *field.Path, profiles []config.KubeSchedulerPr
 	return errs
 }
 
+<<<<<<< HEAD
 // ValidatePolicy checks for errors in the Config
 // It does not return early so that it can find as many errors as possible
 func ValidatePolicy(policy config.Policy) error {
@@ -316,6 +394,8 @@ func ValidatePolicy(policy config.Policy) error {
 	return utilerrors.NewAggregate(validationErrors)
 }
 
+=======
+>>>>>>> upstream/master
 // validateExtenders validates the configured extenders for the Scheduler
 func validateExtenders(fldPath *field.Path, extenders []config.Extender) []error {
 	var errs []error
@@ -347,6 +427,7 @@ func validateExtenders(fldPath *field.Path, extenders []config.Extender) []error
 	return errs
 }
 
+<<<<<<< HEAD
 // validateCustomPriorities validates that:
 // 1. RequestedToCapacityRatioRedeclared custom priority cannot be declared multiple times,
 // 2. LabelPreference/ServiceAntiAffinity custom priorities can be declared multiple times,
@@ -388,6 +469,8 @@ func validateCustomPriorities(priorities map[string]config.PriorityPolicy, prior
 	return nil
 }
 
+=======
+>>>>>>> upstream/master
 // validateExtendedResourceName checks whether the specified name is a valid
 // extended resource name.
 func validateExtendedResourceName(path *field.Path, name v1.ResourceName) []error {

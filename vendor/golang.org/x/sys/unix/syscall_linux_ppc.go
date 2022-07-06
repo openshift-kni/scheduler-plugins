@@ -3,8 +3,12 @@
 // license that can be found in the LICENSE file.
 
 //go:build linux && ppc
+<<<<<<< HEAD
 // +build linux
 // +build ppc
+=======
+// +build linux,ppc
+>>>>>>> upstream/master
 
 package unix
 
@@ -13,8 +17,11 @@ import (
 	"unsafe"
 )
 
+<<<<<<< HEAD
 //sys	dup2(oldfd int, newfd int) (err error)
 //sysnb	EpollCreate(size int) (fd int, err error)
+=======
+>>>>>>> upstream/master
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
 //sys	Fchown(fd int, uid int, gid int) (err error)
 //sys	Fstat(fd int, stat *Stat_t) (err error) = SYS_FSTAT64
@@ -24,7 +31,10 @@ import (
 //sysnb	Geteuid() (euid int)
 //sysnb	Getgid() (gid int)
 //sysnb	Getuid() (uid int)
+<<<<<<< HEAD
 //sysnb	InotifyInit() (fd int, err error)
+=======
+>>>>>>> upstream/master
 //sys	Ioperm(from int, num int, on int) (err error)
 //sys	Iopl(level int) (err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
@@ -143,7 +153,11 @@ const rlimInf32 = ^uint32(0)
 const rlimInf64 = ^uint64(0)
 
 func Getrlimit(resource int, rlim *Rlimit) (err error) {
+<<<<<<< HEAD
 	err = prlimit(0, resource, nil, rlim)
+=======
+	err = Prlimit(0, resource, nil, rlim)
+>>>>>>> upstream/master
 	if err != ENOSYS {
 		return err
 	}
@@ -171,7 +185,11 @@ func Getrlimit(resource int, rlim *Rlimit) (err error) {
 //sysnb	setrlimit(resource int, rlim *rlimit32) (err error) = SYS_SETRLIMIT
 
 func Setrlimit(resource int, rlim *Rlimit) (err error) {
+<<<<<<< HEAD
 	err = prlimit(0, resource, rlim, nil)
+=======
+	err = Prlimit(0, resource, rlim, nil)
+>>>>>>> upstream/master
 	if err != ENOSYS {
 		return err
 	}
@@ -219,6 +237,7 @@ func (rsa *RawSockaddrNFCLLCP) SetServiceNameLen(length int) {
 	rsa.Service_name_len = uint32(length)
 }
 
+<<<<<<< HEAD
 //sysnb	pipe(p *[2]_C_int) (err error)
 
 func Pipe(p []int) (err error) {
@@ -254,6 +273,8 @@ func Poll(fds []PollFd, timeout int) (n int, err error) {
 	return poll(&fds[0], len(fds), timeout)
 }
 
+=======
+>>>>>>> upstream/master
 //sys	syncFileRange2(fd int, flags int, off int64, n int64) (err error) = SYS_SYNC_FILE_RANGE2
 
 func SyncFileRange(fd int, off int64, n int64, flags int) error {

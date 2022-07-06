@@ -18,16 +18,25 @@ package options
 
 import (
 	"fmt"
+<<<<<<< HEAD
 
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	schedulerappconfig "k8s.io/kubernetes/cmd/kube-scheduler/app/config"
 	kubeschedulerconfig "k8s.io/kubernetes/pkg/scheduler/apis/config"
+=======
+	"net"
+
+	"github.com/spf13/pflag"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+	componentbaseconfig "k8s.io/component-base/config"
+>>>>>>> upstream/master
 )
 
 // DeprecatedOptions contains deprecated options and their flags.
 // TODO remove these fields once the deprecated flags are removed.
 type DeprecatedOptions struct {
+<<<<<<< HEAD
 	// The fields below here are placeholders for flags that can't be directly
 	// mapped into componentconfig.KubeSchedulerConfiguration.
 	PolicyConfigFile         string
@@ -38,10 +47,36 @@ type DeprecatedOptions struct {
 
 // AddFlags adds flags for the deprecated options.
 func (o *DeprecatedOptions) AddFlags(fs *pflag.FlagSet, cfg *kubeschedulerconfig.KubeSchedulerConfiguration) {
+=======
+	componentbaseconfig.DebuggingConfiguration
+	componentbaseconfig.ClientConnectionConfiguration
+	// Note that only the deprecated options (lock-object-name and lock-object-namespace) are populated here.
+	componentbaseconfig.LeaderElectionConfiguration
+
+	Port int
+}
+
+// TODO: remove these insecure flags in v1.24
+func addDummyInsecureFlags(o *DeprecatedOptions, fs *pflag.FlagSet) {
+	var (
+		bindAddr = net.IPv4(127, 0, 0, 1)
+	)
+	fs.IPVar(&bindAddr, "address", bindAddr,
+		"The IP address on which to serve the insecure --port (set to 0.0.0.0 for all IPv4 interfaces and :: for all IPv6 interfaces).")
+	fs.MarkDeprecated("address", "This flag has no effect now and will be removed in v1.24. You can use --bind-address instead.")
+
+	fs.IntVar(&o.Port, "port", o.Port, "The port on which to serve unsecured, unauthenticated access. Set to 0 to disable.")
+	fs.MarkDeprecated("port", "This flag has no effect now and will be removed in v1.24. You can use --secure-port instead.")
+}
+
+// AddFlags adds flags for the deprecated options.
+func (o *DeprecatedOptions) AddFlags(fs *pflag.FlagSet) {
+>>>>>>> upstream/master
 	if o == nil {
 		return
 	}
 
+<<<<<<< HEAD
 	fs.StringVar(&o.PolicyConfigFile, "policy-config-file", o.PolicyConfigFile, "DEPRECATED: file with scheduler policy configuration. This file is used if policy ConfigMap is not provided or --use-legacy-policy-config=true. Note: The predicates/priorities defined in this file will take precedence over any profiles define in ComponentConfig.")
 	usage := fmt.Sprintf("DEPRECATED: name of the ConfigMap object that contains scheduler's policy configuration. It must exist in the system namespace before scheduler initialization if --use-legacy-policy-config=false. The config must be provided as the value of an element in 'Data' map with the key='%v'. Note: The predicates/priorities defined in this file will take precedence over any profiles define in ComponentConfig.", kubeschedulerconfig.SchedulerPolicyConfigMapKey)
 	fs.StringVar(&o.PolicyConfigMapName, "policy-configmap", o.PolicyConfigMapName, usage)
@@ -56,12 +91,25 @@ func (o *DeprecatedOptions) AddFlags(fs *pflag.FlagSet, cfg *kubeschedulerconfig
 	fs.Int32Var(&cfg.ClientConnection.Burst, "kube-api-burst", cfg.ClientConnection.Burst, "DEPRECATED: burst to use while talking with kubernetes apiserver. This parameter is ignored if a config file is specified in --config.")
 	fs.StringVar(&cfg.LeaderElection.ResourceNamespace, "lock-object-namespace", cfg.LeaderElection.ResourceNamespace, "DEPRECATED: define the namespace of the lock object. Will be removed in favor of leader-elect-resource-namespace. This parameter is ignored if a config file is specified in --config.")
 	fs.StringVar(&cfg.LeaderElection.ResourceName, "lock-object-name", cfg.LeaderElection.ResourceName, "DEPRECATED: define the name of the lock object. Will be removed in favor of leader-elect-resource-name. This parameter is ignored if a config file is specified in --config.")
+=======
+	addDummyInsecureFlags(o, fs)
+
+	fs.BoolVar(&o.EnableProfiling, "profiling", true, "DEPRECATED: enable profiling via web interface host:port/debug/pprof/. This parameter is ignored if a config file is specified in --config.")
+	fs.BoolVar(&o.EnableContentionProfiling, "contention-profiling", true, "DEPRECATED: enable lock contention profiling, if profiling is enabled. This parameter is ignored if a config file is specified in --config.")
+	fs.StringVar(&o.Kubeconfig, "kubeconfig", "", "DEPRECATED: path to kubeconfig file with authorization and master location information. This parameter is ignored if a config file is specified in --config.")
+	fs.StringVar(&o.ContentType, "kube-api-content-type", "application/vnd.kubernetes.protobuf", "DEPRECATED: content type of requests sent to apiserver. This parameter is ignored if a config file is specified in --config.")
+	fs.Float32Var(&o.QPS, "kube-api-qps", 50.0, "DEPRECATED: QPS to use while talking with kubernetes apiserver. This parameter is ignored if a config file is specified in --config.")
+	fs.Int32Var(&o.Burst, "kube-api-burst", 100, "DEPRECATED: burst to use while talking with kubernetes apiserver. This parameter is ignored if a config file is specified in --config.")
+	fs.StringVar(&o.ResourceNamespace, "lock-object-namespace", "kube-system", "DEPRECATED: define the namespace of the lock object. Will be removed in favor of leader-elect-resource-namespace. This parameter is ignored if a config file is specified in --config.")
+	fs.StringVar(&o.ResourceName, "lock-object-name", "kube-scheduler", "DEPRECATED: define the name of the lock object. Will be removed in favor of leader-elect-resource-name. This parameter is ignored if a config file is specified in --config.")
+>>>>>>> upstream/master
 }
 
 // Validate validates the deprecated scheduler options.
 func (o *DeprecatedOptions) Validate() []error {
 	var errs []error
 
+<<<<<<< HEAD
 	if o.UseLegacyPolicyConfig && len(o.PolicyConfigFile) == 0 {
 		errs = append(errs, field.Required(field.NewPath("policyConfigFile"), "required when --use-legacy-policy-config is true"))
 	}
@@ -94,3 +142,11 @@ func (o *DeprecatedOptions) ApplyTo(c *schedulerappconfig.Config) {
 		}
 	}
 }
+=======
+	// TODO: delete this check after insecure flags removed in v1.24
+	if o.Port != 0 {
+		errs = append(errs, field.Required(field.NewPath("port"), fmt.Sprintf("invalid port value %d: only zero is allowed", o.Port)))
+	}
+	return errs
+}
+>>>>>>> upstream/master

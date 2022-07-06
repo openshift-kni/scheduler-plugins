@@ -289,8 +289,13 @@ func (o *AuditOptions) ApplyTo(
 		return fmt.Errorf("server config must be non-nil")
 	}
 
+<<<<<<< HEAD
 	// 1. Build policy checker
 	checker, err := o.newPolicyChecker()
+=======
+	// 1. Build policy evaluator
+	evaluator, err := o.newPolicyRuleEvaluator()
+>>>>>>> upstream/master
 	if err != nil {
 		return err
 	}
@@ -302,7 +307,11 @@ func (o *AuditOptions) ApplyTo(
 		return err
 	}
 	if w != nil {
+<<<<<<< HEAD
 		if checker == nil {
+=======
+		if evaluator == nil {
+>>>>>>> upstream/master
 			klog.V(2).Info("No audit policy file provided, no events will be recorded for log backend")
 		} else {
 			logBackend = o.LogOptions.newBackend(w)
@@ -312,7 +321,11 @@ func (o *AuditOptions) ApplyTo(
 	// 3. Build webhook backend
 	var webhookBackend audit.Backend
 	if o.WebhookOptions.enabled() {
+<<<<<<< HEAD
 		if checker == nil {
+=======
+		if evaluator == nil {
+>>>>>>> upstream/master
 			klog.V(2).Info("No audit policy file provided, no events will be recorded for webhook backend")
 		} else {
 			if c.EgressSelector != nil {
@@ -343,8 +356,13 @@ func (o *AuditOptions) ApplyTo(
 		dynamicBackend = o.WebhookOptions.TruncateOptions.wrapBackend(webhookBackend, groupVersion)
 	}
 
+<<<<<<< HEAD
 	// 5. Set the policy checker
 	c.AuditPolicyChecker = checker
+=======
+	// 5. Set the policy rule evaluator
+	c.AuditPolicyRuleEvaluator = evaluator
+>>>>>>> upstream/master
 
 	// 6. Join the log backend with the webhooks
 	c.AuditBackend = appendBackend(logBackend, dynamicBackend)
@@ -355,7 +373,11 @@ func (o *AuditOptions) ApplyTo(
 	return nil
 }
 
+<<<<<<< HEAD
 func (o *AuditOptions) newPolicyChecker() (policy.Checker, error) {
+=======
+func (o *AuditOptions) newPolicyRuleEvaluator() (audit.PolicyRuleEvaluator, error) {
+>>>>>>> upstream/master
 	if o.PolicyFile == "" {
 		return nil, nil
 	}
@@ -364,7 +386,11 @@ func (o *AuditOptions) newPolicyChecker() (policy.Checker, error) {
 	if err != nil {
 		return nil, fmt.Errorf("loading audit policy file: %v", err)
 	}
+<<<<<<< HEAD
 	return policy.NewChecker(p), nil
+=======
+	return policy.NewPolicyRuleEvaluator(p), nil
+>>>>>>> upstream/master
 }
 
 func (o *AuditBatchOptions) AddFlags(pluginName string, fs *pflag.FlagSet) {
@@ -451,7 +477,11 @@ func (o *AuditLogOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.IntVar(&o.MaxAge, "audit-log-maxage", o.MaxAge,
 		"The maximum number of days to retain old audit log files based on the timestamp encoded in their filename.")
 	fs.IntVar(&o.MaxBackups, "audit-log-maxbackup", o.MaxBackups,
+<<<<<<< HEAD
 		"The maximum number of old audit log files to retain.")
+=======
+		"The maximum number of old audit log files to retain. Setting a value of 0 will mean there's no restriction on the number of files.")
+>>>>>>> upstream/master
 	fs.IntVar(&o.MaxSize, "audit-log-maxsize", o.MaxSize,
 		"The maximum size in megabytes of the audit log file before it gets rotated.")
 	fs.StringVar(&o.Format, "audit-log-format", o.Format,

@@ -22,11 +22,17 @@ import (
 	"fmt"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/google/go-cmp/cmp"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+=======
+	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+>>>>>>> upstream/master
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/informers"
 	clientset "k8s.io/client-go/kubernetes"
@@ -34,6 +40,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	schedulerapi "k8s.io/kubernetes/pkg/scheduler/apis/config"
+<<<<<<< HEAD
 	"k8s.io/kubernetes/pkg/scheduler/apis/config/v1beta2"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config/validation"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
@@ -42,6 +49,10 @@ import (
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/defaultpreemption"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/noderesources"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/queuesort"
+=======
+	"k8s.io/kubernetes/pkg/scheduler/framework"
+	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/noderesources"
+>>>>>>> upstream/master
 	frameworkruntime "k8s.io/kubernetes/pkg/scheduler/framework/runtime"
 	internalcache "k8s.io/kubernetes/pkg/scheduler/internal/cache"
 	cachedebugger "k8s.io/kubernetes/pkg/scheduler/internal/cache/debugger"
@@ -205,6 +216,7 @@ func (c *Configurator) create() (*Scheduler, error) {
 	}, nil
 }
 
+<<<<<<< HEAD
 // createFromPolicy creates a scheduler from the legacy policy file.
 func (c *Configurator) createFromPolicy(policy schedulerapi.Policy) (*Scheduler, error) {
 	lr := frameworkplugins.NewLegacyRegistry()
@@ -369,6 +381,8 @@ func dedupPluginConfigs(pc []schedulerapi.PluginConfig) ([]schedulerapi.PluginCo
 	return result, nil
 }
 
+=======
+>>>>>>> upstream/master
 // MakeDefaultErrorFunc construct a function to handle pod scheduler error
 func MakeDefaultErrorFunc(client clientset.Interface, podLister corelisters.PodLister, podQueue internalqueue.SchedulingQueue, schedulerCache internalcache.Cache) func(*framework.QueuedPodInfo, error) {
 	return func(podInfo *framework.QueuedPodInfo, err error) {

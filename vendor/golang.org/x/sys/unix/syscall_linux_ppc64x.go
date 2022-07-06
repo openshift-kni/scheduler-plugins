@@ -8,8 +8,11 @@
 
 package unix
 
+<<<<<<< HEAD
 //sys	dup2(oldfd int, newfd int) (err error)
 //sysnb	EpollCreate(size int) (fd int, err error)
+=======
+>>>>>>> upstream/master
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
 //sys	Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
 //sys	Fchown(fd int, uid int, gid int) (err error)
@@ -22,7 +25,10 @@ package unix
 //sysnb	Getgid() (gid int)
 //sysnb	Getrlimit(resource int, rlim *Rlimit) (err error) = SYS_UGETRLIMIT
 //sysnb	Getuid() (uid int)
+<<<<<<< HEAD
 //sysnb	InotifyInit() (fd int, err error)
+=======
+>>>>>>> upstream/master
 //sys	Ioperm(from int, num int, on int) (err error)
 //sys	Iopl(level int) (err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
@@ -104,6 +110,7 @@ func (rsa *RawSockaddrNFCLLCP) SetServiceNameLen(length int) {
 	rsa.Service_name_len = uint64(length)
 }
 
+<<<<<<< HEAD
 //sysnb	pipe(p *[2]_C_int) (err error)
 
 func Pipe(p []int) (err error) {
@@ -139,6 +146,8 @@ func Poll(fds []PollFd, timeout int) (n int, err error) {
 	return poll(&fds[0], len(fds), timeout)
 }
 
+=======
+>>>>>>> upstream/master
 //sys	syncFileRange2(fd int, flags int, off int64, n int64) (err error) = SYS_SYNC_FILE_RANGE2
 
 func SyncFileRange(fd int, off int64, n int64, flags int) error {

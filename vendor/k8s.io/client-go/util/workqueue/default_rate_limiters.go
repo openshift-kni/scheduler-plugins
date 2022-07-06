@@ -27,7 +27,11 @@ import (
 type RateLimiter interface {
 	// When gets an item and gets to decide how long that item should wait
 	When(item interface{}) time.Duration
+<<<<<<< HEAD
 	// Forget indicates that an item is finished being retried.  Doesn't matter whether its for perm failing
+=======
+	// Forget indicates that an item is finished being retried.  Doesn't matter whether it's for failing
+>>>>>>> upstream/master
 	// or for success, we'll stop tracking it
 	Forget(item interface{})
 	// NumRequeues returns back how many failures the item has had
@@ -209,3 +213,33 @@ func (r *MaxOfRateLimiter) Forget(item interface{}) {
 		limiter.Forget(item)
 	}
 }
+<<<<<<< HEAD
+=======
+
+// WithMaxWaitRateLimiter have maxDelay which avoids waiting too long
+type WithMaxWaitRateLimiter struct {
+	limiter  RateLimiter
+	maxDelay time.Duration
+}
+
+func NewWithMaxWaitRateLimiter(limiter RateLimiter, maxDelay time.Duration) RateLimiter {
+	return &WithMaxWaitRateLimiter{limiter: limiter, maxDelay: maxDelay}
+}
+
+func (w WithMaxWaitRateLimiter) When(item interface{}) time.Duration {
+	delay := w.limiter.When(item)
+	if delay > w.maxDelay {
+		return w.maxDelay
+	}
+
+	return delay
+}
+
+func (w WithMaxWaitRateLimiter) Forget(item interface{}) {
+	w.limiter.Forget(item)
+}
+
+func (w WithMaxWaitRateLimiter) NumRequeues(item interface{}) int {
+	return w.limiter.NumRequeues(item)
+}
+>>>>>>> upstream/master

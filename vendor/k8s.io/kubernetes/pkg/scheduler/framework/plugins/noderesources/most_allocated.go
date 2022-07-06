@@ -17,6 +17,7 @@ limitations under the License.
 package noderesources
 
 import (
+<<<<<<< HEAD
 	"context"
 	"fmt"
 
@@ -90,6 +91,17 @@ func NewMostAllocated(maArgs runtime.Object, h framework.Handle, fts feature.Fea
 	}, nil
 }
 
+=======
+	"k8s.io/kubernetes/pkg/scheduler/framework"
+)
+
+// mostResourceScorer favors nodes with most requested resources.
+// It calculates the percentage of memory and CPU requested by pods scheduled on the node, and prioritizes
+// based on the maximum of the average of the fraction of requested to capacity.
+//
+// Details:
+// (cpu(MaxNodeScore * sum(requested) / capacity) + memory(MaxNodeScore * sum(requested) / capacity)) / weightSum
+>>>>>>> upstream/master
 func mostResourceScorer(resToWeightMap resourceToWeightMap) func(requested, allocable resourceToValueMap) int64 {
 	return func(requested, allocable resourceToValueMap) int64 {
 		var nodeScore, weightSum int64

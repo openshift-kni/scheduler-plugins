@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+//go:build !linux && !darwin && !windows
+>>>>>>> upstream/master
 // +build !linux,!darwin,!windows
 
 /*

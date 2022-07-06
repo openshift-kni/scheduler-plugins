@@ -44,6 +44,10 @@ import (
 	storeerr "k8s.io/apiserver/pkg/storage/errors"
 	"k8s.io/apiserver/pkg/storage/etcd3/metrics"
 	"k8s.io/apiserver/pkg/util/dryrun"
+<<<<<<< HEAD
+=======
+	flowcontrolrequest "k8s.io/apiserver/pkg/util/flowcontrol/request"
+>>>>>>> upstream/master
 	"k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/structured-merge-diff/v4/fieldpath"
 
@@ -292,7 +296,11 @@ func (e *Store) NamespaceScoped() bool {
 		return e.UpdateStrategy.NamespaceScoped()
 	}
 
+<<<<<<< HEAD
 	panic("programmer error: no CRUD for resource, you're crazy, override NamespaceScoped too")
+=======
+	panic("programmer error: no CRUD for resource, override NamespaceScoped too")
+>>>>>>> upstream/master
 }
 
 // GetCreateStrategy implements GenericStore.
@@ -359,6 +367,12 @@ func (e *Store) ListPredicate(ctx context.Context, p storage.SelectionPredicate,
 func finishNothing(context.Context, bool) {}
 
 // Create inserts a new item according to the unique key from the object.
+<<<<<<< HEAD
+=======
+// Note that registries may mutate the input object (e.g. in the strategy
+// hooks).  Tests which call this might want to call DeepCopy if they expect to
+// be able to examine the input and output objects for differences.
+>>>>>>> upstream/master
 func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
 	var finishCreate FinishFunc = finishNothing
 
@@ -400,7 +414,11 @@ func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation
 	out := e.NewFunc()
 	if err := e.Storage.Create(ctx, key, obj, out, ttl, dryrun.IsDryRun(options.DryRun)); err != nil {
 		err = storeerr.InterpretCreateError(err, qualifiedResource, name)
+<<<<<<< HEAD
 		err = rest.CheckGeneratedNameError(e.CreateStrategy, err, obj)
+=======
+		err = rest.CheckGeneratedNameError(ctx, e.CreateStrategy, err, obj)
+>>>>>>> upstream/master
 		if !apierrors.IsAlreadyExists(err) {
 			return nil, err
 		}
@@ -655,7 +673,11 @@ func (e *Store) Update(ctx context.Context, name string, objInfo rest.UpdatedObj
 		}
 		if creating {
 			err = storeerr.InterpretCreateError(err, qualifiedResource, name)
+<<<<<<< HEAD
 			err = rest.CheckGeneratedNameError(e.CreateStrategy, err, creatingObj)
+=======
+			err = rest.CheckGeneratedNameError(ctx, e.CreateStrategy, err, creatingObj)
+>>>>>>> upstream/master
 		} else {
 			err = storeerr.InterpretUpdateError(err, qualifiedResource, name)
 		}
@@ -681,8 +703,14 @@ func (e *Store) Update(ctx context.Context, name string, objInfo rest.UpdatedObj
 // create-on-update path.
 func newCreateOptionsFromUpdateOptions(in *metav1.UpdateOptions) *metav1.CreateOptions {
 	co := &metav1.CreateOptions{
+<<<<<<< HEAD
 		DryRun:       in.DryRun,
 		FieldManager: in.FieldManager,
+=======
+		DryRun:          in.DryRun,
+		FieldManager:    in.FieldManager,
+		FieldValidation: in.FieldValidation,
+>>>>>>> upstream/master
 	}
 	co.TypeMeta.SetGroupVersionKind(metav1.SchemeGroupVersion.WithKind("CreateOptions"))
 	return co
@@ -749,9 +777,15 @@ func shouldOrphanDependents(ctx context.Context, e *Store, accessor metav1.Objec
 	}
 
 	// An explicit policy was set at deletion time, that overrides everything
+<<<<<<< HEAD
 	//lint:ignore SA1019 backwards compatibility
 	if options != nil && options.OrphanDependents != nil {
 		//lint:ignore SA1019 backwards compatibility
+=======
+	//nolint:staticcheck // SA1019 backwards compatibility
+	if options != nil && options.OrphanDependents != nil {
+		//nolint:staticcheck // SA1019 backwards compatibility
+>>>>>>> upstream/master
 		return *options.OrphanDependents
 	}
 	if options != nil && options.PropagationPolicy != nil {
@@ -792,7 +826,11 @@ func shouldDeleteDependents(ctx context.Context, e *Store, accessor metav1.Objec
 	}
 
 	// If an explicit policy was set at deletion time, that overrides both
+<<<<<<< HEAD
 	//lint:ignore SA1019 backwards compatibility
+=======
+	//nolint:staticcheck // SA1019 backwards compatibility
+>>>>>>> upstream/master
 	if options != nil && options.OrphanDependents != nil {
 		return false
 	}
@@ -1123,13 +1161,29 @@ func (e *Store) DeleteCollection(ctx context.Context, deleteValidation rest.Vali
 	wg := sync.WaitGroup{}
 	toProcess := make(chan int, 2*workersNumber)
 	errs := make(chan error, workersNumber+1)
+<<<<<<< HEAD
+=======
+	workersExited := make(chan struct{})
+	distributorExited := make(chan struct{})
+>>>>>>> upstream/master
 
 	go func() {
 		defer utilruntime.HandleCrash(func(panicReason interface{}) {
 			errs <- fmt.Errorf("DeleteCollection distributor panicked: %v", panicReason)
 		})
+<<<<<<< HEAD
 		for i := 0; i < len(items); i++ {
 			toProcess <- i
+=======
+		defer close(distributorExited)
+		for i := 0; i < len(items); i++ {
+			select {
+			case toProcess <- i:
+			case <-workersExited:
+				klog.V(4).InfoS("workers already exited, and there are some items waiting to be processed", "finished", i, "total", len(items))
+				return
+			}
+>>>>>>> upstream/master
 		}
 		close(toProcess)
 	}()
@@ -1162,6 +1216,12 @@ func (e *Store) DeleteCollection(ctx context.Context, deleteValidation rest.Vali
 		}()
 	}
 	wg.Wait()
+<<<<<<< HEAD
+=======
+	// notify distributor to exit
+	close(workersExited)
+	<-distributorExited
+>>>>>>> upstream/master
 	select {
 	case err := <-errs:
 		return nil, err
@@ -1413,7 +1473,11 @@ func (e *Store) CompleteWithOptions(options *generic.StoreOptions) error {
 		e.StorageVersioner = opts.StorageConfig.EncodeVersioner
 
 		if opts.CountMetricPollPeriod > 0 {
+<<<<<<< HEAD
 			stopFunc := e.startObservingCount(opts.CountMetricPollPeriod)
+=======
+			stopFunc := e.startObservingCount(opts.CountMetricPollPeriod, opts.StorageObjectCountTracker)
+>>>>>>> upstream/master
 			previousDestroy := e.DestroyFunc
 			e.DestroyFunc = func() {
 				stopFunc()
@@ -1428,7 +1492,11 @@ func (e *Store) CompleteWithOptions(options *generic.StoreOptions) error {
 }
 
 // startObservingCount starts monitoring given prefix and periodically updating metrics. It returns a function to stop collection.
+<<<<<<< HEAD
 func (e *Store) startObservingCount(period time.Duration) func() {
+=======
+func (e *Store) startObservingCount(period time.Duration, objectCountTracker flowcontrolrequest.StorageObjectCountTracker) func() {
+>>>>>>> upstream/master
 	prefix := e.KeyRootFunc(genericapirequest.NewContext())
 	resourceName := e.DefaultQualifiedResource.String()
 	klog.V(2).InfoS("Monitoring resource count at path", "resource", resourceName, "path", "<storage-prefix>/"+prefix)
@@ -1437,9 +1505,18 @@ func (e *Store) startObservingCount(period time.Duration) func() {
 		count, err := e.Storage.Count(prefix)
 		if err != nil {
 			klog.V(5).InfoS("Failed to update storage count metric", "err", err)
+<<<<<<< HEAD
 			metrics.UpdateObjectCount(resourceName, -1)
 		} else {
 			metrics.UpdateObjectCount(resourceName, count)
+=======
+			count = -1
+		}
+
+		metrics.UpdateObjectCount(resourceName, count)
+		if objectCountTracker != nil {
+			objectCountTracker.Set(resourceName, count)
+>>>>>>> upstream/master
 		}
 	}, period, resourceCountPollPeriodJitter, true, stopCh)
 	return func() { close(stopCh) }

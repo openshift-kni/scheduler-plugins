@@ -21,9 +21,15 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
+<<<<<<< HEAD
 	"k8s.io/apimachinery/pkg/util/clock"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
+=======
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/utils/clock"
+>>>>>>> upstream/master
 )
 
 // This file implements a low-level controller that is used in
@@ -322,7 +328,11 @@ func NewInformer(
 	// This will hold the client state, as we know it.
 	clientState := NewStore(DeletionHandlingMetaNamespaceKeyFunc)
 
+<<<<<<< HEAD
 	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState)
+=======
+	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState, nil)
+>>>>>>> upstream/master
 }
 
 // NewIndexerInformer returns an Indexer and a Controller for populating the index
@@ -351,7 +361,63 @@ func NewIndexerInformer(
 	// This will hold the client state, as we know it.
 	clientState := NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers)
 
+<<<<<<< HEAD
 	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState)
+=======
+	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState, nil)
+}
+
+// TransformFunc allows for transforming an object before it will be processed
+// and put into the controller cache and before the corresponding handlers will
+// be called on it.
+// TransformFunc (similarly to ResourceEventHandler functions) should be able
+// to correctly handle the tombstone of type cache.DeletedFinalStateUnknown
+//
+// The most common usage pattern is to clean-up some parts of the object to
+// reduce component memory usage if a given component doesn't care about them.
+// given controller doesn't care for them
+type TransformFunc func(interface{}) (interface{}, error)
+
+// NewTransformingInformer returns a Store and a controller for populating
+// the store while also providing event notifications. You should only used
+// the returned Store for Get/List operations; Add/Modify/Deletes will cause
+// the event notifications to be faulty.
+// The given transform function will be called on all objects before they will
+// put put into the Store and corresponding Add/Modify/Delete handlers will
+// be invokved for them.
+func NewTransformingInformer(
+	lw ListerWatcher,
+	objType runtime.Object,
+	resyncPeriod time.Duration,
+	h ResourceEventHandler,
+	transformer TransformFunc,
+) (Store, Controller) {
+	// This will hold the client state, as we know it.
+	clientState := NewStore(DeletionHandlingMetaNamespaceKeyFunc)
+
+	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState, transformer)
+}
+
+// NewTransformingIndexerInformer returns an Indexer and a controller for
+// populating the index while also providing event notifications. You should
+// only used the returned Index for Get/List operations; Add/Modify/Deletes
+// will cause the event notifications to be faulty.
+// The given transform function will be called on all objects before they will
+// be put into the Index and corresponding Add/Modify/Delete handlers will
+// be invoked for them.
+func NewTransformingIndexerInformer(
+	lw ListerWatcher,
+	objType runtime.Object,
+	resyncPeriod time.Duration,
+	h ResourceEventHandler,
+	indexers Indexers,
+	transformer TransformFunc,
+) (Indexer, Controller) {
+	// This will hold the client state, as we know it.
+	clientState := NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers)
+
+	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState, transformer)
+>>>>>>> upstream/master
 }
 
 // newInformer returns a controller for populating the store while also
@@ -374,6 +440,10 @@ func newInformer(
 	resyncPeriod time.Duration,
 	h ResourceEventHandler,
 	clientState Store,
+<<<<<<< HEAD
+=======
+	transformer TransformFunc,
+>>>>>>> upstream/master
 ) Controller {
 	// This will hold incoming changes. Note how we pass clientState in as a
 	// KeyLister, that way resync operations will result in the correct set
@@ -393,6 +463,7 @@ func newInformer(
 		Process: func(obj interface{}) error {
 			// from oldest to newest
 			for _, d := range obj.(Deltas) {
+<<<<<<< HEAD
 				switch d.Type {
 				case Sync, Replaced, Added, Updated:
 					if old, exists, err := clientState.Get(d.Object); err == nil && exists {
@@ -411,6 +482,35 @@ func newInformer(
 						return err
 					}
 					h.OnDelete(d.Object)
+=======
+				obj := d.Object
+				if transformer != nil {
+					var err error
+					obj, err = transformer(obj)
+					if err != nil {
+						return err
+					}
+				}
+
+				switch d.Type {
+				case Sync, Replaced, Added, Updated:
+					if old, exists, err := clientState.Get(obj); err == nil && exists {
+						if err := clientState.Update(obj); err != nil {
+							return err
+						}
+						h.OnUpdate(old, obj)
+					} else {
+						if err := clientState.Add(obj); err != nil {
+							return err
+						}
+						h.OnAdd(obj)
+					}
+				case Deleted:
+					if err := clientState.Delete(obj); err != nil {
+						return err
+					}
+					h.OnDelete(obj)
+>>>>>>> upstream/master
 				}
 			}
 			return nil

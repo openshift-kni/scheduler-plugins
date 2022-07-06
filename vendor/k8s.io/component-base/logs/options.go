@@ -17,6 +17,7 @@ limitations under the License.
 package logs
 
 import (
+<<<<<<< HEAD
 	"github.com/spf13/pflag"
 
 	"k8s.io/klog/v2"
@@ -24,6 +25,19 @@ import (
 	"k8s.io/component-base/config"
 	"k8s.io/component-base/config/v1alpha1"
 	"k8s.io/component-base/logs/sanitization"
+=======
+	"fmt"
+
+	"github.com/spf13/pflag"
+
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/component-base/config"
+	"k8s.io/component-base/config/v1alpha1"
+	"k8s.io/component-base/logs/registry"
+	"k8s.io/component-base/logs/sanitization"
+	"k8s.io/klog/v2"
+>>>>>>> upstream/master
 )
 
 // Options has klog format parameters
@@ -40,9 +54,28 @@ func NewOptions() *Options {
 	return o
 }
 
+<<<<<<< HEAD
 // Validate verifies if any unsupported flag is set
 // for non-default logging format
 func (o *Options) Validate() []error {
+=======
+// ValidateAndApply combines validation and application of the logging configuration.
+// This should be invoked as early as possible because then the rest of the program
+// startup (including validation of other options) will already run with the final
+// logging configuration.
+func (o *Options) ValidateAndApply() error {
+	errs := o.validate()
+	if len(errs) > 0 {
+		return utilerrors.NewAggregate(errs)
+	}
+	o.apply()
+	return nil
+}
+
+// validate verifies if any unsupported flag is set
+// for non-default logging format
+func (o *Options) validate() []error {
+>>>>>>> upstream/master
 	errs := ValidateLoggingConfiguration(&o.Config, nil)
 	if len(errs) != 0 {
 		return errs.ToAggregate().Errors()
@@ -50,11 +83,19 @@ func (o *Options) Validate() []error {
 	return nil
 }
 
+<<<<<<< HEAD
 // AddFlags add logging-format flag
+=======
+// AddFlags add logging-format flag.
+//
+// Programs using LoggingConfiguration must use SkipLoggingConfigurationFlags
+// when calling AddFlags to avoid the duplicate registration of flags.
+>>>>>>> upstream/master
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	BindLoggingFlags(&o.Config, fs)
 }
 
+<<<<<<< HEAD
 // Apply set klog logger from LogFormat type
 func (o *Options) Apply() {
 	// if log format not exists, use nil loggr
@@ -63,4 +104,27 @@ func (o *Options) Apply() {
 	if o.Config.Sanitization {
 		klog.SetLogFilter(&sanitization.SanitizingFilter{})
 	}
+=======
+// apply set klog logger from LogFormat type
+func (o *Options) apply() {
+	// if log format not exists, use nil loggr
+	factory, _ := registry.LogRegistry.Get(o.Config.Format)
+	if factory == nil {
+		klog.ClearLogger()
+	} else {
+		log, flush := factory.Create(o.Config.Options)
+		klog.SetLogger(log)
+		logrFlush = flush
+	}
+	if o.Config.Sanitization {
+		klog.SetLogFilter(&sanitization.SanitizingFilter{})
+	}
+	if err := loggingFlags.Lookup("v").Value.Set(o.Config.Verbosity.String()); err != nil {
+		panic(fmt.Errorf("internal error while setting klog verbosity: %v", err))
+	}
+	if err := loggingFlags.Lookup("vmodule").Value.Set(o.Config.VModule.String()); err != nil {
+		panic(fmt.Errorf("internal error while setting klog vmodule: %v", err))
+	}
+	go wait.Forever(FlushLogs, o.Config.FlushFrequency)
+>>>>>>> upstream/master
 }

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+//go:build !linux && !windows
+>>>>>>> upstream/master
 // +build !linux,!windows
 
 /*

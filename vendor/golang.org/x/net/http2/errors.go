@@ -53,6 +53,16 @@ func (e ErrCode) String() string {
 	return fmt.Sprintf("unknown error code 0x%x", uint32(e))
 }
 
+<<<<<<< HEAD
+=======
+func (e ErrCode) stringToken() string {
+	if s, ok := errCodeName[e]; ok {
+		return s
+	}
+	return fmt.Sprintf("ERR_UNKNOWN_%d", uint32(e))
+}
+
+>>>>>>> upstream/master
 // ConnectionError is an error that results in the termination of the
 // entire connection.
 type ConnectionError ErrCode
@@ -67,6 +77,14 @@ type StreamError struct {
 	Cause    error // optional additional detail
 }
 
+<<<<<<< HEAD
+=======
+// errFromPeer is a sentinel error value for StreamError.Cause to
+// indicate that the StreamError was sent from the peer over the wire
+// and wasn't locally generated in the Transport.
+var errFromPeer = errors.New("received from peer")
+
+>>>>>>> upstream/master
 func streamError(id uint32, code ErrCode) StreamError {
 	return StreamError{StreamID: id, Code: code}
 }

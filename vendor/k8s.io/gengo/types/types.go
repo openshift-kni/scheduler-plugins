@@ -83,11 +83,21 @@ const (
 	// Interface is any type that could have differing types at run time.
 	Interface Kind = "Interface"
 
+<<<<<<< HEAD
 	// The remaining types are included for completeness, but are not well
 	// supported.
 	Array Kind = "Array" // Array is just like slice, but has a fixed length.
 	Chan  Kind = "Chan"
 	Func  Kind = "Func"
+=======
+	// Array is just like slice, but has a fixed length.
+	Array Kind = "Array"
+
+	// The remaining types are included for completeness, but are not well
+	// supported.
+	Chan Kind = "Chan"
+	Func Kind = "Func"
+>>>>>>> upstream/master
 
 	// DeclarationOf is different from other Kinds; it indicates that instead of
 	// representing an actual Type, the type is a declaration of an instance of
@@ -350,7 +360,13 @@ type Type struct {
 
 	// TODO: Add:
 	// * channel direction
+<<<<<<< HEAD
 	// * array length
+=======
+
+	// If Kind == Array
+	Len int64
+>>>>>>> upstream/master
 }
 
 // String returns the name of the type.

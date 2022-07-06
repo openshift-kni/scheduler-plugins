@@ -17,7 +17,11 @@
  */
 
 // Package networktype declares the network type to be used in the default
+<<<<<<< HEAD
 // dailer. Attribute of a resolver.Address.
+=======
+// dialer. Attribute of a resolver.Address.
+>>>>>>> upstream/master
 package networktype
 
 import (

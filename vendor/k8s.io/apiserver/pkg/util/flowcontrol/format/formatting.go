@@ -21,7 +21,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+<<<<<<< HEAD
 	flowcontrol "k8s.io/api/flowcontrol/v1beta1"
+=======
+	flowcontrol "k8s.io/api/flowcontrol/v1beta2"
+>>>>>>> upstream/master
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/endpoints/request"
 )

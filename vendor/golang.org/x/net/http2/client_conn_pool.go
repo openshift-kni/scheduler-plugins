@@ -16,6 +16,15 @@ import (
 
 // ClientConnPool manages a pool of HTTP/2 client connections.
 type ClientConnPool interface {
+<<<<<<< HEAD
+=======
+	// GetClientConn returns a specific HTTP/2 connection (usually
+	// a TLS-TCP connection) to an HTTP/2 server. On success, the
+	// returned ClientConn accounts for the upcoming RoundTrip
+	// call, so the caller should not omit it. If the caller needs
+	// to, ClientConn.RoundTrip can be called with a bogus
+	// new(http.Request) to release the stream reservation.
+>>>>>>> upstream/master
 	GetClientConn(req *http.Request, addr string) (*ClientConn, error)
 	MarkDead(*ClientConn)
 }
@@ -42,7 +51,11 @@ type clientConnPool struct {
 	conns        map[string][]*ClientConn // key is host:port
 	dialing      map[string]*dialCall     // currently in-flight dials
 	keys         map[*ClientConn][]string
+<<<<<<< HEAD
 	addConnCalls map[string]*addConnCall // in-flight addConnIfNeede calls
+=======
+	addConnCalls map[string]*addConnCall // in-flight addConnIfNeeded calls
+>>>>>>> upstream/master
 }
 
 func (p *clientConnPool) GetClientConn(req *http.Request, addr string) (*ClientConn, error) {
@@ -54,6 +67,7 @@ const (
 	noDialOnMiss = false
 )
 
+<<<<<<< HEAD
 // shouldTraceGetConn reports whether getClientConn should call any
 // ClientTrace.GetConn hook associated with the http.Request.
 //
@@ -76,6 +90,10 @@ func (p *clientConnPool) shouldTraceGetConn(st clientConnIdleState) bool {
 }
 
 func (p *clientConnPool) getClientConn(req *http.Request, addr string, dialOnMiss bool) (*ClientConn, error) {
+=======
+func (p *clientConnPool) getClientConn(req *http.Request, addr string, dialOnMiss bool) (*ClientConn, error) {
+	// TODO(dneil): Dial a new connection when t.DisableKeepAlives is set?
+>>>>>>> upstream/master
 	if isConnectionCloseRequest(req) && dialOnMiss {
 		// It gets its own connection.
 		traceGetConn(req, addr)
@@ -89,10 +107,21 @@ func (p *clientConnPool) getClientConn(req *http.Request, addr string, dialOnMis
 	for {
 		p.mu.Lock()
 		for _, cc := range p.conns[addr] {
+<<<<<<< HEAD
 			if st := cc.idleState(); st.canTakeNewRequest {
 				if p.shouldTraceGetConn(st) {
 					traceGetConn(req, addr)
 				}
+=======
+			if cc.ReserveNewRequest() {
+				// When a connection is presented to us by the net/http package,
+				// the GetConn hook has already been called.
+				// Don't call it a second time here.
+				if !cc.getConnCalled {
+					traceGetConn(req, addr)
+				}
+				cc.getConnCalled = false
+>>>>>>> upstream/master
 				p.mu.Unlock()
 				return cc, nil
 			}
@@ -108,7 +137,17 @@ func (p *clientConnPool) getClientConn(req *http.Request, addr string, dialOnMis
 		if shouldRetryDial(call, req) {
 			continue
 		}
+<<<<<<< HEAD
 		return call.res, call.err
+=======
+		cc, err := call.res, call.err
+		if err != nil {
+			return nil, err
+		}
+		if cc.ReserveNewRequest() {
+			return cc, nil
+		}
+>>>>>>> upstream/master
 	}
 }
 
@@ -205,6 +244,10 @@ func (c *addConnCall) run(t *Transport, key string, tc *tls.Conn) {
 	if err != nil {
 		c.err = err
 	} else {
+<<<<<<< HEAD
+=======
+		cc.getConnCalled = true // already called by the net/http package
+>>>>>>> upstream/master
 		p.addConnLocked(key, cc)
 	}
 	delete(p.addConnCalls, key)

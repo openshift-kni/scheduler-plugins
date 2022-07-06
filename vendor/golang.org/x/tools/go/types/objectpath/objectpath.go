@@ -58,7 +58,11 @@ type Path string
 // - The only OT operator is Object.Type,
 //   which we encode as '.' because dot cannot appear in an identifier.
 // - The TT operators are encoded as [EKPRU].
+<<<<<<< HEAD
 // - The OT operators are encoded as [AFMO];
+=======
+// - The TO operators are encoded as [AFMO];
+>>>>>>> upstream/master
 //   three of these (At,Field,Method) require an integer operand,
 //   which is encoded as a string of decimal digits.
 //   These indices are stable across different representations

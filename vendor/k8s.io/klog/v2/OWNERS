@@ -15,5 +15,10 @@ approvers:
   - tallclair
   - piosz
   - brancz
+<<<<<<< HEAD
   - DirectXMan12
   - lavalamp
+=======
+  - lavalamp
+  - serathius
+>>>>>>> upstream/master

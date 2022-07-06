@@ -295,9 +295,17 @@ func newClientStreamWithParams(ctx context.Context, desc *StreamDesc, cc *Client
 		ctx = sh.TagRPC(ctx, &stats.RPCTagInfo{FullMethodName: method, FailFast: c.failFast})
 		beginTime = time.Now()
 		begin := &stats.Begin{
+<<<<<<< HEAD
 			Client:    true,
 			BeginTime: beginTime,
 			FailFast:  c.failFast,
+=======
+			Client:         true,
+			BeginTime:      beginTime,
+			FailFast:       c.failFast,
+			IsClientStream: desc.ClientStreams,
+			IsServerStream: desc.ServerStreams,
+>>>>>>> upstream/master
 		}
 		sh.HandleRPC(ctx, begin)
 	}
@@ -419,12 +427,18 @@ func (a *csAttempt) newStream() error {
 	cs.callHdr.PreviousAttempts = cs.numRetries
 	s, err := a.t.NewStream(cs.ctx, cs.callHdr)
 	if err != nil {
+<<<<<<< HEAD
 		if _, ok := err.(transport.PerformedIOError); ok {
 			// Return without converting to an RPC error so retry code can
 			// inspect.
 			return err
 		}
 		return toRPCErr(err)
+=======
+		// Return without converting to an RPC error so retry code can
+		// inspect.
+		return err
+>>>>>>> upstream/master
 	}
 	cs.attempt.s = s
 	cs.attempt.p = &parser{r: s}
@@ -523,6 +537,7 @@ func (cs *clientStream) commitAttempt() {
 // shouldRetry returns nil if the RPC should be retried; otherwise it returns
 // the error that should be returned by the operation.
 func (cs *clientStream) shouldRetry(err error) error {
+<<<<<<< HEAD
 	unprocessed := false
 	if cs.attempt.s == nil {
 		pioErr, ok := err.(transport.PerformedIOError)
@@ -536,6 +551,30 @@ func (cs *clientStream) shouldRetry(err error) error {
 			// In the event of a non-IO operation error from NewStream, we
 			// never attempted to write anything to the wire, so we can retry
 			// indefinitely for non-fail-fast RPCs.
+=======
+	if cs.attempt.s == nil {
+		// Error from NewClientStream.
+		nse, ok := err.(*transport.NewStreamError)
+		if !ok {
+			// Unexpected, but assume no I/O was performed and the RPC is not
+			// fatal, so retry indefinitely.
+			return nil
+		}
+
+		// Unwrap and convert error.
+		err = toRPCErr(nse.Err)
+
+		// Never retry DoNotRetry errors, which indicate the RPC should not be
+		// retried due to max header list size violation, etc.
+		if nse.DoNotRetry {
+			return err
+		}
+
+		// In the event of a non-IO operation error from NewStream, we never
+		// attempted to write anything to the wire, so we can retry
+		// indefinitely.
+		if !nse.PerformedIO {
+>>>>>>> upstream/master
 			return nil
 		}
 	}
@@ -544,6 +583,10 @@ func (cs *clientStream) shouldRetry(err error) error {
 		return err
 	}
 	// Wait for the trailers.
+<<<<<<< HEAD
+=======
+	unprocessed := false
+>>>>>>> upstream/master
 	if cs.attempt.s != nil {
 		<-cs.attempt.s.Done()
 		unprocessed = cs.attempt.s.Unprocessed()
@@ -632,7 +675,11 @@ func (cs *clientStream) shouldRetry(err error) error {
 // Returns nil if a retry was performed and succeeded; error otherwise.
 func (cs *clientStream) retryLocked(lastErr error) error {
 	for {
+<<<<<<< HEAD
 		cs.attempt.finish(lastErr)
+=======
+		cs.attempt.finish(toRPCErr(lastErr))
+>>>>>>> upstream/master
 		if err := cs.shouldRetry(lastErr); err != nil {
 			cs.commitAttemptLocked()
 			return err
@@ -659,7 +706,15 @@ func (cs *clientStream) withRetry(op func(a *csAttempt) error, onSuccess func())
 	for {
 		if cs.committed {
 			cs.mu.Unlock()
+<<<<<<< HEAD
 			return op(cs.attempt)
+=======
+			// toRPCErr is used in case the error from the attempt comes from
+			// NewClientStream, which intentionally doesn't return a status
+			// error to allow for further inspection; all other errors should
+			// already be status errors.
+			return toRPCErr(op(cs.attempt))
+>>>>>>> upstream/master
 		}
 		a := cs.attempt
 		cs.mu.Unlock()

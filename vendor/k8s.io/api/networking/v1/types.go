@@ -40,6 +40,10 @@ type NetworkPolicy struct {
 
 // PolicyType string describes the NetworkPolicy type
 // This type is beta-level in 1.8
+<<<<<<< HEAD
+=======
+// +enum
+>>>>>>> upstream/master
 type PolicyType string
 
 const (
@@ -373,6 +377,10 @@ type HTTPIngressRuleValue struct {
 }
 
 // PathType represents the type of path referred to by a HTTPIngressPath.
+<<<<<<< HEAD
+=======
+// +enum
+>>>>>>> upstream/master
 type PathType string
 
 const (
@@ -534,15 +542,22 @@ type IngressClassParametersReference struct {
 	Name string `json:"name" protobuf:"bytes,3,opt,name=name"`
 	// Scope represents if this refers to a cluster or namespace scoped resource.
 	// This may be set to "Cluster" (default) or "Namespace".
+<<<<<<< HEAD
 	// Field can be enabled with IngressClassNamespacedParams feature gate.
 	// +optional
 	// +featureGate=IngressClassNamespacedParams
+=======
+	// +optional
+>>>>>>> upstream/master
 	Scope *string `json:"scope" protobuf:"bytes,4,opt,name=scope"`
 	// Namespace is the namespace of the resource being referenced. This field is
 	// required when scope is set to "Namespace" and must be unset when scope is set to
 	// "Cluster".
 	// +optional
+<<<<<<< HEAD
 	// +featureGate=IngressClassNamespacedParams
+=======
+>>>>>>> upstream/master
 	Namespace *string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
 }
 

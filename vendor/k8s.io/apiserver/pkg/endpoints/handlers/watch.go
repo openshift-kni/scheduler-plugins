@@ -31,7 +31,10 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/apiserver/pkg/endpoints/handlers/negotiation"
 	"k8s.io/apiserver/pkg/endpoints/metrics"
+<<<<<<< HEAD
 	"k8s.io/apiserver/pkg/server/httplog"
+=======
+>>>>>>> upstream/master
 	"k8s.io/apiserver/pkg/util/wsstream"
 
 	"golang.org/x/net/websocket"
@@ -166,8 +169,11 @@ func (s *WatchServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	metrics.RegisteredWatchers.WithContext(req.Context()).WithLabelValues(kind.Group, kind.Version, kind.Kind).Inc()
 	defer metrics.RegisteredWatchers.WithContext(req.Context()).WithLabelValues(kind.Group, kind.Version, kind.Kind).Dec()
 
+<<<<<<< HEAD
 	w = httplog.Unlogged(req, w)
 
+=======
+>>>>>>> upstream/master
 	if wsstream.IsWebSocketRequest(req) {
 		w.Header().Set("Content-Type", s.MediaType)
 		websocket.Handler(s.HandleWS).ServeHTTP(w, req)

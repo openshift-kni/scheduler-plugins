@@ -101,7 +101,11 @@ func getKMSPluginProbes(reader io.Reader) ([]*kmsPluginProbe, error) {
 
 	config, err := loadConfig(configFileContents)
 	if err != nil {
+<<<<<<< HEAD
 		return result, fmt.Errorf("error while parsing encrypiton provider configuration: %v", err)
+=======
+		return result, fmt.Errorf("error while parsing encryption provider configuration: %v", err)
+>>>>>>> upstream/master
 	}
 
 	for _, r := range config.Resources {

@@ -53,6 +53,10 @@ import (
 	"k8s.io/kubernetes/cmd/kube-scheduler/app/options"
 	"k8s.io/kubernetes/pkg/scheduler"
 	kubeschedulerconfig "k8s.io/kubernetes/pkg/scheduler/apis/config"
+<<<<<<< HEAD
+=======
+	"k8s.io/kubernetes/pkg/scheduler/apis/config/latest"
+>>>>>>> upstream/master
 	"k8s.io/kubernetes/pkg/scheduler/framework/runtime"
 	"k8s.io/kubernetes/pkg/scheduler/metrics/resources"
 	"k8s.io/kubernetes/pkg/scheduler/profile"
@@ -63,12 +67,17 @@ type Option func(runtime.Registry) error
 
 // NewSchedulerCommand creates a *cobra.Command object with default parameters and registryOptions
 func NewSchedulerCommand(registryOptions ...Option) *cobra.Command {
+<<<<<<< HEAD
 	opts, err := options.NewOptions()
 	if err != nil {
 		klog.Fatalf("unable to initialize command options: %v", err)
 	}
 
 	namedFlagSets := opts.Flags()
+=======
+	opts := options.NewOptions()
+
+>>>>>>> upstream/master
 	cmd := &cobra.Command{
 		Use: "kube-scheduler",
 		Long: `The Kubernetes scheduler is a control plane process which assigns
@@ -79,6 +88,7 @@ suitable Node. Multiple different schedulers may be used within a cluster;
 kube-scheduler is the reference implementation.
 See [scheduling](https://kubernetes.io/docs/concepts/scheduling-eviction/)
 for more information about scheduling and the kube-scheduler component.`,
+<<<<<<< HEAD
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := opts.Complete(&namedFlagSets); err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
@@ -88,6 +98,10 @@ for more information about scheduling and the kube-scheduler component.`,
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 				os.Exit(1)
 			}
+=======
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runCommand(cmd, opts, registryOptions...)
+>>>>>>> upstream/master
 		},
 		Args: func(cmd *cobra.Command, args []string) error {
 			for _, arg := range args {
@@ -98,15 +112,28 @@ for more information about scheduling and the kube-scheduler component.`,
 			return nil
 		},
 	}
+<<<<<<< HEAD
 	fs := cmd.Flags()
 	verflag.AddFlags(namedFlagSets.FlagSet("global"))
 	globalflag.AddGlobalFlags(namedFlagSets.FlagSet("global"), cmd.Name())
 	for _, f := range namedFlagSets.FlagSets {
+=======
+
+	nfs := opts.Flags
+	verflag.AddFlags(nfs.FlagSet("global"))
+	globalflag.AddGlobalFlags(nfs.FlagSet("global"), cmd.Name(), logs.SkipLoggingConfigurationFlags())
+	fs := cmd.Flags()
+	for _, f := range nfs.FlagSets {
+>>>>>>> upstream/master
 		fs.AddFlagSet(f)
 	}
 
 	cols, _, _ := term.TerminalSize(cmd.OutOrStdout())
+<<<<<<< HEAD
 	cliflag.SetUsageAndHelpFunc(cmd, namedFlagSets, cols)
+=======
+	cliflag.SetUsageAndHelpFunc(cmd, *nfs, cols)
+>>>>>>> upstream/master
 
 	cmd.MarkFlagFilename("config", "yaml", "yml", "json")
 
@@ -116,6 +143,16 @@ for more information about scheduling and the kube-scheduler component.`,
 // runCommand runs the scheduler.
 func runCommand(cmd *cobra.Command, opts *options.Options, registryOptions ...Option) error {
 	verflag.PrintAndExitIfRequested()
+<<<<<<< HEAD
+=======
+
+	// Activate logging as soon as possible, after that
+	// show flags with the final logging configuration.
+	if err := opts.Logs.ValidateAndApply(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+>>>>>>> upstream/master
 	cliflag.PrintFlags(cmd.Flags())
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -137,7 +174,11 @@ func runCommand(cmd *cobra.Command, opts *options.Options, registryOptions ...Op
 // Run executes the scheduler based on the given configuration. It only returns on error or when context is done.
 func Run(ctx context.Context, cc *schedulerserverconfig.CompletedConfig, sched *scheduler.Scheduler) error {
 	// To help debugging, immediately log version
+<<<<<<< HEAD
 	klog.V(1).InfoS("Starting Kubernetes Scheduler version", "version", version.Get())
+=======
+	klog.InfoS("Starting Kubernetes Scheduler", "version", version.Get())
+>>>>>>> upstream/master
 
 	// Configz registration.
 	if cz, err := configz.New("componentconfig"); err == nil {
@@ -168,6 +209,7 @@ func Run(ctx context.Context, cc *schedulerserverconfig.CompletedConfig, sched *
 	}
 
 	// Start up the healthz server.
+<<<<<<< HEAD
 	if cc.InsecureServing != nil {
 		separateMetrics := cc.InsecureMetricsServing != nil
 		handler := buildHandlerChain(newHealthzHandler(&cc.ComponentConfig, cc.InformerFactory, isLeader, separateMetrics, checks...), nil, nil)
@@ -183,6 +225,10 @@ func Run(ctx context.Context, cc *schedulerserverconfig.CompletedConfig, sched *
 	}
 	if cc.SecureServing != nil {
 		handler := buildHandlerChain(newHealthzHandler(&cc.ComponentConfig, cc.InformerFactory, isLeader, false, checks...), cc.Authentication.Authenticator, cc.Authorization.Authorizer)
+=======
+	if cc.SecureServing != nil {
+		handler := buildHandlerChain(newHealthzAndMetricsHandler(&cc.ComponentConfig, cc.InformerFactory, isLeader, checks...), cc.Authentication.Authenticator, cc.Authorization.Authorizer)
+>>>>>>> upstream/master
 		// TODO: handle stoppedCh returned by c.SecureServing.Serve
 		if _, err := cc.SecureServing.Serve(handler, 0, ctx.Done()); err != nil {
 			// fail early for secure handlers, removing the old error loop from above
@@ -192,9 +238,23 @@ func Run(ctx context.Context, cc *schedulerserverconfig.CompletedConfig, sched *
 
 	// Start all informers.
 	cc.InformerFactory.Start(ctx.Done())
+<<<<<<< HEAD
 
 	// Wait for all caches to sync before scheduling.
 	cc.InformerFactory.WaitForCacheSync(ctx.Done())
+=======
+	// DynInformerFactory can be nil in tests.
+	if cc.DynInformerFactory != nil {
+		cc.DynInformerFactory.Start(ctx.Done())
+	}
+
+	// Wait for all caches to sync before scheduling.
+	cc.InformerFactory.WaitForCacheSync(ctx.Done())
+	// DynInformerFactory can be nil in tests.
+	if cc.DynInformerFactory != nil {
+		cc.DynInformerFactory.WaitForCacheSync(ctx.Done())
+	}
+>>>>>>> upstream/master
 
 	// If leader election is enabled, runCommand via LeaderElector until done and exit.
 	if cc.LeaderElection != nil {
@@ -207,11 +267,20 @@ func Run(ctx context.Context, cc *schedulerserverconfig.CompletedConfig, sched *
 				select {
 				case <-ctx.Done():
 					// We were asked to terminate. Exit 0.
+<<<<<<< HEAD
 					klog.Info("Requested to terminate. Exiting.")
 					os.Exit(0)
 				default:
 					// We lost the lock.
 					klog.Exitf("leaderelection lost")
+=======
+					klog.InfoS("Requested to terminate, exiting")
+					os.Exit(0)
+				default:
+					// We lost the lock.
+					klog.ErrorS(nil, "Leaderelection lost")
+					os.Exit(1)
+>>>>>>> upstream/master
 				}
 			},
 		}
@@ -259,6 +328,7 @@ func installMetricHandler(pathRecorderMux *mux.PathRecorderMux, informers inform
 	})
 }
 
+<<<<<<< HEAD
 // newMetricsHandler builds a metrics server from the config.
 func newMetricsHandler(config *kubeschedulerconfig.KubeSchedulerConfiguration, informers informers.SharedInformerFactory, isLeader func() bool) http.Handler {
 	pathRecorderMux := mux.NewPathRecorderMux("kube-scheduler")
@@ -282,6 +352,14 @@ func newHealthzHandler(config *kubeschedulerconfig.KubeSchedulerConfiguration, i
 	if !separateMetrics {
 		installMetricHandler(pathRecorderMux, informers, isLeader)
 	}
+=======
+// newHealthzAndMetricsHandler creates a healthz server from the config, and will also
+// embed the metrics handler.
+func newHealthzAndMetricsHandler(config *kubeschedulerconfig.KubeSchedulerConfiguration, informers informers.SharedInformerFactory, isLeader func() bool, checks ...healthz.HealthChecker) http.Handler {
+	pathRecorderMux := mux.NewPathRecorderMux("kube-scheduler")
+	healthz.InstallHandler(pathRecorderMux, checks...)
+	installMetricHandler(pathRecorderMux, informers, isLeader)
+>>>>>>> upstream/master
 	if config.EnableProfiling {
 		routes.Profiling{}.Install(pathRecorderMux)
 		if config.EnableContentionProfiling {
@@ -308,6 +386,15 @@ func WithPlugin(name string, factory runtime.PluginFactory) Option {
 
 // Setup creates a completed config and a scheduler based on the command args and options
 func Setup(ctx context.Context, opts *options.Options, outOfTreeRegistryOptions ...Option) (*schedulerserverconfig.CompletedConfig, *scheduler.Scheduler, error) {
+<<<<<<< HEAD
+=======
+	if cfg, err := latest.Default(); err != nil {
+		return nil, nil, err
+	} else {
+		opts.ComponentConfig = cfg
+	}
+
+>>>>>>> upstream/master
 	if errs := opts.Validate(); len(errs) > 0 {
 		return nil, nil, utilerrors.NewAggregate(errs)
 	}
@@ -332,12 +419,19 @@ func Setup(ctx context.Context, opts *options.Options, outOfTreeRegistryOptions 
 	// Create the scheduler.
 	sched, err := scheduler.New(cc.Client,
 		cc.InformerFactory,
+<<<<<<< HEAD
+=======
+		cc.DynInformerFactory,
+>>>>>>> upstream/master
 		recorderFactory,
 		ctx.Done(),
 		scheduler.WithComponentConfigVersion(cc.ComponentConfig.TypeMeta.APIVersion),
 		scheduler.WithKubeConfig(cc.KubeConfig),
 		scheduler.WithProfiles(cc.ComponentConfig.Profiles...),
+<<<<<<< HEAD
 		scheduler.WithLegacyPolicySource(cc.LegacyPolicySource),
+=======
+>>>>>>> upstream/master
 		scheduler.WithPercentageOfNodesToScore(cc.ComponentConfig.PercentageOfNodesToScore),
 		scheduler.WithFrameworkOutOfTreeRegistry(outOfTreeRegistry),
 		scheduler.WithPodMaxBackoffSeconds(cc.ComponentConfig.PodMaxBackoffSeconds),

@@ -102,7 +102,15 @@ func (cfgCtlr *configController) dumpQueues(w http.ResponseWriter, r *http.Reque
 		"Index",             // 2
 		"PendingRequests",   // 3
 		"ExecutingRequests", // 4
+<<<<<<< HEAD
 		"VirtualStart",      // 5
+=======
+		"SeatsInUse",        // 5
+		"NextDispatchR",     // 6
+		"InitialSeatsSum",   // 7
+		"MaxSeatsSum",       // 8
+		"TotalWorkSum",      // 9
+>>>>>>> upstream/master
 	}
 	tabPrint(tabWriter, rowForHeaders(columnHeaders))
 	endLine(tabWriter)
@@ -114,18 +122,38 @@ func (cfgCtlr *configController) dumpQueues(w http.ResponseWriter, r *http.Reque
 				"<none>",        // 3
 				"<none>",        // 4
 				"<none>",        // 5
+<<<<<<< HEAD
+=======
+				"<none>",        // 6
+				"<none>",        // 7
+				"<none>",        // 8
+				"<none>",        // 9
+>>>>>>> upstream/master
 			))
 			endLine(tabWriter)
 			continue
 		}
 		queueSetDigest := plState.queues.Dump(false)
 		for i, q := range queueSetDigest.Queues {
+<<<<<<< HEAD
 			tabPrint(tabWriter, rowForQueue(
 				plState.pl.Name,     // 1
 				i,                   // 2
 				len(q.Requests),     // 3
 				q.ExecutingRequests, // 4
 				q.VirtualStart,      // 5
+=======
+			tabPrint(tabWriter, row(
+				plState.pl.Name,                          // 1 - "PriorityLevelName"
+				strconv.Itoa(i),                          // 2 - "Index"
+				strconv.Itoa(len(q.Requests)),            // 3 - "PendingRequests"
+				strconv.Itoa(q.ExecutingRequests),        // 4 - "ExecutingRequests"
+				strconv.Itoa(q.SeatsInUse),               // 5 - "SeatsInUse"
+				q.NextDispatchR,                          // 6 - "NextDispatchR"
+				strconv.Itoa(q.QueueSum.InitialSeatsSum), // 7 - "InitialSeatsSum"
+				strconv.Itoa(q.QueueSum.MaxSeatsSum),     // 8 - "MaxSeatsSum"
+				q.QueueSum.TotalWorkSum,                  // 9 - "TotalWorkSum"
+>>>>>>> upstream/master
 			))
 			endLine(tabWriter)
 		}
@@ -147,10 +175,17 @@ func (cfgCtlr *configController) dumpRequests(w http.ResponseWriter, r *http.Req
 		"RequestIndexInQueue", // 4
 		"FlowDistingsher",     // 5
 		"ArriveTime",          // 6
+<<<<<<< HEAD
+=======
+		"InitialSeats",        // 7
+		"FinalSeats",          // 8
+		"AdditionalLatency",   // 9
+>>>>>>> upstream/master
 	}))
 	if includeRequestDetails {
 		continueLine(tabWriter)
 		tabPrint(tabWriter, rowForHeaders([]string{
+<<<<<<< HEAD
 			"UserName",    // 7
 			"Verb",        // 8
 			"APIPath",     // 9
@@ -159,6 +194,16 @@ func (cfgCtlr *configController) dumpRequests(w http.ResponseWriter, r *http.Req
 			"APIVersion",  // 12
 			"Resource",    // 13
 			"SubResource", // 14
+=======
+			"UserName",    // 10
+			"Verb",        // 11
+			"APIPath",     // 12
+			"Namespace",   // 13
+			"Name",        // 14
+			"APIVersion",  // 15
+			"Resource",    // 16
+			"SubResource", // 17
+>>>>>>> upstream/master
 		}))
 	}
 	endLine(tabWriter)
@@ -169,6 +214,7 @@ func (cfgCtlr *configController) dumpRequests(w http.ResponseWriter, r *http.Req
 		queueSetDigest := plState.queues.Dump(includeRequestDetails)
 		for iq, q := range queueSetDigest.Queues {
 			for ir, r := range q.Requests {
+<<<<<<< HEAD
 				tabPrint(tabWriter, rowForRequest(
 					plState.pl.Name,     // 1
 					r.MatchedFlowSchema, // 2
@@ -176,10 +222,23 @@ func (cfgCtlr *configController) dumpRequests(w http.ResponseWriter, r *http.Req
 					ir,                  // 4
 					r.FlowDistinguisher, // 5
 					r.ArriveTime,        // 6
+=======
+				tabPrint(tabWriter, row(
+					plState.pl.Name,     // 1
+					r.MatchedFlowSchema, // 2
+					strconv.Itoa(iq),    // 3
+					strconv.Itoa(ir),    // 4
+					r.FlowDistinguisher, // 5
+					r.ArriveTime.UTC().Format(time.RFC3339Nano),    // 6
+					strconv.Itoa(int(r.WorkEstimate.InitialSeats)), // 7
+					strconv.Itoa(int(r.WorkEstimate.FinalSeats)),   // 8
+					r.WorkEstimate.AdditionalLatency.String(),      // 9
+>>>>>>> upstream/master
 				))
 				if includeRequestDetails {
 					continueLine(tabWriter)
 					tabPrint(tabWriter, rowForRequestDetails(
+<<<<<<< HEAD
 						r.UserName,              // 7
 						r.RequestInfo.Verb,      // 8
 						r.RequestInfo.Path,      // 9
@@ -191,6 +250,19 @@ func (cfgCtlr *configController) dumpRequests(w http.ResponseWriter, r *http.Req
 						}.String(), // 12
 						r.RequestInfo.Resource,    // 13
 						r.RequestInfo.Subresource, // 14
+=======
+						r.UserName,              // 10
+						r.RequestInfo.Verb,      // 11
+						r.RequestInfo.Path,      // 12
+						r.RequestInfo.Namespace, // 13
+						r.RequestInfo.Name,      // 14
+						schema.GroupVersion{
+							Group:   r.RequestInfo.APIGroup,
+							Version: r.RequestInfo.APIVersion,
+						}.String(), // 15
+						r.RequestInfo.Resource,    // 16
+						r.RequestInfo.Subresource, // 17
+>>>>>>> upstream/master
 					))
 				}
 				endLine(tabWriter)
@@ -229,6 +301,7 @@ func rowForPriorityLevel(plName string, activeQueues int, isIdle, isQuiescing bo
 	)
 }
 
+<<<<<<< HEAD
 func rowForQueue(plName string, index, waitingRequests, executingRequests int, virtualStart float64) string {
 	return row(
 		plName,
@@ -250,6 +323,8 @@ func rowForRequest(plName, fsName string, queueIndex, requestIndex int, flowDist
 	)
 }
 
+=======
+>>>>>>> upstream/master
 func rowForRequestDetails(username, verb, path, namespace, name, apiVersion, resource, subResource string) string {
 	return row(
 		username,

@@ -15,8 +15,11 @@ import (
 
 func Syscall9(trap, a1, a2, a3, a4, a5, a6, a7, a8, a9 uintptr) (r1, r2 uintptr, err syscall.Errno)
 
+<<<<<<< HEAD
 //sys	dup2(oldfd int, newfd int) (err error)
 //sysnb	EpollCreate(size int) (fd int, err error)
+=======
+>>>>>>> upstream/master
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
 //sys	Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
 //sys	Fchown(fd int, uid int, gid int) (err error)
@@ -60,7 +63,10 @@ func Syscall9(trap, a1, a2, a3, a4, a5, a6, a7, a8, a9 uintptr) (r1, r2 uintptr,
 //sys	recvmsg(s int, msg *Msghdr, flags int) (n int, err error)
 //sys	sendmsg(s int, msg *Msghdr, flags int) (n int, err error)
 
+<<<<<<< HEAD
 //sysnb	InotifyInit() (fd int, err error)
+=======
+>>>>>>> upstream/master
 //sys	Ioperm(from int, num int, on int) (err error)
 //sys	Iopl(level int) (err error)
 
@@ -113,6 +119,7 @@ func setTimeval(sec, usec int64) Timeval {
 	return Timeval{Sec: int32(sec), Usec: int32(usec)}
 }
 
+<<<<<<< HEAD
 //sysnb	pipe2(p *[2]_C_int, flags int) (err error)
 
 func Pipe2(p []int, flags int) (err error) {
@@ -136,6 +143,8 @@ func Pipe(p []int) (err error) {
 	return
 }
 
+=======
+>>>>>>> upstream/master
 //sys	mmap2(addr uintptr, length uintptr, prot int, flags int, fd int, pageOffset uintptr) (xaddr uintptr, err error)
 
 func mmap(addr uintptr, length uintptr, prot int, flags int, fd int, offset int64) (xaddr uintptr, err error) {
@@ -157,7 +166,11 @@ type rlimit32 struct {
 //sysnb	getrlimit(resource int, rlim *rlimit32) (err error) = SYS_GETRLIMIT
 
 func Getrlimit(resource int, rlim *Rlimit) (err error) {
+<<<<<<< HEAD
 	err = prlimit(0, resource, nil, rlim)
+=======
+	err = Prlimit(0, resource, nil, rlim)
+>>>>>>> upstream/master
 	if err != ENOSYS {
 		return err
 	}
@@ -185,7 +198,11 @@ func Getrlimit(resource int, rlim *Rlimit) (err error) {
 //sysnb	setrlimit(resource int, rlim *rlimit32) (err error) = SYS_SETRLIMIT
 
 func Setrlimit(resource int, rlim *Rlimit) (err error) {
+<<<<<<< HEAD
 	err = prlimit(0, resource, rlim, nil)
+=======
+	err = Prlimit(0, resource, rlim, nil)
+>>>>>>> upstream/master
 	if err != ENOSYS {
 		return err
 	}
@@ -232,6 +249,7 @@ func (cmsg *Cmsghdr) SetLen(length int) {
 func (rsa *RawSockaddrNFCLLCP) SetServiceNameLen(length int) {
 	rsa.Service_name_len = uint32(length)
 }
+<<<<<<< HEAD
 
 //sys	poll(fds *PollFd, nfds int, timeout int) (n int, err error)
 
@@ -241,3 +259,5 @@ func Poll(fds []PollFd, timeout int) (n int, err error) {
 	}
 	return poll(&fds[0], len(fds), timeout)
 }
+=======
+>>>>>>> upstream/master

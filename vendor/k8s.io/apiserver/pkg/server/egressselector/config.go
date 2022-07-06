@@ -34,8 +34,12 @@ import (
 var cfgScheme = runtime.NewScheme()
 
 // validEgressSelectorNames contains the set of valid egress selctor names.
+<<<<<<< HEAD
 // 'master' is deprecated in favor of 'controlplane' and will be removed in v1.22.
 var validEgressSelectorNames = sets.NewString("master", "controlplane", "cluster", "etcd")
+=======
+var validEgressSelectorNames = sets.NewString("controlplane", "cluster", "etcd")
+>>>>>>> upstream/master
 
 func init() {
 	install.Install(cfgScheme)
@@ -103,6 +107,7 @@ func ValidateEgressSelectorConfiguration(config *apiserver.EgressSelectorConfigu
 		}
 	}
 
+<<<<<<< HEAD
 	var foundControlPlane, foundMaster bool
 	for _, service := range config.EgressSelections {
 		canonicalName := strings.ToLower(service.Name)
@@ -126,6 +131,25 @@ func ValidateEgressSelectorConfiguration(config *apiserver.EgressSelectorConfigu
 		allErrs = append(allErrs, field.Forbidden(field.NewPath("egressSelection", "name"), "both egressSelection names 'master' and 'controlplane' are specified, only one is allowed"))
 	}
 
+=======
+	seen := sets.String{}
+	for i, service := range config.EgressSelections {
+		canonicalName := strings.ToLower(service.Name)
+		fldPath := field.NewPath("service", "connection")
+		// no duplicate check
+		if seen.Has(canonicalName) {
+			allErrs = append(allErrs, field.Duplicate(fldPath.Index(i), canonicalName))
+			continue
+		}
+		seen.Insert(canonicalName)
+
+		if !validEgressSelectorNames.Has(canonicalName) {
+			allErrs = append(allErrs, field.NotSupported(fldPath, canonicalName, validEgressSelectorNames.List()))
+			continue
+		}
+	}
+
+>>>>>>> upstream/master
 	return allErrs
 }
 

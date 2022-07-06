@@ -48,6 +48,33 @@ func (sa *SockaddrCtl) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrCtl, nil
 }
 
+<<<<<<< HEAD
+=======
+// SockaddrVM implements the Sockaddr interface for AF_VSOCK type sockets.
+// SockaddrVM provides access to Darwin VM sockets: a mechanism that enables
+// bidirectional communication between a hypervisor and its guest virtual
+// machines.
+type SockaddrVM struct {
+	// CID and Port specify a context ID and port address for a VM socket.
+	// Guests have a unique CID, and hosts may have a well-known CID of:
+	//  - VMADDR_CID_HYPERVISOR: refers to the hypervisor process.
+	//  - VMADDR_CID_LOCAL: refers to local communication (loopback).
+	//  - VMADDR_CID_HOST: refers to other processes on the host.
+	CID  uint32
+	Port uint32
+	raw  RawSockaddrVM
+}
+
+func (sa *SockaddrVM) sockaddr() (unsafe.Pointer, _Socklen, error) {
+	sa.raw.Len = SizeofSockaddrVM
+	sa.raw.Family = AF_VSOCK
+	sa.raw.Port = sa.Port
+	sa.raw.Cid = sa.CID
+
+	return unsafe.Pointer(&sa.raw), SizeofSockaddrVM, nil
+}
+
+>>>>>>> upstream/master
 func anyToSockaddrGOOS(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 	switch rsa.Addr.Family {
 	case AF_SYSTEM:
@@ -58,6 +85,16 @@ func anyToSockaddrGOOS(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 			sa.Unit = pp.Sc_unit
 			return sa, nil
 		}
+<<<<<<< HEAD
+=======
+	case AF_VSOCK:
+		pp := (*RawSockaddrVM)(unsafe.Pointer(rsa))
+		sa := &SockaddrVM{
+			CID:  pp.Cid,
+			Port: pp.Port,
+		}
+		return sa, nil
+>>>>>>> upstream/master
 	}
 	return nil, EAFNOSUPPORT
 }
@@ -433,6 +470,14 @@ func SysctlKinfoProcSlice(name string) ([]KinfoProc, error) {
 
 //sys	sendfile(infd int, outfd int, offset int64, len *int64, hdtr unsafe.Pointer, flags int) (err error)
 
+<<<<<<< HEAD
+=======
+//sys	shmat(id int, addr uintptr, flag int) (ret uintptr, err error)
+//sys	shmctl(id int, cmd int, buf *SysvShmDesc) (result int, err error)
+//sys	shmdt(addr uintptr) (err error)
+//sys	shmget(key int, size int, flag int) (id int, err error)
+
+>>>>>>> upstream/master
 /*
  * Exposed directly
  */
@@ -590,10 +635,13 @@ func SysctlKinfoProcSlice(name string) ([]KinfoProc, error) {
 // Msgget
 // Msgsnd
 // Msgrcv
+<<<<<<< HEAD
 // Shmat
 // Shmctl
 // Shmdt
 // Shmget
+=======
+>>>>>>> upstream/master
 // Shm_open
 // Shm_unlink
 // Sem_open

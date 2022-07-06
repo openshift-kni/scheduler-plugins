@@ -1,8 +1,14 @@
 package reflect2
 
 import (
+<<<<<<< HEAD
 	"github.com/modern-go/concurrent"
 	"reflect"
+=======
+	"reflect"
+	"runtime"
+	"sync"
+>>>>>>> upstream/master
 	"unsafe"
 )
 
@@ -130,13 +136,21 @@ var ConfigSafe = Config{UseSafeImplementation: true}.Froze()
 
 type frozenConfig struct {
 	useSafeImplementation bool
+<<<<<<< HEAD
 	cache                 *concurrent.Map
+=======
+	cache                 *sync.Map
+>>>>>>> upstream/master
 }
 
 func (cfg Config) Froze() *frozenConfig {
 	return &frozenConfig{
 		useSafeImplementation: cfg.UseSafeImplementation,
+<<<<<<< HEAD
 		cache: concurrent.NewMap(),
+=======
+		cache:                 new(sync.Map),
+>>>>>>> upstream/master
 	}
 }
 
@@ -288,6 +302,7 @@ func NoEscape(p unsafe.Pointer) unsafe.Pointer {
 }
 
 func UnsafeCastString(str string) []byte {
+<<<<<<< HEAD
 	stringHeader := (*reflect.StringHeader)(unsafe.Pointer(&str))
 	sliceHeader := &reflect.SliceHeader{
 		Data: stringHeader.Data,
@@ -295,4 +310,14 @@ func UnsafeCastString(str string) []byte {
 		Len: stringHeader.Len,
 	}
 	return *(*[]byte)(unsafe.Pointer(sliceHeader))
+=======
+	bytes := make([]byte, 0)
+	stringHeader := (*reflect.StringHeader)(unsafe.Pointer(&str))
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
+	sliceHeader.Data = stringHeader.Data
+	sliceHeader.Cap = stringHeader.Len
+	sliceHeader.Len = stringHeader.Len
+	runtime.KeepAlive(str)
+	return bytes
+>>>>>>> upstream/master
 }

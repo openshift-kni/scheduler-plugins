@@ -75,11 +75,19 @@ type ResponseMeta struct {
 }
 
 // IndexerFunc is a function that for a given object computes
+<<<<<<< HEAD
 // <value of an index> for a particular <index>.
 type IndexerFunc func(obj runtime.Object) string
 
 // IndexerFuncs is a mapping from <index name> to function that
 // for a given object computes <value for that index>.
+=======
+// `<value of an index>` for a particular `<index>`.
+type IndexerFunc func(obj runtime.Object) string
+
+// IndexerFuncs is a mapping from `<index name>` to function that
+// for a given object computes `<value for that index>`.
+>>>>>>> upstream/master
 type IndexerFuncs map[string]IndexerFunc
 
 // Everything accepts all objects.
@@ -88,7 +96,11 @@ var Everything = SelectionPredicate{
 	Field: fields.Everything(),
 }
 
+<<<<<<< HEAD
 // MatchValue defines a pair (<index name>, <value for that index>).
+=======
+// MatchValue defines a pair (`<index name>`, `<value for that index>`).
+>>>>>>> upstream/master
 type MatchValue struct {
 	IndexName string
 	Value     string

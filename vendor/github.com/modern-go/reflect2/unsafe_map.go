@@ -107,6 +107,7 @@ func (type2 *UnsafeMapType) Iterate(obj interface{}) MapIterator {
 	return type2.UnsafeIterate(objEFace.data)
 }
 
+<<<<<<< HEAD
 func (type2 *UnsafeMapType) UnsafeIterate(obj unsafe.Pointer) MapIterator {
 	return &UnsafeMapIterator{
 		hiter:      mapiterinit(type2.rtype, *(*unsafe.Pointer)(obj)),
@@ -115,6 +116,8 @@ func (type2 *UnsafeMapType) UnsafeIterate(obj unsafe.Pointer) MapIterator {
 	}
 }
 
+=======
+>>>>>>> upstream/master
 type UnsafeMapIterator struct {
 	*hiter
 	pKeyRType  unsafe.Pointer

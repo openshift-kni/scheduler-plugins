@@ -35,7 +35,10 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+<<<<<<< HEAD
 	"k8s.io/apimachinery/pkg/util/clock"
+=======
+>>>>>>> upstream/master
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
@@ -52,6 +55,10 @@ import (
 	"k8s.io/kubernetes/pkg/features"
 	hashutil "k8s.io/kubernetes/pkg/util/hash"
 	taintutils "k8s.io/kubernetes/pkg/util/taints"
+<<<<<<< HEAD
+=======
+	"k8s.io/utils/clock"
+>>>>>>> upstream/master
 	"k8s.io/utils/integer"
 
 	"k8s.io/klog/v2"
@@ -406,7 +413,11 @@ const (
 // ReplicaSets, as well as increment or decrement them. It is used
 // by the deployment controller to ease testing of actions that it takes.
 type RSControlInterface interface {
+<<<<<<< HEAD
 	PatchReplicaSet(namespace, name string, data []byte) error
+=======
+	PatchReplicaSet(ctx context.Context, namespace, name string, data []byte) error
+>>>>>>> upstream/master
 }
 
 // RealRSControl is the default implementation of RSControllerInterface.
@@ -417,8 +428,13 @@ type RealRSControl struct {
 
 var _ RSControlInterface = &RealRSControl{}
 
+<<<<<<< HEAD
 func (r RealRSControl) PatchReplicaSet(namespace, name string, data []byte) error {
 	_, err := r.KubeClient.AppsV1().ReplicaSets(namespace).Patch(context.TODO(), name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
+=======
+func (r RealRSControl) PatchReplicaSet(ctx context.Context, namespace, name string, data []byte) error {
+	_, err := r.KubeClient.AppsV1().ReplicaSets(namespace).Patch(ctx, name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
+>>>>>>> upstream/master
 	return err
 }
 
@@ -427,7 +443,11 @@ func (r RealRSControl) PatchReplicaSet(namespace, name string, data []byte) erro
 // ControllerRevisions, as well as increment or decrement them. It is used
 // by the daemonset controller to ease testing of actions that it takes.
 type ControllerRevisionControlInterface interface {
+<<<<<<< HEAD
 	PatchControllerRevision(namespace, name string, data []byte) error
+=======
+	PatchControllerRevision(ctx context.Context, namespace, name string, data []byte) error
+>>>>>>> upstream/master
 }
 
 // RealControllerRevisionControl is the default implementation of ControllerRevisionControlInterface.
@@ -437,8 +457,13 @@ type RealControllerRevisionControl struct {
 
 var _ ControllerRevisionControlInterface = &RealControllerRevisionControl{}
 
+<<<<<<< HEAD
 func (r RealControllerRevisionControl) PatchControllerRevision(namespace, name string, data []byte) error {
 	_, err := r.KubeClient.AppsV1().ControllerRevisions(namespace).Patch(context.TODO(), name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
+=======
+func (r RealControllerRevisionControl) PatchControllerRevision(ctx context.Context, namespace, name string, data []byte) error {
+	_, err := r.KubeClient.AppsV1().ControllerRevisions(namespace).Patch(ctx, name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
+>>>>>>> upstream/master
 	return err
 }
 
@@ -446,6 +471,7 @@ func (r RealControllerRevisionControl) PatchControllerRevision(namespace, name s
 // created as an interface to allow testing.
 type PodControlInterface interface {
 	// CreatePods creates new pods according to the spec, and sets object as the pod's controller.
+<<<<<<< HEAD
 	CreatePods(namespace string, template *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference) error
 	// CreatePodsWithGenerateName creates new pods according to the spec, sets object as the pod's controller and sets pod's generateName.
 	CreatePodsWithGenerateName(namespace string, template *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference, generateName string) error
@@ -453,6 +479,15 @@ type PodControlInterface interface {
 	DeletePod(namespace string, podID string, object runtime.Object) error
 	// PatchPod patches the pod.
 	PatchPod(namespace, name string, data []byte) error
+=======
+	CreatePods(ctx context.Context, namespace string, template *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference) error
+	// CreatePodsWithGenerateName creates new pods according to the spec, sets object as the pod's controller and sets pod's generateName.
+	CreatePodsWithGenerateName(ctx context.Context, namespace string, template *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference, generateName string) error
+	// DeletePod deletes the pod identified by podID.
+	DeletePod(ctx context.Context, namespace string, podID string, object runtime.Object) error
+	// PatchPod patches the pod.
+	PatchPod(ctx context.Context, namespace, name string, data []byte) error
+>>>>>>> upstream/master
 }
 
 // RealPodControl is the default implementation of PodControlInterface.
@@ -513,11 +548,19 @@ func validateControllerRef(controllerRef *metav1.OwnerReference) error {
 	return nil
 }
 
+<<<<<<< HEAD
 func (r RealPodControl) CreatePods(namespace string, template *v1.PodTemplateSpec, controllerObject runtime.Object, controllerRef *metav1.OwnerReference) error {
 	return r.CreatePodsWithGenerateName(namespace, template, controllerObject, controllerRef, "")
 }
 
 func (r RealPodControl) CreatePodsWithGenerateName(namespace string, template *v1.PodTemplateSpec, controllerObject runtime.Object, controllerRef *metav1.OwnerReference, generateName string) error {
+=======
+func (r RealPodControl) CreatePods(ctx context.Context, namespace string, template *v1.PodTemplateSpec, controllerObject runtime.Object, controllerRef *metav1.OwnerReference) error {
+	return r.CreatePodsWithGenerateName(ctx, namespace, template, controllerObject, controllerRef, "")
+}
+
+func (r RealPodControl) CreatePodsWithGenerateName(ctx context.Context, namespace string, template *v1.PodTemplateSpec, controllerObject runtime.Object, controllerRef *metav1.OwnerReference, generateName string) error {
+>>>>>>> upstream/master
 	if err := validateControllerRef(controllerRef); err != nil {
 		return err
 	}
@@ -528,11 +571,19 @@ func (r RealPodControl) CreatePodsWithGenerateName(namespace string, template *v
 	if len(generateName) > 0 {
 		pod.ObjectMeta.GenerateName = generateName
 	}
+<<<<<<< HEAD
 	return r.createPods(namespace, pod, controllerObject)
 }
 
 func (r RealPodControl) PatchPod(namespace, name string, data []byte) error {
 	_, err := r.KubeClient.CoreV1().Pods(namespace).Patch(context.TODO(), name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
+=======
+	return r.createPods(ctx, namespace, pod, controllerObject)
+}
+
+func (r RealPodControl) PatchPod(ctx context.Context, namespace, name string, data []byte) error {
+	_, err := r.KubeClient.CoreV1().Pods(namespace).Patch(ctx, name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
+>>>>>>> upstream/master
 	return err
 }
 
@@ -561,11 +612,19 @@ func GetPodFromTemplate(template *v1.PodTemplateSpec, parentObject runtime.Objec
 	return pod, nil
 }
 
+<<<<<<< HEAD
 func (r RealPodControl) createPods(namespace string, pod *v1.Pod, object runtime.Object) error {
 	if len(labels.Set(pod.Labels)) == 0 {
 		return fmt.Errorf("unable to create pods, no labels")
 	}
 	newPod, err := r.KubeClient.CoreV1().Pods(namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
+=======
+func (r RealPodControl) createPods(ctx context.Context, namespace string, pod *v1.Pod, object runtime.Object) error {
+	if len(labels.Set(pod.Labels)) == 0 {
+		return fmt.Errorf("unable to create pods, no labels")
+	}
+	newPod, err := r.KubeClient.CoreV1().Pods(namespace).Create(ctx, pod, metav1.CreateOptions{})
+>>>>>>> upstream/master
 	if err != nil {
 		// only send an event if the namespace isn't terminating
 		if !apierrors.HasStatusCause(err, v1.NamespaceTerminatingCause) {
@@ -584,13 +643,21 @@ func (r RealPodControl) createPods(namespace string, pod *v1.Pod, object runtime
 	return nil
 }
 
+<<<<<<< HEAD
 func (r RealPodControl) DeletePod(namespace string, podID string, object runtime.Object) error {
+=======
+func (r RealPodControl) DeletePod(ctx context.Context, namespace string, podID string, object runtime.Object) error {
+>>>>>>> upstream/master
 	accessor, err := meta.Accessor(object)
 	if err != nil {
 		return fmt.Errorf("object does not have ObjectMeta, %v", err)
 	}
 	klog.V(2).InfoS("Deleting pod", "controller", accessor.GetName(), "pod", klog.KRef(namespace, podID))
+<<<<<<< HEAD
 	if err := r.KubeClient.CoreV1().Pods(namespace).Delete(context.TODO(), podID, metav1.DeleteOptions{}); err != nil {
+=======
+	if err := r.KubeClient.CoreV1().Pods(namespace).Delete(ctx, podID, metav1.DeleteOptions{}); err != nil {
+>>>>>>> upstream/master
 		if apierrors.IsNotFound(err) {
 			klog.V(4).Infof("pod %v/%v has already been deleted.", namespace, podID)
 			return err
@@ -616,7 +683,11 @@ type FakePodControl struct {
 
 var _ PodControlInterface = &FakePodControl{}
 
+<<<<<<< HEAD
 func (f *FakePodControl) PatchPod(namespace, name string, data []byte) error {
+=======
+func (f *FakePodControl) PatchPod(ctx context.Context, namespace, name string, data []byte) error {
+>>>>>>> upstream/master
 	f.Lock()
 	defer f.Unlock()
 	f.Patches = append(f.Patches, data)
@@ -626,6 +697,7 @@ func (f *FakePodControl) PatchPod(namespace, name string, data []byte) error {
 	return nil
 }
 
+<<<<<<< HEAD
 func (f *FakePodControl) CreatePods(namespace string, spec *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference) error {
 	f.Lock()
 	defer f.Unlock()
@@ -642,12 +714,23 @@ func (f *FakePodControl) CreatePods(namespace string, spec *v1.PodTemplateSpec, 
 }
 
 func (f *FakePodControl) CreatePodsWithGenerateName(namespace string, spec *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference, generateNamePrefix string) error {
+=======
+func (f *FakePodControl) CreatePods(ctx context.Context, namespace string, spec *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference) error {
+	return f.CreatePodsWithGenerateName(ctx, namespace, spec, object, controllerRef, "")
+}
+
+func (f *FakePodControl) CreatePodsWithGenerateName(ctx context.Context, namespace string, spec *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference, generateNamePrefix string) error {
+>>>>>>> upstream/master
 	f.Lock()
 	defer f.Unlock()
 	f.CreateCallCount++
 	if f.CreateLimit != 0 && f.CreateCallCount > f.CreateLimit {
 		return fmt.Errorf("not creating pod, limit %d already reached (create call %d)", f.CreateLimit, f.CreateCallCount)
 	}
+<<<<<<< HEAD
+=======
+	spec.GenerateName = generateNamePrefix
+>>>>>>> upstream/master
 	f.Templates = append(f.Templates, *spec)
 	f.ControllerRefs = append(f.ControllerRefs, *controllerRef)
 	if f.Err != nil {
@@ -656,7 +739,11 @@ func (f *FakePodControl) CreatePodsWithGenerateName(namespace string, spec *v1.P
 	return nil
 }
 
+<<<<<<< HEAD
 func (f *FakePodControl) DeletePod(namespace string, podID string, object runtime.Object) error {
+=======
+func (f *FakePodControl) DeletePod(ctx context.Context, namespace string, podID string, object runtime.Object) error {
+>>>>>>> upstream/master
 	f.Lock()
 	defer f.Unlock()
 	f.DeletePodName = append(f.DeletePodName, podID)
@@ -833,7 +920,11 @@ func (s ActivePodsWithRanks) Less(i, j int) bool {
 		return !podutil.IsPodReady(s.Pods[i])
 	}
 
+<<<<<<< HEAD
 	// 4. higher pod-deletion-cost < lower pod-deletion cost
+=======
+	// 4. lower pod-deletion-cost < higher pod-deletion cost
+>>>>>>> upstream/master
 	if utilfeature.DefaultFeatureGate.Enabled(features.PodDeletionCost) {
 		pi, _ := helper.GetDeletionCostFromPodAnnotations(s.Pods[i].Annotations)
 		pj, _ := helper.GetDeletionCostFromPodAnnotations(s.Pods[j].Annotations)
@@ -1039,7 +1130,11 @@ func (o ReplicaSetsBySizeNewer) Less(i, j int) bool {
 
 // AddOrUpdateTaintOnNode add taints to the node. If taint was added into node, it'll issue API calls
 // to update nodes; otherwise, no API calls. Return error if any.
+<<<<<<< HEAD
 func AddOrUpdateTaintOnNode(c clientset.Interface, nodeName string, taints ...*v1.Taint) error {
+=======
+func AddOrUpdateTaintOnNode(ctx context.Context, c clientset.Interface, nodeName string, taints ...*v1.Taint) error {
+>>>>>>> upstream/master
 	if len(taints) == 0 {
 		return nil
 	}
@@ -1050,10 +1145,17 @@ func AddOrUpdateTaintOnNode(c clientset.Interface, nodeName string, taints ...*v
 		// First we try getting node from the API server cache, as it's cheaper. If it fails
 		// we get it from etcd to be sure to have fresh data.
 		if firstTry {
+<<<<<<< HEAD
 			oldNode, err = c.CoreV1().Nodes().Get(context.TODO(), nodeName, metav1.GetOptions{ResourceVersion: "0"})
 			firstTry = false
 		} else {
 			oldNode, err = c.CoreV1().Nodes().Get(context.TODO(), nodeName, metav1.GetOptions{})
+=======
+			oldNode, err = c.CoreV1().Nodes().Get(ctx, nodeName, metav1.GetOptions{ResourceVersion: "0"})
+			firstTry = false
+		} else {
+			oldNode, err = c.CoreV1().Nodes().Get(ctx, nodeName, metav1.GetOptions{})
+>>>>>>> upstream/master
 		}
 		if err != nil {
 			return err
@@ -1074,7 +1176,11 @@ func AddOrUpdateTaintOnNode(c clientset.Interface, nodeName string, taints ...*v
 		if !updated {
 			return nil
 		}
+<<<<<<< HEAD
 		return PatchNodeTaints(c, nodeName, oldNode, newNode)
+=======
+		return PatchNodeTaints(ctx, c, nodeName, oldNode, newNode)
+>>>>>>> upstream/master
 	})
 }
 
@@ -1082,7 +1188,11 @@ func AddOrUpdateTaintOnNode(c clientset.Interface, nodeName string, taints ...*v
 // won't fail if target taint doesn't exist or has been removed.
 // If passed a node it'll check if there's anything to be done, if taint is not present it won't issue
 // any API calls.
+<<<<<<< HEAD
 func RemoveTaintOffNode(c clientset.Interface, nodeName string, node *v1.Node, taints ...*v1.Taint) error {
+=======
+func RemoveTaintOffNode(ctx context.Context, c clientset.Interface, nodeName string, node *v1.Node, taints ...*v1.Taint) error {
+>>>>>>> upstream/master
 	if len(taints) == 0 {
 		return nil
 	}
@@ -1107,10 +1217,17 @@ func RemoveTaintOffNode(c clientset.Interface, nodeName string, node *v1.Node, t
 		// First we try getting node from the API server cache, as it's cheaper. If it fails
 		// we get it from etcd to be sure to have fresh data.
 		if firstTry {
+<<<<<<< HEAD
 			oldNode, err = c.CoreV1().Nodes().Get(context.TODO(), nodeName, metav1.GetOptions{ResourceVersion: "0"})
 			firstTry = false
 		} else {
 			oldNode, err = c.CoreV1().Nodes().Get(context.TODO(), nodeName, metav1.GetOptions{})
+=======
+			oldNode, err = c.CoreV1().Nodes().Get(ctx, nodeName, metav1.GetOptions{ResourceVersion: "0"})
+			firstTry = false
+		} else {
+			oldNode, err = c.CoreV1().Nodes().Get(ctx, nodeName, metav1.GetOptions{})
+>>>>>>> upstream/master
 		}
 		if err != nil {
 			return err
@@ -1131,12 +1248,20 @@ func RemoveTaintOffNode(c clientset.Interface, nodeName string, node *v1.Node, t
 		if !updated {
 			return nil
 		}
+<<<<<<< HEAD
 		return PatchNodeTaints(c, nodeName, oldNode, newNode)
+=======
+		return PatchNodeTaints(ctx, c, nodeName, oldNode, newNode)
+>>>>>>> upstream/master
 	})
 }
 
 // PatchNodeTaints patches node's taints.
+<<<<<<< HEAD
 func PatchNodeTaints(c clientset.Interface, nodeName string, oldNode *v1.Node, newNode *v1.Node) error {
+=======
+func PatchNodeTaints(ctx context.Context, c clientset.Interface, nodeName string, oldNode *v1.Node, newNode *v1.Node) error {
+>>>>>>> upstream/master
 	oldData, err := json.Marshal(oldNode)
 	if err != nil {
 		return fmt.Errorf("failed to marshal old node %#v for node %q: %v", oldNode, nodeName, err)
@@ -1155,7 +1280,11 @@ func PatchNodeTaints(c clientset.Interface, nodeName string, oldNode *v1.Node, n
 		return fmt.Errorf("failed to create patch for node %q: %v", nodeName, err)
 	}
 
+<<<<<<< HEAD
 	_, err = c.CoreV1().Nodes().Patch(context.TODO(), nodeName, types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{})
+=======
+	_, err = c.CoreV1().Nodes().Patch(ctx, nodeName, types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{})
+>>>>>>> upstream/master
 	return err
 }
 

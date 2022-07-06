@@ -19,6 +19,10 @@ package dynamic
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
+=======
+	"net/http"
+>>>>>>> upstream/master
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,17 +64,43 @@ func NewForConfigOrDie(c *rest.Config) Interface {
 }
 
 // NewForConfig creates a new dynamic client or returns an error.
+<<<<<<< HEAD
 func NewForConfig(inConfig *rest.Config) (Interface, error) {
 	config := ConfigFor(inConfig)
+=======
+// NewForConfig is equivalent to NewForConfigAndClient(c, httpClient),
+// where httpClient was generated with rest.HTTPClientFor(c).
+func NewForConfig(inConfig *rest.Config) (Interface, error) {
+	config := ConfigFor(inConfig)
+
+	httpClient, err := rest.HTTPClientFor(config)
+	if err != nil {
+		return nil, err
+	}
+	return NewForConfigAndClient(config, httpClient)
+}
+
+// NewForConfigAndClient creates a new dynamic client for the given config and http client.
+// Note the http client provided takes precedence over the configured transport values.
+func NewForConfigAndClient(inConfig *rest.Config, h *http.Client) (Interface, error) {
+	config := ConfigFor(inConfig)
+>>>>>>> upstream/master
 	// for serializing the options
 	config.GroupVersion = &schema.GroupVersion{}
 	config.APIPath = "/if-you-see-this-search-for-the-break"
 
+<<<<<<< HEAD
 	restClient, err := rest.RESTClientFor(config)
 	if err != nil {
 		return nil, err
 	}
 
+=======
+	restClient, err := rest.RESTClientForConfigAndClient(config, h)
+	if err != nil {
+		return nil, err
+	}
+>>>>>>> upstream/master
 	return &dynamicClient{client: restClient}, nil
 }
 
@@ -110,6 +140,10 @@ func (c *dynamicResourceClient) Create(ctx context.Context, obj *unstructured.Un
 	result := c.client.client.
 		Post().
 		AbsPath(append(c.makeURLSegments(name), subresources...)...).
+<<<<<<< HEAD
+=======
+		SetHeader("Content-Type", runtime.ContentTypeJSON).
+>>>>>>> upstream/master
 		Body(outBytes).
 		SpecificallyVersionedParams(&opts, dynamicParameterCodec, versionV1).
 		Do(ctx)
@@ -145,6 +179,10 @@ func (c *dynamicResourceClient) Update(ctx context.Context, obj *unstructured.Un
 	result := c.client.client.
 		Put().
 		AbsPath(append(c.makeURLSegments(name), subresources...)...).
+<<<<<<< HEAD
+=======
+		SetHeader("Content-Type", runtime.ContentTypeJSON).
+>>>>>>> upstream/master
 		Body(outBytes).
 		SpecificallyVersionedParams(&opts, dynamicParameterCodec, versionV1).
 		Do(ctx)
@@ -181,6 +219,10 @@ func (c *dynamicResourceClient) UpdateStatus(ctx context.Context, obj *unstructu
 	result := c.client.client.
 		Put().
 		AbsPath(append(c.makeURLSegments(name), "status")...).
+<<<<<<< HEAD
+=======
+		SetHeader("Content-Type", runtime.ContentTypeJSON).
+>>>>>>> upstream/master
 		Body(outBytes).
 		SpecificallyVersionedParams(&opts, dynamicParameterCodec, versionV1).
 		Do(ctx)
@@ -211,6 +253,10 @@ func (c *dynamicResourceClient) Delete(ctx context.Context, name string, opts me
 	result := c.client.client.
 		Delete().
 		AbsPath(append(c.makeURLSegments(name), subresources...)...).
+<<<<<<< HEAD
+=======
+		SetHeader("Content-Type", runtime.ContentTypeJSON).
+>>>>>>> upstream/master
 		Body(deleteOptionsByte).
 		Do(ctx)
 	return result.Error()
@@ -225,6 +271,10 @@ func (c *dynamicResourceClient) DeleteCollection(ctx context.Context, opts metav
 	result := c.client.client.
 		Delete().
 		AbsPath(c.makeURLSegments("")...).
+<<<<<<< HEAD
+=======
+		SetHeader("Content-Type", runtime.ContentTypeJSON).
+>>>>>>> upstream/master
 		Body(deleteOptionsByte).
 		SpecificallyVersionedParams(&listOptions, dynamicParameterCodec, versionV1).
 		Do(ctx)

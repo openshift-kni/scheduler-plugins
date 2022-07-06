@@ -24,11 +24,22 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 )
 
+<<<<<<< HEAD
+=======
+var (
+	_ ResettableRESTMapper = MultiRESTMapper{}
+)
+
+>>>>>>> upstream/master
 // MultiRESTMapper is a wrapper for multiple RESTMappers.
 type MultiRESTMapper []RESTMapper
 
 func (m MultiRESTMapper) String() string {
+<<<<<<< HEAD
 	nested := []string{}
+=======
+	nested := make([]string, 0, len(m))
+>>>>>>> upstream/master
 	for _, t := range m {
 		currString := fmt.Sprintf("%v", t)
 		splitStrings := strings.Split(currString, "\n")
@@ -208,3 +219,12 @@ func (m MultiRESTMapper) RESTMappings(gk schema.GroupKind, versions ...string) (
 	}
 	return allMappings, nil
 }
+<<<<<<< HEAD
+=======
+
+func (m MultiRESTMapper) Reset() {
+	for _, t := range m {
+		MaybeResetRESTMapper(t)
+	}
+}
+>>>>>>> upstream/master

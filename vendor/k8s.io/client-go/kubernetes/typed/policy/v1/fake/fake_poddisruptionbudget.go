@@ -120,7 +120,11 @@ func (c *FakePodDisruptionBudgets) UpdateStatus(ctx context.Context, podDisrupti
 // Delete takes name of the podDisruptionBudget and deletes it. Returns an error if one occurs.
 func (c *FakePodDisruptionBudgets) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
+<<<<<<< HEAD
 		Invokes(testing.NewDeleteAction(poddisruptionbudgetsResource, c.ns, name), &policyv1.PodDisruptionBudget{})
+=======
+		Invokes(testing.NewDeleteActionWithOptions(poddisruptionbudgetsResource, c.ns, name, opts), &policyv1.PodDisruptionBudget{})
+>>>>>>> upstream/master
 
 	return err
 }

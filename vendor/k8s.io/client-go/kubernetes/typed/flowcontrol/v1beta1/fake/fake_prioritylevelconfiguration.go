@@ -113,7 +113,11 @@ func (c *FakePriorityLevelConfigurations) UpdateStatus(ctx context.Context, prio
 // Delete takes name of the priorityLevelConfiguration and deletes it. Returns an error if one occurs.
 func (c *FakePriorityLevelConfigurations) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
+<<<<<<< HEAD
 		Invokes(testing.NewRootDeleteAction(prioritylevelconfigurationsResource, name), &v1beta1.PriorityLevelConfiguration{})
+=======
+		Invokes(testing.NewRootDeleteActionWithOptions(prioritylevelconfigurationsResource, name, opts), &v1beta1.PriorityLevelConfiguration{})
+>>>>>>> upstream/master
 	return err
 }
 

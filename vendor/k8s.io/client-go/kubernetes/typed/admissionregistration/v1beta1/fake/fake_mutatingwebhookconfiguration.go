@@ -102,7 +102,11 @@ func (c *FakeMutatingWebhookConfigurations) Update(ctx context.Context, mutating
 // Delete takes name of the mutatingWebhookConfiguration and deletes it. Returns an error if one occurs.
 func (c *FakeMutatingWebhookConfigurations) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
+<<<<<<< HEAD
 		Invokes(testing.NewRootDeleteAction(mutatingwebhookconfigurationsResource, name), &v1beta1.MutatingWebhookConfiguration{})
+=======
+		Invokes(testing.NewRootDeleteActionWithOptions(mutatingwebhookconfigurationsResource, name, opts), &v1beta1.MutatingWebhookConfiguration{})
+>>>>>>> upstream/master
 	return err
 }
 

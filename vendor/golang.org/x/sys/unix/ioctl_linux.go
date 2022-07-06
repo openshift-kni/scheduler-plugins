@@ -5,7 +5,10 @@
 package unix
 
 import (
+<<<<<<< HEAD
 	"runtime"
+=======
+>>>>>>> upstream/master
 	"unsafe"
 )
 
@@ -22,29 +25,46 @@ func IoctlRetInt(fd int, req uint) (int, error) {
 
 func IoctlGetUint32(fd int, req uint) (uint32, error) {
 	var value uint32
+<<<<<<< HEAD
 	err := ioctl(fd, req, uintptr(unsafe.Pointer(&value)))
+=======
+	err := ioctlPtr(fd, req, unsafe.Pointer(&value))
+>>>>>>> upstream/master
 	return value, err
 }
 
 func IoctlGetRTCTime(fd int) (*RTCTime, error) {
 	var value RTCTime
+<<<<<<< HEAD
 	err := ioctl(fd, RTC_RD_TIME, uintptr(unsafe.Pointer(&value)))
+=======
+	err := ioctlPtr(fd, RTC_RD_TIME, unsafe.Pointer(&value))
+>>>>>>> upstream/master
 	return &value, err
 }
 
 func IoctlSetRTCTime(fd int, value *RTCTime) error {
+<<<<<<< HEAD
 	err := ioctl(fd, RTC_SET_TIME, uintptr(unsafe.Pointer(value)))
 	runtime.KeepAlive(value)
 	return err
+=======
+	return ioctlPtr(fd, RTC_SET_TIME, unsafe.Pointer(value))
+>>>>>>> upstream/master
 }
 
 func IoctlGetRTCWkAlrm(fd int) (*RTCWkAlrm, error) {
 	var value RTCWkAlrm
+<<<<<<< HEAD
 	err := ioctl(fd, RTC_WKALM_RD, uintptr(unsafe.Pointer(&value)))
+=======
+	err := ioctlPtr(fd, RTC_WKALM_RD, unsafe.Pointer(&value))
+>>>>>>> upstream/master
 	return &value, err
 }
 
 func IoctlSetRTCWkAlrm(fd int, value *RTCWkAlrm) error {
+<<<<<<< HEAD
 	err := ioctl(fd, RTC_WKALM_SET, uintptr(unsafe.Pointer(value)))
 	runtime.KeepAlive(value)
 	return err
@@ -53,11 +73,15 @@ func IoctlSetRTCWkAlrm(fd int, value *RTCWkAlrm) error {
 type ifreqEthtool struct {
 	name [IFNAMSIZ]byte
 	data unsafe.Pointer
+=======
+	return ioctlPtr(fd, RTC_WKALM_SET, unsafe.Pointer(value))
+>>>>>>> upstream/master
 }
 
 // IoctlGetEthtoolDrvinfo fetches ethtool driver information for the network
 // device specified by ifname.
 func IoctlGetEthtoolDrvinfo(fd int, ifname string) (*EthtoolDrvinfo, error) {
+<<<<<<< HEAD
 	// Leave room for terminating NULL byte.
 	if len(ifname) >= IFNAMSIZ {
 		return nil, EINVAL
@@ -72,6 +96,17 @@ func IoctlGetEthtoolDrvinfo(fd int, ifname string) (*EthtoolDrvinfo, error) {
 	copy(ifreq.name[:], ifname)
 	err := ioctl(fd, SIOCETHTOOL, uintptr(unsafe.Pointer(&ifreq)))
 	runtime.KeepAlive(ifreq)
+=======
+	ifr, err := NewIfreq(ifname)
+	if err != nil {
+		return nil, err
+	}
+
+	value := EthtoolDrvinfo{Cmd: ETHTOOL_GDRVINFO}
+	ifrd := ifr.withData(unsafe.Pointer(&value))
+
+	err = ioctlIfreqData(fd, SIOCETHTOOL, &ifrd)
+>>>>>>> upstream/master
 	return &value, err
 }
 
@@ -80,7 +115,11 @@ func IoctlGetEthtoolDrvinfo(fd int, ifname string) (*EthtoolDrvinfo, error) {
 // https://www.kernel.org/doc/html/latest/watchdog/watchdog-api.html.
 func IoctlGetWatchdogInfo(fd int) (*WatchdogInfo, error) {
 	var value WatchdogInfo
+<<<<<<< HEAD
 	err := ioctl(fd, WDIOC_GETSUPPORT, uintptr(unsafe.Pointer(&value)))
+=======
+	err := ioctlPtr(fd, WDIOC_GETSUPPORT, unsafe.Pointer(&value))
+>>>>>>> upstream/master
 	return &value, err
 }
 
@@ -88,6 +127,10 @@ func IoctlGetWatchdogInfo(fd int) (*WatchdogInfo, error) {
 // more information, see:
 // https://www.kernel.org/doc/html/latest/watchdog/watchdog-api.html.
 func IoctlWatchdogKeepalive(fd int) error {
+<<<<<<< HEAD
+=======
+	// arg is ignored and not a pointer, so ioctl is fine instead of ioctlPtr.
+>>>>>>> upstream/master
 	return ioctl(fd, WDIOC_KEEPALIVE, 0)
 }
 
@@ -95,9 +138,13 @@ func IoctlWatchdogKeepalive(fd int) error {
 // range of data conveyed in value to the file associated with the file
 // descriptor destFd. See the ioctl_ficlonerange(2) man page for details.
 func IoctlFileCloneRange(destFd int, value *FileCloneRange) error {
+<<<<<<< HEAD
 	err := ioctl(destFd, FICLONERANGE, uintptr(unsafe.Pointer(value)))
 	runtime.KeepAlive(value)
 	return err
+=======
+	return ioctlPtr(destFd, FICLONERANGE, unsafe.Pointer(value))
+>>>>>>> upstream/master
 }
 
 // IoctlFileClone performs an FICLONE ioctl operation to clone the entire file
@@ -148,7 +195,11 @@ func IoctlFileDedupeRange(srcFd int, value *FileDedupeRange) error {
 		rawinfo.Reserved = value.Info[i].Reserved
 	}
 
+<<<<<<< HEAD
 	err := ioctl(srcFd, FIDEDUPERANGE, uintptr(unsafe.Pointer(&buf[0])))
+=======
+	err := ioctlPtr(srcFd, FIDEDUPERANGE, unsafe.Pointer(&buf[0]))
+>>>>>>> upstream/master
 
 	// Output
 	for i := range value.Info {
@@ -166,31 +217,71 @@ func IoctlFileDedupeRange(srcFd int, value *FileDedupeRange) error {
 }
 
 func IoctlHIDGetDesc(fd int, value *HIDRawReportDescriptor) error {
+<<<<<<< HEAD
 	err := ioctl(fd, HIDIOCGRDESC, uintptr(unsafe.Pointer(value)))
 	runtime.KeepAlive(value)
 	return err
+=======
+	return ioctlPtr(fd, HIDIOCGRDESC, unsafe.Pointer(value))
+>>>>>>> upstream/master
 }
 
 func IoctlHIDGetRawInfo(fd int) (*HIDRawDevInfo, error) {
 	var value HIDRawDevInfo
+<<<<<<< HEAD
 	err := ioctl(fd, HIDIOCGRAWINFO, uintptr(unsafe.Pointer(&value)))
+=======
+	err := ioctlPtr(fd, HIDIOCGRAWINFO, unsafe.Pointer(&value))
+>>>>>>> upstream/master
 	return &value, err
 }
 
 func IoctlHIDGetRawName(fd int) (string, error) {
 	var value [_HIDIOCGRAWNAME_LEN]byte
+<<<<<<< HEAD
 	err := ioctl(fd, _HIDIOCGRAWNAME, uintptr(unsafe.Pointer(&value[0])))
+=======
+	err := ioctlPtr(fd, _HIDIOCGRAWNAME, unsafe.Pointer(&value[0]))
+>>>>>>> upstream/master
 	return ByteSliceToString(value[:]), err
 }
 
 func IoctlHIDGetRawPhys(fd int) (string, error) {
 	var value [_HIDIOCGRAWPHYS_LEN]byte
+<<<<<<< HEAD
 	err := ioctl(fd, _HIDIOCGRAWPHYS, uintptr(unsafe.Pointer(&value[0])))
+=======
+	err := ioctlPtr(fd, _HIDIOCGRAWPHYS, unsafe.Pointer(&value[0]))
+>>>>>>> upstream/master
 	return ByteSliceToString(value[:]), err
 }
 
 func IoctlHIDGetRawUniq(fd int) (string, error) {
 	var value [_HIDIOCGRAWUNIQ_LEN]byte
+<<<<<<< HEAD
 	err := ioctl(fd, _HIDIOCGRAWUNIQ, uintptr(unsafe.Pointer(&value[0])))
 	return ByteSliceToString(value[:]), err
 }
+=======
+	err := ioctlPtr(fd, _HIDIOCGRAWUNIQ, unsafe.Pointer(&value[0]))
+	return ByteSliceToString(value[:]), err
+}
+
+// IoctlIfreq performs an ioctl using an Ifreq structure for input and/or
+// output. See the netdevice(7) man page for details.
+func IoctlIfreq(fd int, req uint, value *Ifreq) error {
+	// It is possible we will add more fields to *Ifreq itself later to prevent
+	// misuse, so pass the raw *ifreq directly.
+	return ioctlPtr(fd, req, unsafe.Pointer(&value.raw))
+}
+
+// TODO(mdlayher): export if and when IfreqData is exported.
+
+// ioctlIfreqData performs an ioctl using an ifreqData structure for input
+// and/or output. See the netdevice(7) man page for details.
+func ioctlIfreqData(fd int, req uint, value *ifreqData) error {
+	// The memory layout of IfreqData (type-safe) and ifreq (not type-safe) are
+	// identical so pass *IfreqData directly.
+	return ioctlPtr(fd, req, unsafe.Pointer(value))
+}
+>>>>>>> upstream/master

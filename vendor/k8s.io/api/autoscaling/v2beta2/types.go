@@ -28,6 +28,10 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:prerelease-lifecycle-gen:introduced=1.12
 // +k8s:prerelease-lifecycle-gen:deprecated=1.23
+<<<<<<< HEAD
+=======
+// +k8s:prerelease-lifecycle-gen:replacement=autoscaling,v2,HorizontalPodAutoscaler
+>>>>>>> upstream/master
 
 // HorizontalPodAutoscaler is the configuration for a horizontal pod
 // autoscaler, which automatically manages the replica count of any resource
@@ -373,6 +377,10 @@ type HorizontalPodAutoscalerStatus struct {
 
 	// conditions is the set of conditions required for this autoscaler to scale its target,
 	// and indicates whether or not those conditions are met.
+<<<<<<< HEAD
+=======
+	// +optional
+>>>>>>> upstream/master
 	Conditions []HorizontalPodAutoscalerCondition `json:"conditions" protobuf:"bytes,6,rep,name=conditions"`
 }
 

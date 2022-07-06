@@ -19,12 +19,19 @@ package volumebinding
 import (
 	"math"
 
+<<<<<<< HEAD
 	"k8s.io/kubernetes/pkg/controller/volume/scheduling"
+=======
+>>>>>>> upstream/master
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/helper"
 )
 
 // classResourceMap holds a map of storage class to resource.
+<<<<<<< HEAD
 type classResourceMap map[string]*scheduling.StorageResource
+=======
+type classResourceMap map[string]*StorageResource
+>>>>>>> upstream/master
 
 // volumeCapacityScorer calculates the score based on class storage resource information.
 type volumeCapacityScorer func(classResourceMap) int64

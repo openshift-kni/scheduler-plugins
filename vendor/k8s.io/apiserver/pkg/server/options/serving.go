@@ -27,6 +27,10 @@ import (
 
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
+<<<<<<< HEAD
+=======
+	netutils "k8s.io/utils/net"
+>>>>>>> upstream/master
 
 	utilnet "k8s.io/apimachinery/pkg/util/net"
 	"k8s.io/apiserver/pkg/server"
@@ -108,7 +112,11 @@ type GeneratableKeyCert struct {
 
 func NewSecureServingOptions() *SecureServingOptions {
 	return &SecureServingOptions{
+<<<<<<< HEAD
 		BindAddress: net.ParseIP("0.0.0.0"),
+=======
+		BindAddress: netutils.ParseIPSloppy("0.0.0.0"),
+>>>>>>> upstream/master
 		BindPort:    443,
 		ServerCert: GeneratableKeyCert{
 			PairName:      "apiserver",

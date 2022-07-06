@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+//go:build windows
+>>>>>>> upstream/master
 // +build windows
 
 /*
@@ -84,6 +88,7 @@ func NormalizeWindowsPath(path string) string {
 
 // ValidateDiskNumber : disk number should be a number in [0, 99]
 func ValidateDiskNumber(disk string) error {
+<<<<<<< HEAD
 	diskNum, err := strconv.Atoi(disk)
 	if err != nil {
 		return fmt.Errorf("wrong disk number format: %q, err:%v", disk, err)
@@ -93,6 +98,11 @@ func ValidateDiskNumber(disk string) error {
 		return fmt.Errorf("disk number out of range: %q", disk)
 	}
 
+=======
+	if _, err := strconv.Atoi(disk); err != nil {
+		return fmt.Errorf("wrong disk number format: %q, err: %v", disk, err)
+	}
+>>>>>>> upstream/master
 	return nil
 }
 
@@ -100,3 +110,20 @@ func ValidateDiskNumber(disk string) error {
 func isMountPointMatch(mp MountPoint, dir string) bool {
 	return mp.Path == dir
 }
+<<<<<<< HEAD
+=======
+
+// PathExists returns true if the specified path exists.
+// TODO: clean this up to use pkg/util/file/FileExists
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	} else if os.IsNotExist(err) {
+		return false, nil
+	} else if IsCorruptedMnt(err) {
+		return true, err
+	}
+	return false, err
+}
+>>>>>>> upstream/master

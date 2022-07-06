@@ -7,7 +7,10 @@ Cobra is used in many Go projects such as [Kubernetes](http://kubernetes.io/),
 name a few. [This list](./projects_using_cobra.md) contains a more extensive list of projects using Cobra.
 
 [![](https://img.shields.io/github/workflow/status/spf13/cobra/Test?longCache=tru&label=Test&logo=github%20actions&logoColor=fff)](https://github.com/spf13/cobra/actions?query=workflow%3ATest)
+<<<<<<< HEAD
 [![Build Status](https://travis-ci.org/spf13/cobra.svg "Travis CI status")](https://travis-ci.org/spf13/cobra)
+=======
+>>>>>>> upstream/master
 [![GoDoc](https://godoc.org/github.com/spf13/cobra?status.svg)](https://godoc.org/github.com/spf13/cobra)
 [![Go Report Card](https://goreportcard.com/badge/github.com/spf13/cobra)](https://goreportcard.com/report/github.com/spf13/cobra)
 [![Slack](https://img.shields.io/badge/Slack-cobra-brightgreen)](https://gophers.slack.com/archives/CD3LP1199)
@@ -19,6 +22,7 @@ name a few. [This list](./projects_using_cobra.md) contains a more extensive lis
   * [Commands](#commands)
   * [Flags](#flags)
 - [Installing](#installing)
+<<<<<<< HEAD
 - [Getting Started](#getting-started)
   * [Using the Cobra Generator](#using-the-cobra-generator)
   * [Using the Cobra Library](#using-the-cobra-library)
@@ -31,6 +35,20 @@ name a few. [This list](./projects_using_cobra.md) contains a more extensive lis
   * [Suggestions when "unknown command" happens](#suggestions-when-unknown-command-happens)
   * [Generating documentation for your command](#generating-documentation-for-your-command)
   * [Generating shell completions](#generating-shell-completions)
+=======
+- [Usage](#usage)
+  * [Using the Cobra Generator](user_guide.md#using-the-cobra-generator)
+  * [Using the Cobra Library](user_guide.md#using-the-cobra-library)
+  * [Working with Flags](user_guide.md#working-with-flags)
+  * [Positional and Custom Arguments](user_guide.md#positional-and-custom-arguments)
+  * [Example](user_guide.md#example)
+  * [Help Command](user_guide.md#help-command)
+  * [Usage Message](user_guide.md#usage-message)
+  * [PreRun and PostRun Hooks](user_guide.md#prerun-and-postrun-hooks)
+  * [Suggestions when "unknown command" happens](user_guide.md#suggestions-when-unknown-command-happens)
+  * [Generating documentation for your command](user_guide.md#generating-documentation-for-your-command)
+  * [Generating shell completions](user_guide.md#generating-shell-completions)
+>>>>>>> upstream/master
 - [Contributing](CONTRIBUTING.md)
 - [License](#license)
 
@@ -117,6 +135,7 @@ Next, include Cobra in your application:
 import "github.com/spf13/cobra"
 ```
 
+<<<<<<< HEAD
 # Getting Started
 
 While you are welcome to provide your own organization, typically a Cobra-based
@@ -754,6 +773,11 @@ Cobra can generate documentation based on subcommands, flags, etc. Read more abo
 ## Generating shell completions
 
 Cobra can generate a shell-completion file for the following shells: bash, zsh, fish, PowerShell. If you add more information to your commands, these completions can be amazingly powerful and flexible.  Read more about it in [Shell Completions](shell_completions.md).
+=======
+# Usage
+
+See [User Guide](user_guide.md).
+>>>>>>> upstream/master
 
 # License
 

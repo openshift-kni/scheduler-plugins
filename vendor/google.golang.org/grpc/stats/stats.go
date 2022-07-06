@@ -45,6 +45,13 @@ type Begin struct {
 	BeginTime time.Time
 	// FailFast indicates if this RPC is failfast.
 	FailFast bool
+<<<<<<< HEAD
+=======
+	// IsClientStream indicates whether the RPC is a client streaming RPC.
+	IsClientStream bool
+	// IsServerStream indicates whether the RPC is a server streaming RPC.
+	IsServerStream bool
+>>>>>>> upstream/master
 }
 
 // IsClient indicates if the stats information is from client side.

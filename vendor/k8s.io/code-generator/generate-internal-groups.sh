@@ -47,7 +47,16 @@ EXT_APIS_PKG="$4"
 GROUPS_WITH_VERSIONS="$5"
 shift 5
 
+<<<<<<< HEAD
 go install ./"$(dirname "${0}")"/cmd/{defaulter-gen,conversion-gen,client-gen,lister-gen,informer-gen,deepcopy-gen,openapi-gen}
+=======
+(
+  # To support running this script from anywhere, first cd into this directory,
+  # and then install with forced module mode on and fully qualified name.
+  cd "$(dirname "${0}")"
+  GO111MODULE=on go install k8s.io/code-generator/cmd/{defaulter-gen,conversion-gen,client-gen,lister-gen,informer-gen,deepcopy-gen,openapi-gen}
+)
+>>>>>>> upstream/master
 
 function codegen::join() { local IFS="$1"; shift; echo "$*"; }
 
@@ -72,7 +81,11 @@ done
 
 if [ "${GENS}" = "all" ] || grep -qw "deepcopy" <<<"${GENS}"; then
   echo "Generating deepcopy funcs"
+<<<<<<< HEAD
   "${GOPATH}/bin/deepcopy-gen" --input-dirs "$(codegen::join , "${ALL_FQ_APIS[@]}")" -O zz_generated.deepcopy --bounding-dirs "${INT_APIS_PKG},${EXT_APIS_PKG}" "$@"
+=======
+  "${GOPATH}/bin/deepcopy-gen" --input-dirs "$(codegen::join , "${ALL_FQ_APIS[@]}")" -O zz_generated.deepcopy "$@"
+>>>>>>> upstream/master
 fi
 
 if [ "${GENS}" = "all" ] || grep -qw "defaulter" <<<"${GENS}"; then

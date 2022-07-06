@@ -9,6 +9,7 @@ package unix
 
 import "unsafe"
 
+<<<<<<< HEAD
 func EpollCreate(size int) (fd int, err error) {
 	if size <= 0 {
 		return -1, EINVAL
@@ -16,6 +17,8 @@ func EpollCreate(size int) (fd int, err error) {
 	return EpollCreate1(0)
 }
 
+=======
+>>>>>>> upstream/master
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error) = SYS_EPOLL_PWAIT
 //sys	Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
 //sys	Fchown(fd int, uid int, gid int) (err error)
@@ -144,6 +147,7 @@ func utimes(path string, tv *[2]Timeval) (err error) {
 	return utimensat(AT_FDCWD, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])), 0)
 }
 
+<<<<<<< HEAD
 func Pipe(p []int) (err error) {
 	if len(p) != 2 {
 		return EINVAL
@@ -168,6 +172,8 @@ func Pipe2(p []int, flags int) (err error) {
 	return
 }
 
+=======
+>>>>>>> upstream/master
 func (r *PtraceRegs) PC() uint64 { return r.Pc }
 
 func (r *PtraceRegs) SetPC(pc uint64) { r.Pc = pc }
@@ -192,15 +198,19 @@ func (rsa *RawSockaddrNFCLLCP) SetServiceNameLen(length int) {
 	rsa.Service_name_len = uint64(length)
 }
 
+<<<<<<< HEAD
 func InotifyInit() (fd int, err error) {
 	return InotifyInit1(0)
 }
 
+=======
+>>>>>>> upstream/master
 func Pause() error {
 	_, err := ppoll(nil, 0, nil, nil)
 	return err
 }
 
+<<<<<<< HEAD
 func Poll(fds []PollFd, timeout int) (n int, err error) {
 	var ts *Timespec
 	if timeout >= 0 {
@@ -213,6 +223,8 @@ func Poll(fds []PollFd, timeout int) (n int, err error) {
 	return ppoll(&fds[0], len(fds), ts, nil)
 }
 
+=======
+>>>>>>> upstream/master
 func Renameat(olddirfd int, oldpath string, newdirfd int, newpath string) (err error) {
 	return Renameat2(olddirfd, oldpath, newdirfd, newpath, 0)
 }
@@ -229,7 +241,10 @@ func KexecFileLoad(kernelFd int, initrdFd int, cmdline string, flags int) error 
 	}
 	return kexecFileLoad(kernelFd, initrdFd, cmdlineLen, cmdline, flags)
 }
+<<<<<<< HEAD
 
 // dup2 exists because func Dup3 in syscall_linux.go references
 // it in an unreachable path. dup2 isn't available on arm64.
 func dup2(oldfd int, newfd int) error
+=======
+>>>>>>> upstream/master

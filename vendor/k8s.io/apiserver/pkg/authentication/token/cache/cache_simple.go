@@ -20,7 +20,11 @@ import (
 	"time"
 
 	utilcache "k8s.io/apimachinery/pkg/util/cache"
+<<<<<<< HEAD
 	"k8s.io/apimachinery/pkg/util/clock"
+=======
+	"k8s.io/utils/clock"
+>>>>>>> upstream/master
 )
 
 type simpleCache struct {

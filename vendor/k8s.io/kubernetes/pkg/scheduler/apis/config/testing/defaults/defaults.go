@@ -21,8 +21,13 @@ import (
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/names"
 )
 
+<<<<<<< HEAD
 // PluginsV1beta1 default set of v1beta1 plugins.
 var PluginsV1beta1 = &config.Plugins{
+=======
+// PluginsV1beta2 default set of v1beta2 plugins.
+var PluginsV1beta2 = &config.Plugins{
+>>>>>>> upstream/master
 	QueueSort: config.PluginSet{
 		Enabled: []config.Plugin{
 			{Name: names.PrioritySort},
@@ -76,9 +81,14 @@ var PluginsV1beta1 = &config.Plugins{
 			{Name: names.NodeResourcesBalancedAllocation, Weight: 1},
 			{Name: names.ImageLocality, Weight: 1},
 			{Name: names.InterPodAffinity, Weight: 1},
+<<<<<<< HEAD
 			{Name: names.NodeResourcesLeastAllocated, Weight: 1},
 			{Name: names.NodeAffinity, Weight: 1},
 			{Name: names.NodePreferAvoidPods, Weight: 10000},
+=======
+			{Name: names.NodeResourcesFit, Weight: 1},
+			{Name: names.NodeAffinity, Weight: 1},
+>>>>>>> upstream/master
 			// Weight is doubled because:
 			// - This is a score coming from user preference.
 			// - It makes its signal comparable to NodeResourcesLeastAllocated.
@@ -103,9 +113,15 @@ var PluginsV1beta1 = &config.Plugins{
 	},
 }
 
+<<<<<<< HEAD
 // PluginConfigsV1beta1 default plugin configurations. This could get versioned, but since
 // all available versions produce the same defaults, we just have one for now.
 var PluginConfigsV1beta1 = []config.PluginConfig{
+=======
+// PluginConfigsV1beta2 default plugin configurations. This could get versioned, but since
+// all available versions produce the same defaults, we just have one for now.
+var PluginConfigsV1beta2 = []config.PluginConfig{
+>>>>>>> upstream/master
 	{
 		Name: "DefaultPreemption",
 		Args: &config.DefaultPreemptionArgs{
@@ -139,12 +155,15 @@ var PluginConfigsV1beta1 = []config.PluginConfig{
 		},
 	},
 	{
+<<<<<<< HEAD
 		Name: "NodeResourcesLeastAllocated",
 		Args: &config.NodeResourcesLeastAllocatedArgs{
 			Resources: []config.ResourceSpec{{Name: "cpu", Weight: 1}, {Name: "memory", Weight: 1}},
 		},
 	},
 	{
+=======
+>>>>>>> upstream/master
 		Name: "PodTopologySpread",
 		Args: &config.PodTopologySpreadArgs{
 			DefaultingType: config.SystemDefaulting,
@@ -158,8 +177,41 @@ var PluginConfigsV1beta1 = []config.PluginConfig{
 	},
 }
 
+<<<<<<< HEAD
 // PluginsV1beta2 default set of v1beta2 plugins.
 var PluginsV1beta2 = &config.Plugins{
+=======
+// PluginsV1beta3 is the set of default v1beta3 plugins (before MultiPoint expansion)
+var PluginsV1beta3 = &config.Plugins{
+	MultiPoint: config.PluginSet{
+		Enabled: []config.Plugin{
+			{Name: names.PrioritySort},
+			{Name: names.NodeUnschedulable},
+			{Name: names.NodeName},
+			{Name: names.TaintToleration, Weight: 3},
+			{Name: names.NodeAffinity, Weight: 2},
+			{Name: names.NodePorts},
+			{Name: names.NodeResourcesFit, Weight: 1},
+			{Name: names.VolumeRestrictions},
+			{Name: names.EBSLimits},
+			{Name: names.GCEPDLimits},
+			{Name: names.NodeVolumeLimits},
+			{Name: names.AzureDiskLimits},
+			{Name: names.VolumeBinding},
+			{Name: names.VolumeZone},
+			{Name: names.PodTopologySpread, Weight: 2},
+			{Name: names.InterPodAffinity, Weight: 2},
+			{Name: names.DefaultPreemption},
+			{Name: names.NodeResourcesBalancedAllocation, Weight: 1},
+			{Name: names.ImageLocality, Weight: 1},
+			{Name: names.DefaultBinder},
+		},
+	},
+}
+
+// ExpandedPluginsV1beta3 default set of v1beta3 plugins after MultiPoint expansion
+var ExpandedPluginsV1beta3 = &config.Plugins{
+>>>>>>> upstream/master
 	QueueSort: config.PluginSet{
 		Enabled: []config.Plugin{
 			{Name: names.PrioritySort},
@@ -167,6 +219,7 @@ var PluginsV1beta2 = &config.Plugins{
 	},
 	PreFilter: config.PluginSet{
 		Enabled: []config.Plugin{
+<<<<<<< HEAD
 			{Name: names.NodeResourcesFit},
 			{Name: names.NodePorts},
 			{Name: names.VolumeRestrictions},
@@ -174,6 +227,15 @@ var PluginsV1beta2 = &config.Plugins{
 			{Name: names.InterPodAffinity},
 			{Name: names.VolumeBinding},
 			{Name: names.NodeAffinity},
+=======
+			{Name: names.NodeAffinity},
+			{Name: names.NodePorts},
+			{Name: names.NodeResourcesFit},
+			{Name: names.VolumeRestrictions},
+			{Name: names.VolumeBinding},
+			{Name: names.PodTopologySpread},
+			{Name: names.InterPodAffinity},
+>>>>>>> upstream/master
 		},
 	},
 	Filter: config.PluginSet{
@@ -202,24 +264,56 @@ var PluginsV1beta2 = &config.Plugins{
 	},
 	PreScore: config.PluginSet{
 		Enabled: []config.Plugin{
+<<<<<<< HEAD
 			{Name: names.InterPodAffinity},
 			{Name: names.PodTopologySpread},
 			{Name: names.TaintToleration},
 			{Name: names.NodeAffinity},
+=======
+			{Name: names.TaintToleration},
+			{Name: names.NodeAffinity},
+			{Name: names.PodTopologySpread},
+			{Name: names.InterPodAffinity},
+>>>>>>> upstream/master
 		},
 	},
 	Score: config.PluginSet{
 		Enabled: []config.Plugin{
+<<<<<<< HEAD
 			{Name: names.NodeResourcesBalancedAllocation, Weight: 1},
 			{Name: names.ImageLocality, Weight: 1},
 			{Name: names.InterPodAffinity, Weight: 1},
 			{Name: names.NodeResourcesFit, Weight: 1},
 			{Name: names.NodeAffinity, Weight: 1},
+=======
+			// Weight is tripled because:
+			// - This is a score coming from user preference.
+			// - Usage of node tainting to group nodes in the cluster is increasing becoming a use-case
+			// for many user workloads
+			{Name: names.TaintToleration, Weight: 3},
+			// Weight is doubled because:
+			// - This is a score coming from user preference.
+			{Name: names.NodeAffinity, Weight: 2},
+			{Name: names.NodeResourcesFit, Weight: 1},
+			// Weight is tripled because:
+			// - This is a score coming from user preference.
+			// - Usage of node tainting to group nodes in the cluster is increasing becoming a use-case
+			//	 for many user workloads
+			{Name: names.VolumeBinding, Weight: 1},
+>>>>>>> upstream/master
 			// Weight is doubled because:
 			// - This is a score coming from user preference.
 			// - It makes its signal comparable to NodeResourcesLeastAllocated.
 			{Name: names.PodTopologySpread, Weight: 2},
+<<<<<<< HEAD
 			{Name: names.TaintToleration, Weight: 1},
+=======
+			// Weight is doubled because:
+			// - This is a score coming from user preference.
+			{Name: names.InterPodAffinity, Weight: 2},
+			{Name: names.NodeResourcesBalancedAllocation, Weight: 1},
+			{Name: names.ImageLocality, Weight: 1},
+>>>>>>> upstream/master
 		},
 	},
 	Reserve: config.PluginSet{
@@ -239,9 +333,14 @@ var PluginsV1beta2 = &config.Plugins{
 	},
 }
 
+<<<<<<< HEAD
 // PluginConfigsV1beta2 default plugin configurations. This could get versioned, but since
 // all available versions produce the same defaults, we just have one for now.
 var PluginConfigsV1beta2 = []config.PluginConfig{
+=======
+// PluginConfigsV1beta3 default plugin configurations.
+var PluginConfigsV1beta3 = []config.PluginConfig{
+>>>>>>> upstream/master
 	{
 		Name: "DefaultPreemption",
 		Args: &config.DefaultPreemptionArgs{

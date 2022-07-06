@@ -18,6 +18,7 @@ package defaultpreemption
 
 import (
 	"context"
+<<<<<<< HEAD
 	"errors"
 	"fmt"
 	"math"
@@ -27,6 +28,11 @@ import (
 	"sync/atomic"
 
 	"k8s.io/klog/v2"
+=======
+	"fmt"
+	"math/rand"
+	"sort"
+>>>>>>> upstream/master
 
 	v1 "k8s.io/api/core/v1"
 	policy "k8s.io/api/policy/v1"
@@ -34,16 +40,27 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/informers"
+<<<<<<< HEAD
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	policylisters "k8s.io/client-go/listers/policy/v1"
 	corev1helpers "k8s.io/component-helpers/scheduling/corev1"
+=======
+	corelisters "k8s.io/client-go/listers/core/v1"
+	policylisters "k8s.io/client-go/listers/policy/v1"
+	corev1helpers "k8s.io/component-helpers/scheduling/corev1"
+	"k8s.io/klog/v2"
+>>>>>>> upstream/master
 	extenderv1 "k8s.io/kube-scheduler/extender/v1"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config/validation"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/feature"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/names"
+<<<<<<< HEAD
+=======
+	"k8s.io/kubernetes/pkg/scheduler/framework/preemption"
+>>>>>>> upstream/master
 	"k8s.io/kubernetes/pkg/scheduler/metrics"
 	"k8s.io/kubernetes/pkg/scheduler/util"
 )
@@ -92,6 +109,7 @@ func (pl *DefaultPreemption) PostFilter(ctx context.Context, state *framework.Cy
 		metrics.PreemptionAttempts.Inc()
 	}()
 
+<<<<<<< HEAD
 	nnn, status := pl.preempt(ctx, state, pod, m)
 	if !status.IsSuccess() {
 		return nil, status
@@ -171,6 +189,17 @@ func (pl *DefaultPreemption) preempt(ctx context.Context, state *framework.Cycle
 	}
 
 	return bestCandidate.Name(), nil
+=======
+	pe := preemption.Evaluator{
+		PluginName: names.DefaultPreemption,
+		Handler:    pl.fh,
+		PodLister:  pl.podLister,
+		PdbLister:  pl.pdbLister,
+		State:      state,
+		Interface:  pl,
+	}
+	return pe.Preempt(ctx, pod, m)
+>>>>>>> upstream/master
 }
 
 // calculateNumCandidates returns the number of candidates the FindCandidates
@@ -188,6 +217,7 @@ func (pl *DefaultPreemption) calculateNumCandidates(numNodes int32) int32 {
 	return n
 }
 
+<<<<<<< HEAD
 // getOffsetAndNumCandidates chooses a random offset and calculates the number
 // of candidates that should be shortlisted for dry running preemption.
 func (pl *DefaultPreemption) getOffsetAndNumCandidates(numNodes int32) (int32, int32) {
@@ -430,6 +460,17 @@ func CallExtenders(extenders []framework.Extender, pod *v1.Pod, nodeLister frame
 // This function is not applicable for out-of-tree preemption plugins that exercise
 // different preemption candidates on the same nominated node.
 func candidatesToVictimsMap(candidates []Candidate) map[string]*extenderv1.Victims {
+=======
+// GetOffsetAndNumCandidates chooses a random offset and calculates the number
+// of candidates that should be shortlisted for dry running preemption.
+func (pl *DefaultPreemption) GetOffsetAndNumCandidates(numNodes int32) (int32, int32) {
+	return rand.Int31n(numNodes), pl.calculateNumCandidates(numNodes)
+}
+
+// This function is not applicable for out-of-tree preemption plugins that exercise
+// different preemption candidates on the same nominated node.
+func (pl *DefaultPreemption) CandidatesToVictimsMap(candidates []preemption.Candidate) map[string]*extenderv1.Victims {
+>>>>>>> upstream/master
 	m := make(map[string]*extenderv1.Victims)
 	for _, c := range candidates {
 		m[c.Name()] = c.Victims()
@@ -437,6 +478,7 @@ func candidatesToVictimsMap(candidates []Candidate) map[string]*extenderv1.Victi
 	return m
 }
 
+<<<<<<< HEAD
 // SelectCandidate chooses the best-fit candidate from given <candidates> and return it.
 func SelectCandidate(candidates []Candidate) Candidate {
 	if len(candidates) == 0 {
@@ -618,12 +660,26 @@ func selectVictimsOnNode(
 	nodeInfo *framework.NodeInfo,
 	pdbs []*policy.PodDisruptionBudget,
 ) ([]*v1.Pod, int, *framework.Status) {
+=======
+// SelectVictimsOnNode finds minimum set of pods on the given node that should be preempted in order to make enough room
+// for "pod" to be scheduled.
+func (pl *DefaultPreemption) SelectVictimsOnNode(
+	ctx context.Context,
+	state *framework.CycleState,
+	pod *v1.Pod,
+	nodeInfo *framework.NodeInfo,
+	pdbs []*policy.PodDisruptionBudget) ([]*v1.Pod, int, *framework.Status) {
+>>>>>>> upstream/master
 	var potentialVictims []*framework.PodInfo
 	removePod := func(rpi *framework.PodInfo) error {
 		if err := nodeInfo.RemovePod(rpi.Pod); err != nil {
 			return err
 		}
+<<<<<<< HEAD
 		status := fh.RunPreFilterExtensionRemovePod(ctx, state, pod, rpi, nodeInfo)
+=======
+		status := pl.fh.RunPreFilterExtensionRemovePod(ctx, state, pod, rpi, nodeInfo)
+>>>>>>> upstream/master
 		if !status.IsSuccess() {
 			return status.AsError()
 		}
@@ -631,7 +687,11 @@ func selectVictimsOnNode(
 	}
 	addPod := func(api *framework.PodInfo) error {
 		nodeInfo.AddPodInfo(api)
+<<<<<<< HEAD
 		status := fh.RunPreFilterExtensionAddPod(ctx, state, pod, api, nodeInfo)
+=======
+		status := pl.fh.RunPreFilterExtensionAddPod(ctx, state, pod, api, nodeInfo)
+>>>>>>> upstream/master
 		if !status.IsSuccess() {
 			return status.AsError()
 		}
@@ -661,7 +721,11 @@ func selectVictimsOnNode(
 	// inter-pod affinity to one or more victims, but we have decided not to
 	// support this case for performance reasons. Having affinity to lower
 	// priority pods is not a recommended configuration anyway.
+<<<<<<< HEAD
 	if status := fh.RunFilterPluginsWithNominatedPods(ctx, state, pod, nodeInfo); !status.IsSuccess() {
+=======
+	if status := pl.fh.RunFilterPluginsWithNominatedPods(ctx, state, pod, nodeInfo); !status.IsSuccess() {
+>>>>>>> upstream/master
 		return nil, 0, status
 	}
 	var victims []*v1.Pod
@@ -675,7 +739,11 @@ func selectVictimsOnNode(
 		if err := addPod(pi); err != nil {
 			return false, err
 		}
+<<<<<<< HEAD
 		status := fh.RunFilterPluginsWithNominatedPods(ctx, state, pod, nodeInfo)
+=======
+		status := pl.fh.RunFilterPluginsWithNominatedPods(ctx, state, pod, nodeInfo)
+>>>>>>> upstream/master
 		fits := status.IsSuccess()
 		if !fits {
 			if err := removePod(pi); err != nil {
@@ -703,6 +771,7 @@ func selectVictimsOnNode(
 	return victims, numViolatingVictim, framework.NewStatus(framework.Success)
 }
 
+<<<<<<< HEAD
 // PrepareCandidate does some preparation work before nominating the selected candidate:
 // - Evict the victim pods
 // - Reject the victim pods if they are in waitingPod map
@@ -757,6 +826,39 @@ func getLowerPriorityNominatedPods(pn framework.PodNominator, pod *v1.Pod, nodeN
 		}
 	}
 	return lowerPriorityPods
+=======
+// PodEligibleToPreemptOthers determines whether this pod should be considered
+// for preempting other pods or not. If this pod has already preempted other
+// pods and those are in their graceful termination period, it shouldn't be
+// considered for preemption.
+// We look at the node that is nominated for this pod and as long as there are
+// terminating pods on the node, we don't consider this for preempting more pods.
+func (pl *DefaultPreemption) PodEligibleToPreemptOthers(pod *v1.Pod, nominatedNodeStatus *framework.Status) bool {
+	if pod.Spec.PreemptionPolicy != nil && *pod.Spec.PreemptionPolicy == v1.PreemptNever {
+		klog.V(5).InfoS("Pod is not eligible for preemption because it has a preemptionPolicy of Never", "pod", klog.KObj(pod))
+		return false
+	}
+	nodeInfos := pl.fh.SnapshotSharedLister().NodeInfos()
+	nomNodeName := pod.Status.NominatedNodeName
+	if len(nomNodeName) > 0 {
+		// If the pod's nominated node is considered as UnschedulableAndUnresolvable by the filters,
+		// then the pod should be considered for preempting again.
+		if nominatedNodeStatus.Code() == framework.UnschedulableAndUnresolvable {
+			return true
+		}
+
+		if nodeInfo, _ := nodeInfos.Get(nomNodeName); nodeInfo != nil {
+			podPriority := corev1helpers.PodPriority(pod)
+			for _, p := range nodeInfo.Pods {
+				if p.Pod.DeletionTimestamp != nil && corev1helpers.PodPriority(p.Pod) < podPriority {
+					// There is a terminating pod on the nominated node.
+					return false
+				}
+			}
+		}
+	}
+	return true
+>>>>>>> upstream/master
 }
 
 // filterPodsWithPDBViolation groups the given "pods" into two groups of "violatingPods"
@@ -817,6 +919,7 @@ func getPDBLister(informerFactory informers.SharedInformerFactory, enablePodDisr
 	}
 	return nil
 }
+<<<<<<< HEAD
 
 func getPodDisruptionBudgets(pdbLister policylisters.PodDisruptionBudgetLister) ([]*policy.PodDisruptionBudget, error) {
 	if pdbLister != nil {
@@ -824,3 +927,5 @@ func getPodDisruptionBudgets(pdbLister policylisters.PodDisruptionBudgetLister) 
 	}
 	return nil, nil
 }
+=======
+>>>>>>> upstream/master

@@ -1,17 +1,28 @@
+<<<<<<< HEAD
+=======
+// +build !gccgo
+
+>>>>>>> upstream/master
 package reflect2
 
 import (
 	"reflect"
+<<<<<<< HEAD
 	"runtime"
 	"strings"
+=======
+>>>>>>> upstream/master
 	"sync"
 	"unsafe"
 )
 
+<<<<<<< HEAD
 // typelinks1 for 1.5 ~ 1.6
 //go:linkname typelinks1 reflect.typelinks
 func typelinks1() [][]unsafe.Pointer
 
+=======
+>>>>>>> upstream/master
 // typelinks2 for 1.7 ~
 //go:linkname typelinks2 reflect.typelinks
 func typelinks2() (sections []unsafe.Pointer, offset [][]int32)
@@ -27,6 +38,7 @@ func discoverTypes() {
 	types = make(map[string]reflect.Type)
 	packages = make(map[string]map[string]reflect.Type)
 
+<<<<<<< HEAD
 	ver := runtime.Version()
 	if ver == "go1.5" || strings.HasPrefix(ver, "go1.5.") {
 		loadGo15Types()
@@ -70,6 +82,12 @@ func loadGo15Types() {
 }
 
 func loadGo17Types() {
+=======
+	loadGoTypes()
+}
+
+func loadGoTypes() {
+>>>>>>> upstream/master
 	var obj interface{} = reflect.TypeOf(0)
 	sections, offset := typelinks2()
 	for i, offs := range offset {

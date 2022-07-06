@@ -56,6 +56,7 @@ type InterPodAffinityArgs struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+<<<<<<< HEAD
 // NodeLabelArgs holds arguments used to configure the NodeLabel plugin.
 //
 // This plugin has been deprecated and is only configurable through the
@@ -76,6 +77,8 @@ type NodeLabelArgs struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+=======
+>>>>>>> upstream/master
 // NodeResourcesFitArgs holds arguments used to configure the NodeResourcesFit plugin.
 type NodeResourcesFitArgs struct {
 	metav1.TypeMeta
@@ -133,6 +136,7 @@ type PodTopologySpreadArgs struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+<<<<<<< HEAD
 // RequestedToCapacityRatioArgs holds arguments used to configure RequestedToCapacityRatio plugin.
 type RequestedToCapacityRatioArgs struct {
 	metav1.TypeMeta
@@ -171,6 +175,8 @@ type NodeResourcesMostAllocatedArgs struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+=======
+>>>>>>> upstream/master
 // NodeResourcesBalancedAllocationArgs holds arguments used to configure NodeResourcesBalancedAllocation plugin.
 type NodeResourcesBalancedAllocationArgs struct {
 	metav1.TypeMeta
@@ -198,6 +204,7 @@ type ResourceSpec struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+<<<<<<< HEAD
 // ServiceAffinityArgs holds arguments used to configure the ServiceAffinity
 // plugin.
 //
@@ -217,6 +224,8 @@ type ServiceAffinityArgs struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+=======
+>>>>>>> upstream/master
 // VolumeBindingArgs holds arguments used to configure the VolumeBinding plugin.
 type VolumeBindingArgs struct {
 	metav1.TypeMeta

@@ -8,8 +8,11 @@
 
 package unix
 
+<<<<<<< HEAD
 //sys	dup2(oldfd int, newfd int) (err error)
 //sysnb	EpollCreate(size int) (fd int, err error)
+=======
+>>>>>>> upstream/master
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
 //sys	Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
 //sys	Fchown(fd int, uid int, gid int) (err error)
@@ -94,6 +97,7 @@ func setTimeval(sec, usec int64) Timeval {
 	return Timeval{Sec: sec, Usec: usec}
 }
 
+<<<<<<< HEAD
 func Pipe(p []int) (err error) {
 	if len(p) != 2 {
 		return EINVAL
@@ -118,6 +122,8 @@ func Pipe2(p []int, flags int) (err error) {
 	return
 }
 
+=======
+>>>>>>> upstream/master
 func Ioperm(from int, num int, on int) (err error) {
 	return ENOSYS
 }
@@ -220,6 +226,7 @@ func (cmsg *Cmsghdr) SetLen(length int) {
 func (rsa *RawSockaddrNFCLLCP) SetServiceNameLen(length int) {
 	rsa.Service_name_len = uint64(length)
 }
+<<<<<<< HEAD
 
 func InotifyInit() (fd int, err error) {
 	return InotifyInit1(0)
@@ -233,3 +240,5 @@ func Poll(fds []PollFd, timeout int) (n int, err error) {
 	}
 	return poll(&fds[0], len(fds), timeout)
 }
+=======
+>>>>>>> upstream/master

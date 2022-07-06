@@ -222,10 +222,21 @@ func NewUpdateSubresourceAction(resource schema.GroupVersionResource, subresourc
 }
 
 func NewRootDeleteAction(resource schema.GroupVersionResource, name string) DeleteActionImpl {
+<<<<<<< HEAD
+=======
+	return NewRootDeleteActionWithOptions(resource, name, metav1.DeleteOptions{})
+}
+
+func NewRootDeleteActionWithOptions(resource schema.GroupVersionResource, name string, opts metav1.DeleteOptions) DeleteActionImpl {
+>>>>>>> upstream/master
 	action := DeleteActionImpl{}
 	action.Verb = "delete"
 	action.Resource = resource
 	action.Name = name
+<<<<<<< HEAD
+=======
+	action.DeleteOptions = opts
+>>>>>>> upstream/master
 
 	return action
 }
@@ -241,11 +252,22 @@ func NewRootDeleteSubresourceAction(resource schema.GroupVersionResource, subres
 }
 
 func NewDeleteAction(resource schema.GroupVersionResource, namespace, name string) DeleteActionImpl {
+<<<<<<< HEAD
+=======
+	return NewDeleteActionWithOptions(resource, namespace, name, metav1.DeleteOptions{})
+}
+
+func NewDeleteActionWithOptions(resource schema.GroupVersionResource, namespace, name string, opts metav1.DeleteOptions) DeleteActionImpl {
+>>>>>>> upstream/master
 	action := DeleteActionImpl{}
 	action.Verb = "delete"
 	action.Resource = resource
 	action.Namespace = namespace
 	action.Name = name
+<<<<<<< HEAD
+=======
+	action.DeleteOptions = opts
+>>>>>>> upstream/master
 
 	return action
 }
@@ -391,6 +413,10 @@ type UpdateAction interface {
 type DeleteAction interface {
 	Action
 	GetName() string
+<<<<<<< HEAD
+=======
+	GetDeleteOptions() metav1.DeleteOptions
+>>>>>>> upstream/master
 }
 
 type DeleteCollectionAction interface {
@@ -583,17 +609,34 @@ func (a PatchActionImpl) DeepCopy() Action {
 
 type DeleteActionImpl struct {
 	ActionImpl
+<<<<<<< HEAD
 	Name string
+=======
+	Name          string
+	DeleteOptions metav1.DeleteOptions
+>>>>>>> upstream/master
 }
 
 func (a DeleteActionImpl) GetName() string {
 	return a.Name
 }
 
+<<<<<<< HEAD
 func (a DeleteActionImpl) DeepCopy() Action {
 	return DeleteActionImpl{
 		ActionImpl: a.ActionImpl.DeepCopy().(ActionImpl),
 		Name:       a.Name,
+=======
+func (a DeleteActionImpl) GetDeleteOptions() metav1.DeleteOptions {
+	return a.DeleteOptions
+}
+
+func (a DeleteActionImpl) DeepCopy() Action {
+	return DeleteActionImpl{
+		ActionImpl:    a.ActionImpl.DeepCopy().(ActionImpl),
+		Name:          a.Name,
+		DeleteOptions: *a.DeleteOptions.DeepCopy(),
+>>>>>>> upstream/master
 	}
 }
 

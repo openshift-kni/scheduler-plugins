@@ -39,7 +39,10 @@ import (
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
+<<<<<<< HEAD
 	"google.golang.org/grpc/internal/grpcutil"
+=======
+>>>>>>> upstream/master
 	"google.golang.org/grpc/status"
 )
 
@@ -96,6 +99,7 @@ var (
 	logger = grpclog.Component("transport")
 )
 
+<<<<<<< HEAD
 type parsedHeaderData struct {
 	encoding string
 	// statusGen caches the stream status received from the trailer the server
@@ -143,6 +147,8 @@ type decodeState struct {
 	data parsedHeaderData
 }
 
+=======
+>>>>>>> upstream/master
 // isReservedHeader checks whether hdr belongs to HTTP2 headers
 // reserved by gRPC protocol. Any other headers are classified as the
 // user-specified metadata.
@@ -180,6 +186,7 @@ func isWhitelistedHeader(hdr string) bool {
 	}
 }
 
+<<<<<<< HEAD
 func (d *decodeState) status() *status.Status {
 	if d.data.statusGen == nil {
 		// No status-details were provided; generate status using code/msg.
@@ -188,6 +195,8 @@ func (d *decodeState) status() *status.Status {
 	return d.data.statusGen
 }
 
+=======
+>>>>>>> upstream/master
 const binHdrSuffix = "-bin"
 
 func encodeBinHeader(v []byte) string {
@@ -217,6 +226,7 @@ func decodeMetadataHeader(k, v string) (string, error) {
 	return v, nil
 }
 
+<<<<<<< HEAD
 func (d *decodeState) decodeHeader(frame *http2.MetaHeadersFrame) (http2.ErrCode, error) {
 	// frame.Truncated is set to true when framer detects that the current header
 	// list size hits MaxHeaderListSize limit.
@@ -379,6 +389,18 @@ func (d *decodeState) processHeaderField(f hpack.HeaderField) {
 		}
 		d.addMetadata(f.Name, v)
 	}
+=======
+func decodeGRPCStatusDetails(rawDetails string) (*status.Status, error) {
+	v, err := decodeBinHeader(rawDetails)
+	if err != nil {
+		return nil, err
+	}
+	st := &spb.Status{}
+	if err = proto.Unmarshal(v, st); err != nil {
+		return nil, err
+	}
+	return status.FromProto(st), nil
+>>>>>>> upstream/master
 }
 
 type timeoutUnit uint8

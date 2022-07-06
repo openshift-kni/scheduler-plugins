@@ -63,9 +63,15 @@ type Command struct {
 	// Example is examples of how to use the command.
 	Example string
 
+<<<<<<< HEAD
 	// ValidArgs is list of all valid non-flag arguments that are accepted in bash completions
 	ValidArgs []string
 	// ValidArgsFunction is an optional function that provides valid non-flag arguments for bash completion.
+=======
+	// ValidArgs is list of all valid non-flag arguments that are accepted in shell completions
+	ValidArgs []string
+	// ValidArgsFunction is an optional function that provides valid non-flag arguments for shell completion.
+>>>>>>> upstream/master
 	// It is a dynamic version of using ValidArgs.
 	// Only one of ValidArgs and ValidArgsFunction can be used for a command.
 	ValidArgsFunction func(cmd *Command, args []string, toComplete string) ([]string, ShellCompDirective)
@@ -74,11 +80,20 @@ type Command struct {
 	Args PositionalArgs
 
 	// ArgAliases is List of aliases for ValidArgs.
+<<<<<<< HEAD
 	// These are not suggested to the user in the bash completion,
 	// but accepted if entered manually.
 	ArgAliases []string
 
 	// BashCompletionFunction is custom functions used by the bash autocompletion generator.
+=======
+	// These are not suggested to the user in the shell completion,
+	// but accepted if entered manually.
+	ArgAliases []string
+
+	// BashCompletionFunction is custom bash functions used by the legacy bash autocompletion generator.
+	// For portability with other shells, it is recommended to instead use ValidArgsFunction
+>>>>>>> upstream/master
 	BashCompletionFunction string
 
 	// Deprecated defines, if this command is deprecated and should print this string when used.
@@ -168,6 +183,12 @@ type Command struct {
 	//FParseErrWhitelist flag parse errors to be ignored
 	FParseErrWhitelist FParseErrWhitelist
 
+<<<<<<< HEAD
+=======
+	// CompletionOptions is a set of options to control the handling of shell completion
+	CompletionOptions CompletionOptions
+
+>>>>>>> upstream/master
 	// commandsAreSorted defines, if command slice are sorted or not.
 	commandsAreSorted bool
 	// commandCalledAs is the name or alias value used to call this command.
@@ -884,7 +905,12 @@ func (c *Command) preRun() {
 }
 
 // ExecuteContext is the same as Execute(), but sets the ctx on the command.
+<<<<<<< HEAD
 // Retrieve ctx by calling cmd.Context() inside your *Run lifecycle functions.
+=======
+// Retrieve ctx by calling cmd.Context() inside your *Run lifecycle or ValidArgs
+// functions.
+>>>>>>> upstream/master
 func (c *Command) ExecuteContext(ctx context.Context) error {
 	c.ctx = ctx
 	return c.Execute()
@@ -898,6 +924,17 @@ func (c *Command) Execute() error {
 	return err
 }
 
+<<<<<<< HEAD
+=======
+// ExecuteContextC is the same as ExecuteC(), but sets the ctx on the command.
+// Retrieve ctx by calling cmd.Context() inside your *Run lifecycle or ValidArgs
+// functions.
+func (c *Command) ExecuteContextC(ctx context.Context) (*Command, error) {
+	c.ctx = ctx
+	return c.ExecuteC()
+}
+
+>>>>>>> upstream/master
 // ExecuteC executes the command.
 func (c *Command) ExecuteC() (cmd *Command, err error) {
 	if c.ctx == nil {
@@ -914,9 +951,16 @@ func (c *Command) ExecuteC() (cmd *Command, err error) {
 		preExecHookFn(c)
 	}
 
+<<<<<<< HEAD
 	// initialize help as the last point possible to allow for user
 	// overriding
 	c.InitDefaultHelpCmd()
+=======
+	// initialize help at the last point to allow for user overriding
+	c.InitDefaultHelpCmd()
+	// initialize completion at the last point to allow for user overriding
+	c.initDefaultCompletionCmd()
+>>>>>>> upstream/master
 
 	args := c.args
 
@@ -925,7 +969,11 @@ func (c *Command) ExecuteC() (cmd *Command, err error) {
 		args = os.Args[1:]
 	}
 
+<<<<<<< HEAD
 	// initialize the hidden command to be used for bash completion
+=======
+	// initialize the hidden command to be used for shell completion
+>>>>>>> upstream/master
 	c.initCompleteCmd(args)
 
 	var flags []string

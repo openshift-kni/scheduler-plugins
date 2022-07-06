@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+//go:build linux || darwin
+>>>>>>> upstream/master
 // +build linux darwin
 
 /*

@@ -19,9 +19,15 @@ package metrics
 import (
 	"time"
 
+<<<<<<< HEAD
 	"k8s.io/apimachinery/pkg/util/clock"
 	"k8s.io/component-base/metrics"
 	"k8s.io/component-base/metrics/legacyregistry"
+=======
+	"k8s.io/component-base/metrics"
+	"k8s.io/component-base/metrics/legacyregistry"
+	"k8s.io/utils/clock"
+>>>>>>> upstream/master
 )
 
 const (

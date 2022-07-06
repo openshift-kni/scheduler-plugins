@@ -17,6 +17,7 @@ limitations under the License.
 package noderesources
 
 import (
+<<<<<<< HEAD
 	"context"
 	"fmt"
 	"math"
@@ -97,6 +98,21 @@ func (pl *RequestedToCapacityRatio) ScoreExtensions() framework.ScoreExtensions 
 	return nil
 }
 
+=======
+	"math"
+
+	"k8s.io/kubernetes/pkg/scheduler/apis/config"
+	"k8s.io/kubernetes/pkg/scheduler/framework"
+	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/helper"
+)
+
+const (
+	maxUtilization = 100
+)
+
+// buildRequestedToCapacityRatioScorerFunction allows users to apply bin packing
+// on core resources like CPU, Memory as well as extended resources like accelerators.
+>>>>>>> upstream/master
 func buildRequestedToCapacityRatioScorerFunction(scoringFunctionShape helper.FunctionShape, resourceToWeightMap resourceToWeightMap) func(resourceToValueMap, resourceToValueMap) int64 {
 	rawScoringFunction := helper.BuildBrokenLinearFunction(scoringFunctionShape)
 	resourceScoringFunction := func(requested, capacity int64) int64 {

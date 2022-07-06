@@ -100,7 +100,11 @@ type NodeMetrics struct {
 	Metadata Metadata `json:"metadata,omitempty"`
 }
 
+<<<<<<< HEAD
 // Returns a new initialised Watcher
+=======
+// NewWatcher Returns a new initialised Watcher
+>>>>>>> upstream/master
 func NewWatcher(client MetricsProviderClient) *Watcher {
 	sizePerWindow := 5
 	return &Watcher{
@@ -114,7 +118,11 @@ func NewWatcher(client MetricsProviderClient) *Watcher {
 	}
 }
 
+<<<<<<< HEAD
 // This function needs to be called to begin actual watching
+=======
+// StartWatching This function needs to be called to begin actual watching
+>>>>>>> upstream/master
 func (w *Watcher) StartWatching() {
 	w.mutex.RLock()
 	if w.isStarted {
@@ -181,13 +189,22 @@ func (w *Watcher) StartWatching() {
 	log.Info("Started watching metrics")
 }
 
+<<<<<<< HEAD
 // StartWatching() should be called before calling this.
 // It starts from 15 minute window, and falls back to 10 min, 5 min windows subsequently if metrics are not present
+=======
+// GetLatestWatcherMetrics It starts from 15 minute window, and falls back to 10 min, 5 min windows subsequently
+// if metrics are not present. StartWatching() should be called before calling this.
+>>>>>>> upstream/master
 func (w *Watcher) GetLatestWatcherMetrics(duration string) (*WatcherMetrics, error) {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
 	if !w.isStarted {
+<<<<<<< HEAD
 		return nil, errors.New("need to call StartWatching() first!")
+=======
+		return nil, errors.New("need to call StartWatching() first")
+>>>>>>> upstream/master
 	}
 
 	switch {

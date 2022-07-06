@@ -107,8 +107,13 @@ func main() {
 	}
 	fmt.Println(string(y))
 	/* Output:
+<<<<<<< HEAD
 	name: John
 	age: 30
+=======
+	age: 30
+	name: John
+>>>>>>> upstream/master
 	*/
 	j2, err := yaml.YAMLToJSON(y)
 	if err != nil {

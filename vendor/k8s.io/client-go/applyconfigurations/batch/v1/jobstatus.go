@@ -33,6 +33,10 @@ type JobStatusApplyConfiguration struct {
 	Failed                  *int32                                     `json:"failed,omitempty"`
 	CompletedIndexes        *string                                    `json:"completedIndexes,omitempty"`
 	UncountedTerminatedPods *UncountedTerminatedPodsApplyConfiguration `json:"uncountedTerminatedPods,omitempty"`
+<<<<<<< HEAD
+=======
+	Ready                   *int32                                     `json:"ready,omitempty"`
+>>>>>>> upstream/master
 }
 
 // JobStatusApplyConfiguration constructs an declarative configuration of the JobStatus type for use with
@@ -109,3 +113,14 @@ func (b *JobStatusApplyConfiguration) WithUncountedTerminatedPods(value *Uncount
 	b.UncountedTerminatedPods = value
 	return b
 }
+<<<<<<< HEAD
+=======
+
+// WithReady sets the Ready field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Ready field is set to the value of the last call.
+func (b *JobStatusApplyConfiguration) WithReady(value int32) *JobStatusApplyConfiguration {
+	b.Ready = &value
+	return b
+}
+>>>>>>> upstream/master

@@ -31,6 +31,11 @@ type Timeval struct {
 	Usec int32
 }
 
+<<<<<<< HEAD
+=======
+type Time_t int32
+
+>>>>>>> upstream/master
 type Rusage struct {
 	Utime    Timeval
 	Stime    Timeval

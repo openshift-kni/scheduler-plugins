@@ -87,6 +87,7 @@ func validateHardPodAffinityWeight(path *field.Path, w int32) error {
 	return nil
 }
 
+<<<<<<< HEAD
 // ValidateNodeLabelArgs validates that NodeLabelArgs are correct.
 func ValidateNodeLabelArgs(path *field.Path, args *config.NodeLabelArgs) error {
 	var allErrs field.ErrorList
@@ -116,6 +117,8 @@ func validateNoConflict(presentLabels, absentLabels []string, presentPath, absen
 	return allErrs
 }
 
+=======
+>>>>>>> upstream/master
 // ValidatePodTopologySpreadArgs validates that PodTopologySpreadArgs are correct.
 // It replicates the validation from pkg/apis/core/validation.validateTopologySpreadConstraints
 // with an additional check for .labelSelector to be nil.
@@ -193,6 +196,7 @@ func validateConstraintNotRepeat(path *field.Path, constraints []v1.TopologySpre
 	return nil
 }
 
+<<<<<<< HEAD
 // ValidateRequestedToCapacityRatioArgs validates that RequestedToCapacityRatioArgs are correct.
 func ValidateRequestedToCapacityRatioArgs(path *field.Path, args *config.RequestedToCapacityRatioArgs) error {
 	var allErrs field.ErrorList
@@ -201,6 +205,8 @@ func ValidateRequestedToCapacityRatioArgs(path *field.Path, args *config.Request
 	return allErrs.ToAggregate()
 }
 
+=======
+>>>>>>> upstream/master
 func validateFunctionShape(shape []config.UtilizationShapePoint, path *field.Path) field.ErrorList {
 	const (
 		minUtilization = 0
@@ -238,6 +244,7 @@ func validateFunctionShape(shape []config.UtilizationShapePoint, path *field.Pat
 	return allErrs
 }
 
+<<<<<<< HEAD
 // weight of resource is allowed to exceed 100, this is only applicable to `RequestedToCapacityRatio` plugin for backwards compatibility reason.
 func validateResourcesNoMax(resources []config.ResourceSpec, p *field.Path) field.ErrorList {
 	var allErrs field.ErrorList
@@ -260,6 +267,8 @@ func ValidateNodeResourcesMostAllocatedArgs(path *field.Path, args *config.NodeR
 	return validateResources(args.Resources, path.Child("resources")).ToAggregate()
 }
 
+=======
+>>>>>>> upstream/master
 func validateResources(resources []config.ResourceSpec, p *field.Path) field.ErrorList {
 	var allErrs field.ErrorList
 	for i, resource := range resources {
@@ -311,15 +320,36 @@ func ValidateNodeAffinityArgs(path *field.Path, args *config.NodeAffinityArgs) e
 	return errors.Flatten(errors.NewAggregate(errs))
 }
 
+<<<<<<< HEAD
 // ValidateVolumeBindingArgs validates that VolumeBindingArgs are set correctly.
 func ValidateVolumeBindingArgs(path *field.Path, args *config.VolumeBindingArgs) error {
+=======
+// VolumeBindingArgsValidationOptions contains the different settings for validation.
+type VolumeBindingArgsValidationOptions struct {
+	AllowVolumeCapacityPriority bool
+}
+
+// ValidateVolumeBindingArgs validates that VolumeBindingArgs are set correctly.
+func ValidateVolumeBindingArgs(path *field.Path, args *config.VolumeBindingArgs) error {
+	return ValidateVolumeBindingArgsWithOptions(path, args, VolumeBindingArgsValidationOptions{
+		AllowVolumeCapacityPriority: utilfeature.DefaultFeatureGate.Enabled(features.VolumeCapacityPriority),
+	})
+}
+
+// ValidateVolumeBindingArgs validates that VolumeBindingArgs with scheduler features.
+func ValidateVolumeBindingArgsWithOptions(path *field.Path, args *config.VolumeBindingArgs, opts VolumeBindingArgsValidationOptions) error {
+>>>>>>> upstream/master
 	var allErrs field.ErrorList
 
 	if args.BindTimeoutSeconds < 0 {
 		allErrs = append(allErrs, field.Invalid(path.Child("bindTimeoutSeconds"), args.BindTimeoutSeconds, "invalid BindTimeoutSeconds, should not be a negative value"))
 	}
 
+<<<<<<< HEAD
 	if utilfeature.DefaultFeatureGate.Enabled(features.VolumeCapacityPriority) {
+=======
+	if opts.AllowVolumeCapacityPriority {
+>>>>>>> upstream/master
 		allErrs = append(allErrs, validateFunctionShape(args.Shape, path.Child("shape"))...)
 	} else if args.Shape != nil {
 		// When the feature is off, return an error if the config is not nil.
@@ -353,7 +383,11 @@ func ValidateNodeResourcesFitArgs(path *field.Path, args *config.NodeResourcesFi
 
 	if args.ScoringStrategy != nil {
 		allErrs = append(allErrs, validateResources(args.ScoringStrategy.Resources, path.Child("resources"))...)
+<<<<<<< HEAD
 		if args.ScoringStrategy.RequestedToCapacityRatio != nil && len(args.ScoringStrategy.RequestedToCapacityRatio.Shape) > 0 {
+=======
+		if args.ScoringStrategy.RequestedToCapacityRatio != nil {
+>>>>>>> upstream/master
 			allErrs = append(allErrs, validateFunctionShape(args.ScoringStrategy.RequestedToCapacityRatio.Shape, path.Child("shape"))...)
 		}
 	}

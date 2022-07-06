@@ -125,6 +125,12 @@ type SerializerInfo struct {
 	// PrettySerializer, if set, can serialize this object in a form biased towards
 	// readability.
 	PrettySerializer Serializer
+<<<<<<< HEAD
+=======
+	// StrictSerializer, if set, deserializes this object strictly,
+	// erring on unknown fields.
+	StrictSerializer Serializer
+>>>>>>> upstream/master
 	// StreamSerializer, if set, describes the streaming serialization format
 	// for this media type.
 	StreamSerializer *StreamSerializerInfo

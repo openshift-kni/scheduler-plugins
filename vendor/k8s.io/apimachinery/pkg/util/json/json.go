@@ -17,10 +17,18 @@ limitations under the License.
 package json
 
 import (
+<<<<<<< HEAD
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+=======
+	"encoding/json"
+	"fmt"
+	"io"
+
+	kjson "sigs.k8s.io/json"
+>>>>>>> upstream/master
 )
 
 // NewEncoder delegates to json.NewEncoder
@@ -38,6 +46,7 @@ func Marshal(v interface{}) ([]byte, error) {
 // limit recursive depth to prevent stack overflow errors
 const maxDepth = 10000
 
+<<<<<<< HEAD
 // Unmarshal unmarshals the given data
 // If v is a *map[string]interface{}, *[]interface{}, or *interface{} numbers
 // are converted to int64 or float64
@@ -82,6 +91,13 @@ func Unmarshal(data []byte, v interface{}) error {
 	default:
 		return json.Unmarshal(data, v)
 	}
+=======
+// Unmarshal unmarshals the given data.
+// Object keys are case-sensitive.
+// Numbers decoded into interface{} fields are converted to int64 or float64.
+func Unmarshal(data []byte, v interface{}) error {
+	return kjson.UnmarshalCaseSensitivePreserveInts(data, v)
+>>>>>>> upstream/master
 }
 
 // ConvertInterfaceNumbers converts any json.Number values to int64 or float64.
