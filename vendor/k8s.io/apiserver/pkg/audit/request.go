@@ -18,10 +18,7 @@ package audit
 
 import (
 	"bytes"
-<<<<<<< HEAD
-=======
 	"context"
->>>>>>> upstream/master
 	"fmt"
 	"net/http"
 	"reflect"
@@ -115,12 +112,8 @@ func LogImpersonatedUser(ae *auditinternal.Event, user user.Info) {
 
 // LogRequestObject fills in the request object into an audit event. The passed runtime.Object
 // will be converted to the given gv.
-<<<<<<< HEAD
-func LogRequestObject(ae *auditinternal.Event, obj runtime.Object, objGV schema.GroupVersion, gvr schema.GroupVersionResource, subresource string, s runtime.NegotiatedSerializer) {
-=======
 func LogRequestObject(ctx context.Context, obj runtime.Object, objGV schema.GroupVersion, gvr schema.GroupVersionResource, subresource string, s runtime.NegotiatedSerializer) {
 	ae := AuditEventFrom(ctx)
->>>>>>> upstream/master
 	if ae == nil || ae.Level.Less(auditinternal.LevelMetadata) {
 		return
 	}
@@ -160,8 +153,6 @@ func LogRequestObject(ctx context.Context, obj runtime.Object, objGV schema.Grou
 		return
 	}
 
-<<<<<<< HEAD
-=======
 	if shouldOmitManagedFields(ctx) {
 		copy, ok, err := copyWithoutManagedFields(obj)
 		if err != nil {
@@ -172,7 +163,6 @@ func LogRequestObject(ctx context.Context, obj runtime.Object, objGV schema.Grou
 		}
 	}
 
->>>>>>> upstream/master
 	// TODO(audit): hook into the serializer to avoid double conversion
 	var err error
 	ae.RequestObject, err = encodeObject(obj, objGV, s)
@@ -184,12 +174,8 @@ func LogRequestObject(ctx context.Context, obj runtime.Object, objGV schema.Grou
 }
 
 // LogRequestPatch fills in the given patch as the request object into an audit event.
-<<<<<<< HEAD
-func LogRequestPatch(ae *auditinternal.Event, patch []byte) {
-=======
 func LogRequestPatch(ctx context.Context, patch []byte) {
 	ae := AuditEventFrom(ctx)
->>>>>>> upstream/master
 	if ae == nil || ae.Level.Less(auditinternal.LevelRequest) {
 		return
 	}
@@ -202,12 +188,8 @@ func LogRequestPatch(ctx context.Context, patch []byte) {
 
 // LogResponseObject fills in the response object into an audit event. The passed runtime.Object
 // will be converted to the given gv.
-<<<<<<< HEAD
-func LogResponseObject(ae *auditinternal.Event, obj runtime.Object, gv schema.GroupVersion, s runtime.NegotiatedSerializer) {
-=======
 func LogResponseObject(ctx context.Context, obj runtime.Object, gv schema.GroupVersion, s runtime.NegotiatedSerializer) {
 	ae := AuditEventFrom(ctx)
->>>>>>> upstream/master
 	if ae == nil || ae.Level.Less(auditinternal.LevelMetadata) {
 		return
 	}
@@ -223,8 +205,6 @@ func LogResponseObject(ctx context.Context, obj runtime.Object, gv schema.GroupV
 	if ae.Level.Less(auditinternal.LevelRequestResponse) {
 		return
 	}
-<<<<<<< HEAD
-=======
 
 	if shouldOmitManagedFields(ctx) {
 		copy, ok, err := copyWithoutManagedFields(obj)
@@ -236,7 +216,6 @@ func LogResponseObject(ctx context.Context, obj runtime.Object, gv schema.GroupV
 		}
 	}
 
->>>>>>> upstream/master
 	// TODO(audit): hook into the serializer to avoid double conversion
 	var err error
 	ae.ResponseObject, err = encodeObject(obj, gv, s)
@@ -288,8 +267,6 @@ func maybeTruncateUserAgent(req *http.Request) string {
 
 	return ua
 }
-<<<<<<< HEAD
-=======
 
 // copyWithoutManagedFields will make a deep copy of the specified object and
 // will discard the managed fields from the copy.
@@ -359,4 +336,3 @@ func shouldOmitManagedFields(ctx context.Context) bool {
 	// to retain the manage fields in the audit.
 	return false
 }
->>>>>>> upstream/master

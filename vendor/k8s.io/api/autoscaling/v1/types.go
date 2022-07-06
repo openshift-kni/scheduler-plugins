@@ -150,10 +150,7 @@ type ScaleStatus struct {
 // the types below are used in the alpha metrics annotation
 
 // MetricSourceType indicates the type of metric.
-<<<<<<< HEAD
-=======
 // +enum
->>>>>>> upstream/master
 type MetricSourceType string
 
 const (

@@ -17,16 +17,6 @@ limitations under the License.
 package logs
 
 import (
-<<<<<<< HEAD
-	"flag"
-	"fmt"
-	"strings"
-
-	"github.com/spf13/pflag"
-
-	"k8s.io/apimachinery/pkg/util/validation/field"
-	"k8s.io/component-base/config"
-=======
 	"fmt"
 	"math"
 	"strings"
@@ -35,49 +25,11 @@ import (
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/config"
 	"k8s.io/component-base/logs/registry"
->>>>>>> upstream/master
 )
 
 func ValidateLoggingConfiguration(c *config.LoggingConfiguration, fldPath *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 	if c.Format != DefaultLogFormat {
-<<<<<<< HEAD
-		allFlags := UnsupportedLoggingFlags(hyphensToUnderscores)
-		for _, fname := range allFlags {
-			if flagIsSet(fname, hyphensToUnderscores) {
-				errs = append(errs, field.Invalid(fldPath.Child("format"), c.Format, fmt.Sprintf("Non-default format doesn't honor flag: %s", fname)))
-			}
-		}
-	}
-	if _, err := LogRegistry.Get(c.Format); err != nil {
-		errs = append(errs, field.Invalid(fldPath.Child("format"), c.Format, "Unsupported log format"))
-	}
-	return errs
-}
-
-// hyphensToUnderscores replaces hyphens with underscores
-// we should always use underscores instead of hyphens when validate flags
-func hyphensToUnderscores(s string) string {
-	return strings.Replace(s, "-", "_", -1)
-}
-
-func flagIsSet(name string, normalizeFunc func(name string) string) bool {
-	f := flag.Lookup(name)
-	if f != nil {
-		return f.DefValue != f.Value.String()
-	}
-	if normalizeFunc != nil {
-		f = flag.Lookup(normalizeFunc(name))
-		if f != nil {
-			return f.DefValue != f.Value.String()
-		}
-	}
-	pf := pflag.Lookup(name)
-	if pf != nil {
-		return pf.DefValue != pf.Value.String()
-	}
-	panic("failed to lookup unsupported log flag")
-=======
 		// WordSepNormalizeFunc is just a guess. Commands should use it,
 		// but we cannot know for sure.
 		allFlags := UnsupportedLoggingFlags(cliflag.WordSepNormalizeFunc)
@@ -115,5 +67,4 @@ func flagIsSet(name string, normalizeFunc func(name string) string) bool {
 	// Currently nothing to validate for c.Options.
 
 	return errs
->>>>>>> upstream/master
 }

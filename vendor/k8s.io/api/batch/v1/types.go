@@ -71,10 +71,7 @@ type JobList struct {
 }
 
 // CompletionMode specifies how Pod completions of a Job are tracked.
-<<<<<<< HEAD
-=======
 // +enum
->>>>>>> upstream/master
 type CompletionMode string
 
 const (
@@ -158,11 +155,6 @@ type JobSpec struct {
 	// guarantees (e.g. finalizers) will be honored. If this field is unset,
 	// the Job won't be automatically deleted. If this field is set to zero,
 	// the Job becomes eligible to be deleted immediately after it finishes.
-<<<<<<< HEAD
-	// This field is alpha-level and is only honored by servers that enable the
-	// TTLAfterFinished feature.
-=======
->>>>>>> upstream/master
 	// +optional
 	TTLSecondsAfterFinished *int32 `json:"ttlSecondsAfterFinished,omitempty" protobuf:"varint,8,opt,name=ttlSecondsAfterFinished"`
 
@@ -234,11 +226,7 @@ type JobStatus struct {
 	// +optional
 	CompletionTime *metav1.Time `json:"completionTime,omitempty" protobuf:"bytes,3,opt,name=completionTime"`
 
-<<<<<<< HEAD
-	// The number of actively running pods.
-=======
 	// The number of pending and running pods.
->>>>>>> upstream/master
 	// +optional
 	Active int32 `json:"active,omitempty" protobuf:"varint,4,opt,name=active"`
 
@@ -271,20 +259,13 @@ type JobStatus struct {
 	// (3) Remove the pod UID from the arrays while increasing the corresponding
 	//     counter.
 	//
-<<<<<<< HEAD
-	// This field is alpha-level. The job controller only makes use of this field
-	// when the feature gate PodTrackingWithFinalizers is enabled.
-=======
 	// This field is beta-level. The job controller only makes use of this field
 	// when the feature gate JobTrackingWithFinalizers is enabled (enabled
 	// by default).
->>>>>>> upstream/master
 	// Old jobs might not be tracked using this field, in which case the field
 	// remains null.
 	// +optional
 	UncountedTerminatedPods *UncountedTerminatedPods `json:"uncountedTerminatedPods,omitempty" protobuf:"bytes,8,opt,name=uncountedTerminatedPods"`
-<<<<<<< HEAD
-=======
 
 	// The number of pods which have a Ready condition.
 	//
@@ -292,7 +273,6 @@ type JobStatus struct {
 	// the feature gate JobReadyPods is enabled (disabled by default).
 	// +optional
 	Ready *int32 `json:"ready,omitempty" protobuf:"varint,9,opt,name=ready"`
->>>>>>> upstream/master
 }
 
 // UncountedTerminatedPods holds UIDs of Pods that have terminated but haven't
@@ -309,10 +289,7 @@ type UncountedTerminatedPods struct {
 	Failed []types.UID `json:"failed,omitempty" protobuf:"bytes,2,rep,name=failed,casttype=k8s.io/apimachinery/pkg/types.UID"`
 }
 
-<<<<<<< HEAD
-=======
 // +enum
->>>>>>> upstream/master
 type JobConditionType string
 
 // These are valid conditions of a job.
@@ -437,10 +414,7 @@ type CronJobSpec struct {
 // Only one of the following concurrent policies may be specified.
 // If none of the following policies is specified, the default one
 // is AllowConcurrent.
-<<<<<<< HEAD
-=======
 // +enum
->>>>>>> upstream/master
 type ConcurrencyPolicy string
 
 const (

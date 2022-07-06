@@ -17,12 +17,6 @@ limitations under the License.
 package flowcontrol
 
 import (
-<<<<<<< HEAD
-	"sync"
-
-	"k8s.io/apimachinery/pkg/util/sets"
-	"k8s.io/apiserver/pkg/endpoints/request"
-=======
 	"net/http"
 	"sync"
 
@@ -33,7 +27,6 @@ import (
 	"k8s.io/apiserver/pkg/endpoints/request"
 
 	"k8s.io/klog/v2"
->>>>>>> upstream/master
 )
 
 // readOnlyVerbs contains verbs for read-only requests.
@@ -64,17 +57,10 @@ type ForgetWatchFunc func()
 // of watches in the system for the purpose of estimating the
 // cost of incoming mutating requests.
 type WatchTracker interface {
-<<<<<<< HEAD
-	// RegisterWatch reqisters a watch with the provided requestInfo
-	// in the tracker. It returns the function that should be called
-	// to forget the watcher once it is finished.
-	RegisterWatch(requestInfo *request.RequestInfo) ForgetWatchFunc
-=======
 	// RegisterWatch reqisters a watch based on the provided http.Request
 	// in the tracker. It returns the function that should be called
 	// to forget the watcher once it is finished.
 	RegisterWatch(r *http.Request) ForgetWatchFunc
->>>>>>> upstream/master
 
 	// GetInterestedWatchCount returns the number of watches that are
 	// potentially interested in a request with a given RequestInfo
@@ -82,13 +68,6 @@ type WatchTracker interface {
 	GetInterestedWatchCount(requestInfo *request.RequestInfo) int
 }
 
-<<<<<<< HEAD
-// watchTracker tracks the number of watches in the system for
-// the purpose of estimating the cost of incoming mutating requests.
-type watchTracker struct {
-	lock sync.Mutex
-
-=======
 // builtinIndexes represents of set of indexes registered in
 // watchcache that are indexing watches and increase speed of
 // their processing.
@@ -115,28 +94,16 @@ type watchTracker struct {
 	indexes builtinIndexes
 
 	lock       sync.Mutex
->>>>>>> upstream/master
 	watchCount map[watchIdentifier]int
 }
 
 func NewWatchTracker() WatchTracker {
 	return &watchTracker{
-<<<<<<< HEAD
-=======
 		indexes:    getBuiltinIndexes(),
->>>>>>> upstream/master
 		watchCount: make(map[watchIdentifier]int),
 	}
 }
 
-<<<<<<< HEAD
-// RegisterWatch implements WatchTracker interface.
-func (w *watchTracker) RegisterWatch(requestInfo *request.RequestInfo) ForgetWatchFunc {
-	if requestInfo == nil || requestInfo.Verb != "watch" {
-		return nil
-	}
-
-=======
 const (
 	unsetValue = "<unset>"
 )
@@ -176,7 +143,6 @@ func (w *watchTracker) RegisterWatch(r *http.Request) ForgetWatchFunc {
 		}
 	}
 
->>>>>>> upstream/master
 	identifier := &watchIdentifier{
 		apiGroup:  requestInfo.APIGroup,
 		resource:  requestInfo.Resource,
@@ -186,13 +152,6 @@ func (w *watchTracker) RegisterWatch(r *http.Request) ForgetWatchFunc {
 
 	w.lock.Lock()
 	defer w.lock.Unlock()
-<<<<<<< HEAD
-	w.watchCount[*identifier]++
-	return w.forgetWatch(identifier)
-}
-
-func (w *watchTracker) forgetWatch(identifier *watchIdentifier) ForgetWatchFunc {
-=======
 	w.updateIndexLocked(identifier, index, 1)
 	return w.forgetWatch(identifier, index)
 }
@@ -222,16 +181,11 @@ func (w *watchTracker) updateIndexLocked(identifier *watchIdentifier, index *ind
 }
 
 func (w *watchTracker) forgetWatch(identifier *watchIdentifier, index *indexValue) ForgetWatchFunc {
->>>>>>> upstream/master
 	return func() {
 		w.lock.Lock()
 		defer w.lock.Unlock()
 
-<<<<<<< HEAD
-		w.watchCount[*identifier]--
-=======
 		w.updateIndexLocked(identifier, index, -1)
->>>>>>> upstream/master
 		if w.watchCount[*identifier] == 0 {
 			delete(w.watchCount, *identifier)
 		}

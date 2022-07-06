@@ -61,17 +61,10 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-<<<<<<< HEAD
-	"k8s.io/apimachinery/pkg/util/clock"
-	"k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
-	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
-=======
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 
 	"k8s.io/klog/v2"
 )
@@ -150,11 +143,7 @@ type LeaderElectionConfig struct {
 	Callbacks LeaderCallbacks
 
 	// WatchDog is the associated health checker
-<<<<<<< HEAD
-	// WatchDog may be null if its not needed/configured.
-=======
 	// WatchDog may be null if it's not needed/configured.
->>>>>>> upstream/master
 	WatchDog *HealthzAdaptor
 
 	// ReleaseOnCancel should be set true if the lock should be released

@@ -29,10 +29,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-<<<<<<< HEAD
-	"k8s.io/apimachinery/pkg/util/clock"
-=======
->>>>>>> upstream/master
 	"k8s.io/apimachinery/pkg/util/json"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
@@ -46,10 +42,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/tools/record/util"
 	"k8s.io/klog/v2"
-<<<<<<< HEAD
-=======
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 )
 
 const (
@@ -297,8 +290,6 @@ func getKey(event *eventsv1.Event) eventKey {
 	return key
 }
 
-<<<<<<< HEAD
-=======
 // StartStructuredLogging starts sending events received from this EventBroadcaster to the structured logging function.
 // The return value can be ignored or used to stop recording, if desired.
 func (e *eventBroadcasterImpl) StartStructuredLogging(verbosity klog.Level) func() {
@@ -313,7 +304,6 @@ func (e *eventBroadcasterImpl) StartStructuredLogging(verbosity klog.Level) func
 		})
 }
 
->>>>>>> upstream/master
 // StartEventWatcher starts sending events received from this EventBroadcaster to the given event handler function.
 // The return value is used to stop recording
 func (e *eventBroadcasterImpl) StartEventWatcher(eventHandler func(event runtime.Object)) func() {

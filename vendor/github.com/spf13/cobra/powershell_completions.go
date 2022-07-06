@@ -86,11 +86,7 @@ Register-ArgumentCompleter -CommandName '%[1]s' -ScriptBlock {
         # We add an extra empty parameter so we can indicate this to the go method.
         __%[1]s_debug "Adding extra empty parameter"
 `+"        # We need to use `\"`\" to pass an empty argument a \"\" or '' does not work!!!"+`
-<<<<<<< HEAD
-`+"        $RequestComp=\"$RequestComp\" + ' `\"`\"' "+`
-=======
 `+"        $RequestComp=\"$RequestComp\" + ' `\"`\"'"+`
->>>>>>> upstream/master
     }
 
     __%[1]s_debug "Calling $RequestComp"
@@ -144,22 +140,6 @@ Register-ArgumentCompleter -CommandName '%[1]s' -ScriptBlock {
         $Space = ""
     }
 
-<<<<<<< HEAD
-    if (($Directive -band $ShellCompDirectiveNoFileComp) -ne 0 ) {
-        __%[1]s_debug "ShellCompDirectiveNoFileComp is called"
-
-        if ($Values.Length -eq 0) {
-            # Just print an empty string here so the
-            # shell does not start to complete paths.
-            # We cannot use CompletionResult here because
-            # it does not accept an empty string as argument.
-            ""
-            return
-        }
-    }
-
-=======
->>>>>>> upstream/master
     if ((($Directive -band $ShellCompDirectiveFilterFileExt) -ne 0 ) -or
        (($Directive -band $ShellCompDirectiveFilterDirs) -ne 0 ))  {
         __%[1]s_debug "ShellCompDirectiveFilterFileExt ShellCompDirectiveFilterDirs are not supported"
@@ -172,19 +152,13 @@ Register-ArgumentCompleter -CommandName '%[1]s' -ScriptBlock {
         # filter the result
         $_.Name -like "$WordToComplete*"
 
-<<<<<<< HEAD
-        # Join the flag back if we have a equal sign flag
-=======
         # Join the flag back if we have an equal sign flag
->>>>>>> upstream/master
         if ( $IsEqualFlag ) {
             __%[1]s_debug "Join the equal sign flag back to the completion value"
             $_.Name = $Flag + "=" + $_.Name
         }
     }
 
-<<<<<<< HEAD
-=======
     if (($Directive -band $ShellCompDirectiveNoFileComp) -ne 0 ) {
         __%[1]s_debug "ShellCompDirectiveNoFileComp is called"
 
@@ -198,18 +172,13 @@ Register-ArgumentCompleter -CommandName '%[1]s' -ScriptBlock {
         }
     }
 
->>>>>>> upstream/master
     # Get the current mode
     $Mode = (Get-PSReadLineKeyHandler | Where-Object {$_.Key -eq "Tab" }).Function
     __%[1]s_debug "Mode: $Mode"
 
     $Values | ForEach-Object {
 
-<<<<<<< HEAD
-        # store temporay because switch will overwrite $_
-=======
         # store temporary because switch will overwrite $_
->>>>>>> upstream/master
         $comp = $_
 
         # PowerShell supports three different completion modes

@@ -40,10 +40,7 @@ type serializerType struct {
 
 	Serializer       runtime.Serializer
 	PrettySerializer runtime.Serializer
-<<<<<<< HEAD
-=======
 	StrictSerializer runtime.Serializer
->>>>>>> upstream/master
 
 	AcceptStreamContentTypes []string
 	StreamContentType        string
@@ -74,26 +71,20 @@ func newSerializersForScheme(scheme *runtime.Scheme, mf json.MetaFactory, option
 		)
 	}
 
-<<<<<<< HEAD
-=======
 	strictJSONSerializer := json.NewSerializerWithOptions(
 		mf, scheme, scheme,
 		json.SerializerOptions{Yaml: false, Pretty: false, Strict: true},
 	)
 	jsonSerializerType.StrictSerializer = strictJSONSerializer
 
->>>>>>> upstream/master
 	yamlSerializer := json.NewSerializerWithOptions(
 		mf, scheme, scheme,
 		json.SerializerOptions{Yaml: true, Pretty: false, Strict: options.Strict},
 	)
-<<<<<<< HEAD
-=======
 	strictYAMLSerializer := json.NewSerializerWithOptions(
 		mf, scheme, scheme,
 		json.SerializerOptions{Yaml: true, Pretty: false, Strict: true},
 	)
->>>>>>> upstream/master
 	protoSerializer := protobuf.NewSerializer(scheme, scheme)
 	protoRawSerializer := protobuf.NewRawSerializer(scheme, scheme)
 
@@ -105,22 +96,16 @@ func newSerializersForScheme(scheme *runtime.Scheme, mf json.MetaFactory, option
 			FileExtensions:     []string{"yaml"},
 			EncodesAsText:      true,
 			Serializer:         yamlSerializer,
-<<<<<<< HEAD
-=======
 			StrictSerializer:   strictYAMLSerializer,
->>>>>>> upstream/master
 		},
 		{
 			AcceptContentTypes: []string{runtime.ContentTypeProtobuf},
 			ContentType:        runtime.ContentTypeProtobuf,
 			FileExtensions:     []string{"pb"},
 			Serializer:         protoSerializer,
-<<<<<<< HEAD
-=======
 			// note, strict decoding is unsupported for protobuf,
 			// fall back to regular serializing
 			StrictSerializer: protoSerializer,
->>>>>>> upstream/master
 
 			Framer:           protobuf.LengthDelimitedFramer,
 			StreamSerializer: protoRawSerializer,
@@ -217,10 +202,7 @@ func newCodecFactory(scheme *runtime.Scheme, serializers []serializerType) Codec
 				EncodesAsText:    d.EncodesAsText,
 				Serializer:       d.Serializer,
 				PrettySerializer: d.PrettySerializer,
-<<<<<<< HEAD
-=======
 				StrictSerializer: d.StrictSerializer,
->>>>>>> upstream/master
 			}
 
 			mediaType, _, err := mime.ParseMediaType(info.MediaType)

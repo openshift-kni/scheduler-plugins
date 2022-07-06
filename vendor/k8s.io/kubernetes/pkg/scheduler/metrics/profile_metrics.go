@@ -44,9 +44,6 @@ func PodScheduleError(profile string, duration float64) {
 
 func observeScheduleAttemptAndLatency(result, profile string, duration float64) {
 	e2eSchedulingLatency.WithLabelValues(result, profile).Observe(duration)
-<<<<<<< HEAD
-=======
 	schedulingLatency.WithLabelValues(result, profile).Observe(duration)
->>>>>>> upstream/master
 	scheduleAttempts.WithLabelValues(result, profile).Inc()
 }

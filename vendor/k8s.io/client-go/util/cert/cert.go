@@ -33,10 +33,7 @@ import (
 	"time"
 
 	"k8s.io/client-go/util/keyutil"
-<<<<<<< HEAD
-=======
 	netutils "k8s.io/utils/net"
->>>>>>> upstream/master
 )
 
 const duration365d = time.Hour * 24 * 365
@@ -161,11 +158,7 @@ func GenerateSelfSignedCertKeyWithFixtures(host string, alternateIPs []net.IP, a
 		BasicConstraintsValid: true,
 	}
 
-<<<<<<< HEAD
-	if ip := net.ParseIP(host); ip != nil {
-=======
 	if ip := netutils.ParseIPSloppy(host); ip != nil {
->>>>>>> upstream/master
 		template.IPAddresses = append(template.IPAddresses, ip)
 	} else {
 		template.DNSNames = append(template.DNSNames, host)

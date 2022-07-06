@@ -28,10 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/admission"
-<<<<<<< HEAD
-=======
 	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
->>>>>>> upstream/master
 	"k8s.io/apiserver/pkg/features"
 	"k8s.io/apiserver/pkg/storage/names"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
@@ -113,10 +110,7 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	objectMeta.SetDeletionGracePeriodSeconds(nil)
 	strategy.PrepareForCreate(ctx, obj)
 	FillObjectMetaSystemFields(objectMeta)
-<<<<<<< HEAD
-=======
 
->>>>>>> upstream/master
 	if len(objectMeta.GetGenerateName()) > 0 && len(objectMeta.GetName()) == 0 {
 		objectMeta.SetName(strategy.GenerateName(objectMeta.GetGenerateName()))
 	}
@@ -153,31 +147,17 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 
 // CheckGeneratedNameError checks whether an error that occurred creating a resource is due
 // to generation being unable to pick a valid name.
-<<<<<<< HEAD
-func CheckGeneratedNameError(strategy RESTCreateStrategy, err error, obj runtime.Object) error {
-=======
 func CheckGeneratedNameError(ctx context.Context, strategy RESTCreateStrategy, err error, obj runtime.Object) error {
->>>>>>> upstream/master
 	if !errors.IsAlreadyExists(err) {
 		return err
 	}
 
-<<<<<<< HEAD
-	objectMeta, kind, kerr := objectMetaAndKind(strategy, obj)
-=======
 	objectMeta, gvk, kerr := objectMetaAndKind(strategy, obj)
->>>>>>> upstream/master
 	if kerr != nil {
 		return kerr
 	}
 
 	if len(objectMeta.GetGenerateName()) == 0 {
-<<<<<<< HEAD
-		return err
-	}
-
-	return errors.NewServerTimeoutForKind(kind.GroupKind(), "POST", 0)
-=======
 		// If we don't have a generated name, return the original error (AlreadyExists).
 		// When we're here, the user picked a name that is causing a conflict.
 		return err
@@ -192,7 +172,6 @@ func CheckGeneratedNameError(ctx context.Context, strategy RESTCreateStrategy, e
 	// If we have a name and generated name, the server picked a name
 	// that already exists.
 	return errors.NewGenerateNameConflict(gr, objectMeta.GetName(), 1)
->>>>>>> upstream/master
 }
 
 // objectMetaAndKind retrieves kind and ObjectMeta from a runtime object, or returns an error.

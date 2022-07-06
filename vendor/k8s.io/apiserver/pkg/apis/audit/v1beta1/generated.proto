@@ -204,8 +204,6 @@ message Policy {
   // be specified per rule in which case the union of both are omitted.
   // +optional
   repeated string omitStages = 3;
-<<<<<<< HEAD
-=======
 
   // OmitManagedFields indicates whether to omit the managed fields of the request
   // and response bodies from being written to the API audit log.
@@ -215,7 +213,6 @@ message Policy {
   // in a rule will override the global default.
   // +optional
   optional bool omitManagedFields = 4;
->>>>>>> upstream/master
 }
 
 // PolicyList is a list of audit Policies.
@@ -271,8 +268,6 @@ message PolicyRule {
   // An empty list means no restrictions will apply.
   // +optional
   repeated string omitStages = 8;
-<<<<<<< HEAD
-=======
 
   // OmitManagedFields indicates whether to omit the managed fields of the request
   // and response bodies from being written to the API audit log.
@@ -284,6 +279,5 @@ message PolicyRule {
   // Policy.OmitManagedFields will stand.
   // +optional
   optional bool omitManagedFields = 9;
->>>>>>> upstream/master
 }
 

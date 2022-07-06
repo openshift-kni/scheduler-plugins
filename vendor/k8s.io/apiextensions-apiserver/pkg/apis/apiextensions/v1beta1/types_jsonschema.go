@@ -161,8 +161,6 @@ type JSONSchemaProps struct {
 	//      Atomic maps will be entirely replaced when updated.
 	// +optional
 	XMapType *string `json:"x-kubernetes-map-type,omitempty" protobuf:"bytes,43,opt,name=xKubernetesMapType"`
-<<<<<<< HEAD
-=======
 
 	// x-kubernetes-validations describes a list of validation rules written in the CEL expression language.
 	// This field is an alpha-level. Using this field requires the feature gate `CustomResourceValidationExpressions` to be enabled.
@@ -237,7 +235,6 @@ type ValidationRule struct {
 	// If unset, the message is "failed rule: {Rule}".
 	// e.g. "must be a URL with the host matching spec.host"
 	Message string `json:"message,omitempty" protobuf:"bytes,2,opt,name=message"`
->>>>>>> upstream/master
 }
 
 // JSON represents any valid JSON value.

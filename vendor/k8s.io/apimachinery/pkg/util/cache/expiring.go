@@ -21,29 +21,17 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD
-	utilclock "k8s.io/apimachinery/pkg/util/clock"
-=======
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 )
 
 // NewExpiring returns an initialized expiring cache.
 func NewExpiring() *Expiring {
-<<<<<<< HEAD
-	return NewExpiringWithClock(utilclock.RealClock{})
-=======
 	return NewExpiringWithClock(clock.RealClock{})
->>>>>>> upstream/master
 }
 
 // NewExpiringWithClock is like NewExpiring but allows passing in a custom
 // clock for testing.
-<<<<<<< HEAD
-func NewExpiringWithClock(clock utilclock.Clock) *Expiring {
-=======
 func NewExpiringWithClock(clock clock.Clock) *Expiring {
->>>>>>> upstream/master
 	return &Expiring{
 		clock: clock,
 		cache: make(map[interface{}]entry),
@@ -52,11 +40,7 @@ func NewExpiringWithClock(clock clock.Clock) *Expiring {
 
 // Expiring is a map whose entries expire after a per-entry timeout.
 type Expiring struct {
-<<<<<<< HEAD
-	clock utilclock.Clock
-=======
 	clock clock.Clock
->>>>>>> upstream/master
 
 	// mu protects the below fields
 	mu sync.RWMutex

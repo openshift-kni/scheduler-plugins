@@ -25,19 +25,12 @@ import (
 // PersistentVolumeClaimStatusApplyConfiguration represents an declarative configuration of the PersistentVolumeClaimStatus type for use
 // with apply.
 type PersistentVolumeClaimStatusApplyConfiguration struct {
-<<<<<<< HEAD
-	Phase       *v1.PersistentVolumeClaimPhase                     `json:"phase,omitempty"`
-	AccessModes []v1.PersistentVolumeAccessMode                    `json:"accessModes,omitempty"`
-	Capacity    *v1.ResourceList                                   `json:"capacity,omitempty"`
-	Conditions  []PersistentVolumeClaimConditionApplyConfiguration `json:"conditions,omitempty"`
-=======
 	Phase              *v1.PersistentVolumeClaimPhase                     `json:"phase,omitempty"`
 	AccessModes        []v1.PersistentVolumeAccessMode                    `json:"accessModes,omitempty"`
 	Capacity           *v1.ResourceList                                   `json:"capacity,omitempty"`
 	Conditions         []PersistentVolumeClaimConditionApplyConfiguration `json:"conditions,omitempty"`
 	AllocatedResources *v1.ResourceList                                   `json:"allocatedResources,omitempty"`
 	ResizeStatus       *v1.PersistentVolumeClaimResizeStatus              `json:"resizeStatus,omitempty"`
->>>>>>> upstream/master
 }
 
 // PersistentVolumeClaimStatusApplyConfiguration constructs an declarative configuration of the PersistentVolumeClaimStatus type for use with
@@ -84,8 +77,6 @@ func (b *PersistentVolumeClaimStatusApplyConfiguration) WithConditions(values ..
 	}
 	return b
 }
-<<<<<<< HEAD
-=======
 
 // WithAllocatedResources sets the AllocatedResources field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
@@ -102,4 +93,3 @@ func (b *PersistentVolumeClaimStatusApplyConfiguration) WithResizeStatus(value v
 	b.ResizeStatus = &value
 	return b
 }
->>>>>>> upstream/master

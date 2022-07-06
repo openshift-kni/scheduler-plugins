@@ -23,16 +23,6 @@ import (
 	"time"
 
 	"golang.org/x/time/rate"
-<<<<<<< HEAD
-)
-
-type RateLimiter interface {
-	// TryAccept returns true if a token is taken immediately. Otherwise,
-	// it returns false.
-	TryAccept() bool
-	// Accept returns once a token becomes available.
-	Accept()
-=======
 	"k8s.io/utils/clock"
 )
 
@@ -40,30 +30,20 @@ type PassiveRateLimiter interface {
 	// TryAccept returns true if a token is taken immediately. Otherwise,
 	// it returns false.
 	TryAccept() bool
->>>>>>> upstream/master
 	// Stop stops the rate limiter, subsequent calls to CanAccept will return false
 	Stop()
 	// QPS returns QPS of this rate limiter
 	QPS() float32
-<<<<<<< HEAD
-=======
 }
 
 type RateLimiter interface {
 	PassiveRateLimiter
 	// Accept returns once a token becomes available.
 	Accept()
->>>>>>> upstream/master
 	// Wait returns nil if a token is taken before the Context is done.
 	Wait(ctx context.Context) error
 }
 
-<<<<<<< HEAD
-type tokenBucketRateLimiter struct {
-	limiter *rate.Limiter
-	clock   Clock
-	qps     float32
-=======
 type tokenBucketPassiveRateLimiter struct {
 	limiter *rate.Limiter
 	qps     float32
@@ -73,7 +53,6 @@ type tokenBucketPassiveRateLimiter struct {
 type tokenBucketRateLimiter struct {
 	tokenBucketPassiveRateLimiter
 	clock Clock
->>>>>>> upstream/master
 }
 
 // NewTokenBucketRateLimiter creates a rate limiter which implements a token bucket approach.
@@ -83,9 +62,6 @@ type tokenBucketRateLimiter struct {
 // The maximum number of tokens in the bucket is capped at 'burst'.
 func NewTokenBucketRateLimiter(qps float32, burst int) RateLimiter {
 	limiter := rate.NewLimiter(rate.Limit(qps), burst)
-<<<<<<< HEAD
-	return newTokenBucketRateLimiter(limiter, realClock{}, qps)
-=======
 	return newTokenBucketRateLimiterWithClock(limiter, clock.RealClock{}, qps)
 }
 
@@ -94,68 +70,20 @@ func NewTokenBucketRateLimiter(qps float32, burst int) RateLimiter {
 func NewTokenBucketPassiveRateLimiter(qps float32, burst int) PassiveRateLimiter {
 	limiter := rate.NewLimiter(rate.Limit(qps), burst)
 	return newTokenBucketRateLimiterWithPassiveClock(limiter, clock.RealClock{}, qps)
->>>>>>> upstream/master
 }
 
 // An injectable, mockable clock interface.
 type Clock interface {
-<<<<<<< HEAD
-	Now() time.Time
-	Sleep(time.Duration)
-}
-
-type realClock struct{}
-
-func (realClock) Now() time.Time {
-	return time.Now()
-}
-func (realClock) Sleep(d time.Duration) {
-	time.Sleep(d)
-}
-=======
 	clock.PassiveClock
 	Sleep(time.Duration)
 }
 
 var _ Clock = (*clock.RealClock)(nil)
->>>>>>> upstream/master
 
 // NewTokenBucketRateLimiterWithClock is identical to NewTokenBucketRateLimiter
 // but allows an injectable clock, for testing.
 func NewTokenBucketRateLimiterWithClock(qps float32, burst int, c Clock) RateLimiter {
 	limiter := rate.NewLimiter(rate.Limit(qps), burst)
-<<<<<<< HEAD
-	return newTokenBucketRateLimiter(limiter, c, qps)
-}
-
-func newTokenBucketRateLimiter(limiter *rate.Limiter, c Clock, qps float32) RateLimiter {
-	return &tokenBucketRateLimiter{
-		limiter: limiter,
-		clock:   c,
-		qps:     qps,
-	}
-}
-
-func (t *tokenBucketRateLimiter) TryAccept() bool {
-	return t.limiter.AllowN(t.clock.Now(), 1)
-}
-
-// Accept will block until a token becomes available
-func (t *tokenBucketRateLimiter) Accept() {
-	now := t.clock.Now()
-	t.clock.Sleep(t.limiter.ReserveN(now, 1).DelayFrom(now))
-}
-
-func (t *tokenBucketRateLimiter) Stop() {
-}
-
-func (t *tokenBucketRateLimiter) QPS() float32 {
-	return t.qps
-}
-
-func (t *tokenBucketRateLimiter) Wait(ctx context.Context) error {
-	return t.limiter.Wait(ctx)
-=======
 	return newTokenBucketRateLimiterWithClock(limiter, c, qps)
 }
 
@@ -201,7 +129,6 @@ func (tbrl *tokenBucketRateLimiter) Accept() {
 
 func (tbrl *tokenBucketRateLimiter) Wait(ctx context.Context) error {
 	return tbrl.limiter.Wait(ctx)
->>>>>>> upstream/master
 }
 
 type fakeAlwaysRateLimiter struct{}
@@ -255,8 +182,6 @@ func (t *fakeNeverRateLimiter) QPS() float32 {
 func (t *fakeNeverRateLimiter) Wait(ctx context.Context) error {
 	return errors.New("can not be accept")
 }
-<<<<<<< HEAD
-=======
 
 var (
 	_ RateLimiter = (*tokenBucketRateLimiter)(nil)
@@ -265,4 +190,3 @@ var (
 )
 
 var _ PassiveRateLimiter = (*tokenBucketPassiveRateLimiter)(nil)
->>>>>>> upstream/master

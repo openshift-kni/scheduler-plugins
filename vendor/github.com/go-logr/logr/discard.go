@@ -16,41 +16,6 @@ limitations under the License.
 
 package logr
 
-<<<<<<< HEAD
-// Discard returns a valid Logger that discards all messages logged to it.
-// It can be used whenever the caller is not interested in the logs.
-func Discard() Logger {
-	return DiscardLogger{}
-}
-
-// DiscardLogger is a Logger that discards all messages.
-type DiscardLogger struct{}
-
-func (l DiscardLogger) Enabled() bool {
-	return false
-}
-
-func (l DiscardLogger) Info(msg string, keysAndValues ...interface{}) {
-}
-
-func (l DiscardLogger) Error(err error, msg string, keysAndValues ...interface{}) {
-}
-
-func (l DiscardLogger) V(level int) Logger {
-	return l
-}
-
-func (l DiscardLogger) WithValues(keysAndValues ...interface{}) Logger {
-	return l
-}
-
-func (l DiscardLogger) WithName(name string) Logger {
-	return l
-}
-
-// Verify that it actually implements the interface
-var _ Logger = DiscardLogger{}
-=======
 // Discard returns a Logger that discards all messages logged to it.  It can be
 // used whenever the caller is not interested in the logs.  Logger instances
 // produced by this function always compare as equal.
@@ -87,4 +52,3 @@ func (l discardLogSink) WithValues(...interface{}) LogSink {
 func (l discardLogSink) WithName(string) LogSink {
 	return l
 }
->>>>>>> upstream/master

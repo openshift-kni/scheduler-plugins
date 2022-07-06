@@ -17,11 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-<<<<<<< HEAD
-	"k8s.io/api/core/v1"
-=======
 	v1 "k8s.io/api/core/v1"
->>>>>>> upstream/master
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,14 +29,10 @@ import (
 
 // NodeMetrics sets resource usage metrics of a node.
 type NodeMetrics struct {
-<<<<<<< HEAD
-	metav1.TypeMeta   `json:",inline"`
-=======
 	metav1.TypeMeta `json:",inline"`
 	// Standard object's metadata.
 	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
 	// +optional
->>>>>>> upstream/master
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
 	// The following fields define time interval from which metrics were
@@ -72,14 +64,10 @@ type NodeMetricsList struct {
 
 // PodMetrics sets resource usage metrics of a pod.
 type PodMetrics struct {
-<<<<<<< HEAD
-	metav1.TypeMeta   `json:",inline"`
-=======
 	metav1.TypeMeta `json:",inline"`
 	// Standard object's metadata.
 	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
 	// +optional
->>>>>>> upstream/master
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
 	// The following fields define time interval from which metrics were

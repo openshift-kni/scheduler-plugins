@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 //go:build linux
->>>>>>> upstream/master
 // +build linux
 
 /*
@@ -30,13 +27,7 @@ import (
 	"time"
 
 	v1 "k8s.io/api/core/v1"
-<<<<<<< HEAD
-	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/klog/v2"
-	"k8s.io/kubernetes/pkg/features"
-=======
-	"k8s.io/klog/v2"
->>>>>>> upstream/master
 	"k8s.io/kubernetes/pkg/volume/util/types"
 )
 
@@ -54,31 +45,11 @@ func SetVolumeOwnership(mounter Mounter, fsGroup *int64, fsGroupChangePolicy *v1
 		return nil
 	}
 
-<<<<<<< HEAD
-	fsGroupPolicyEnabled := utilfeature.DefaultFeatureGate.Enabled(features.ConfigurableFSGroupPolicy)
-
-=======
->>>>>>> upstream/master
 	timer := time.AfterFunc(30*time.Second, func() {
 		klog.Warningf("Setting volume ownership for %s and fsGroup set. If the volume has a lot of files then setting volume ownership could be slow, see https://github.com/kubernetes/kubernetes/issues/69699", mounter.GetPath())
 	})
 	defer timer.Stop()
 
-<<<<<<< HEAD
-	// This code exists for legacy purposes, so as old behaviour is entirely preserved when feature gate is disabled
-	// TODO: remove this when ConfigurableFSGroupPolicy turns GA.
-	if !fsGroupPolicyEnabled {
-		err := legacyOwnershipChange(mounter, fsGroup)
-		if completeFunc != nil {
-			completeFunc(types.CompleteFuncParam{
-				Err: &err,
-			})
-		}
-		return err
-	}
-
-=======
->>>>>>> upstream/master
 	if skipPermissionChange(mounter, fsGroup, fsGroupChangePolicy) {
 		klog.V(3).InfoS("Skipping permission and ownership change for volume", "path", mounter.GetPath())
 		return nil
@@ -98,18 +69,6 @@ func SetVolumeOwnership(mounter Mounter, fsGroup *int64, fsGroupChangePolicy *v1
 	return err
 }
 
-<<<<<<< HEAD
-func legacyOwnershipChange(mounter Mounter, fsGroup *int64) error {
-	return filepath.Walk(mounter.GetPath(), func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		return changeFilePermission(path, fsGroup, mounter.GetAttributes().ReadOnly, info)
-	})
-}
-
-=======
->>>>>>> upstream/master
 func changeFilePermission(filename string, fsGroup *int64, readonly bool, info os.FileInfo) error {
 	err := os.Lchown(filename, -1, int(*fsGroup))
 	if err != nil {

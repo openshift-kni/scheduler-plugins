@@ -17,8 +17,6 @@ limitations under the License.
 package config
 
 import (
-<<<<<<< HEAD
-=======
 	"fmt"
 	"strconv"
 	"strings"
@@ -27,7 +25,6 @@ import (
 	"github.com/spf13/pflag"
 
 	"k8s.io/apimachinery/pkg/api/resource"
->>>>>>> upstream/master
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -96,11 +93,6 @@ type LoggingConfiguration struct {
 	// Format Flag specifies the structure of log messages.
 	// default value of format is `text`
 	Format string
-<<<<<<< HEAD
-	// [Experimental] When enabled prevents logging of fields tagged as sensitive (passwords, keys, tokens).
-	// Runtime log sanitization may introduce significant computation overhead and therefore should not be enabled in production.`)
-	Sanitization bool
-=======
 	// Maximum number of seconds between log flushes. Ignored if the
 	// selected logging backend writes log messages without buffering.
 	FlushFrequency time.Duration
@@ -219,5 +211,4 @@ func (l *VerbosityLevel) Set(value string) error {
 
 func (l *VerbosityLevel) Type() string {
 	return "Level"
->>>>>>> upstream/master
 }

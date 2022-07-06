@@ -264,8 +264,6 @@ TEXT libc_sendfile_trampoline<>(SB),NOSPLIT,$0-0
 GLOBL	·libc_sendfile_trampoline_addr(SB), RODATA, $8
 DATA	·libc_sendfile_trampoline_addr(SB)/8, $libc_sendfile_trampoline<>(SB)
 
-<<<<<<< HEAD
-=======
 TEXT libc_shmat_trampoline<>(SB),NOSPLIT,$0-0
 	JMP	libc_shmat(SB)
 
@@ -290,7 +288,6 @@ TEXT libc_shmget_trampoline<>(SB),NOSPLIT,$0-0
 GLOBL	·libc_shmget_trampoline_addr(SB), RODATA, $8
 DATA	·libc_shmget_trampoline_addr(SB)/8, $libc_shmget_trampoline<>(SB)
 
->>>>>>> upstream/master
 TEXT libc_access_trampoline<>(SB),NOSPLIT,$0-0
 	JMP	libc_access(SB)
 

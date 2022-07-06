@@ -18,10 +18,6 @@ package metrics
 
 import (
 	"context"
-<<<<<<< HEAD
-	"fmt"
-=======
->>>>>>> upstream/master
 	"strconv"
 	"time"
 
@@ -48,11 +44,6 @@ const (
 )
 
 var (
-<<<<<<< HEAD
-	// Use buckets ranging from 5 ms to 2.5 seconds (admission webhooks timeout at 30 seconds by default).
-	latencyBuckets       = []float64{0.005, 0.025, 0.1, 0.5, 2.5}
-=======
->>>>>>> upstream/master
 	latencySummaryMaxAge = 5 * time.Hour
 
 	// Metrics provides access to all admission metrics.
@@ -125,31 +116,13 @@ type AdmissionMetrics struct {
 	controller       *metricSet
 	webhook          *metricSet
 	webhookRejection *metrics.CounterVec
-<<<<<<< HEAD
-=======
 	webhookRequest   *metrics.CounterVec
->>>>>>> upstream/master
 }
 
 // newAdmissionMetrics create a new AdmissionMetrics, configured with default metric names.
 func newAdmissionMetrics() *AdmissionMetrics {
 	// Admission metrics for a step of the admission flow. The entire admission flow is broken down into a series of steps
 	// Each step is identified by a distinct type label value.
-<<<<<<< HEAD
-	step := newMetricSet("step",
-		[]string{"type", "operation", "rejected"},
-		"Admission sub-step %s, broken out for each operation and API resource and step type (validate or admit).", true)
-
-	// Built-in admission controller metrics. Each admission controller is identified by name.
-	controller := newMetricSet("controller",
-		[]string{"name", "type", "operation", "rejected"},
-		"Admission controller %s, identified by name and broken out for each operation and API resource and type (validate or admit).", false)
-
-	// Admission webhook metrics. Each webhook is identified by name.
-	webhook := newMetricSet("webhook",
-		[]string{"name", "type", "operation", "rejected"},
-		"Admission webhook %s, identified by name and broken out for each operation and API resource and type (validate or admit).", false)
-=======
 	// Use buckets ranging from 5 ms to 2.5 seconds.
 	step := &metricSet{
 		latencies: metrics.NewHistogramVec(
@@ -212,7 +185,6 @@ func newAdmissionMetrics() *AdmissionMetrics {
 
 		latenciesSummary: nil,
 	}
->>>>>>> upstream/master
 
 	webhookRejection := metrics.NewCounterVec(
 		&metrics.CounterOpts{
@@ -224,8 +196,6 @@ func newAdmissionMetrics() *AdmissionMetrics {
 		},
 		[]string{"name", "type", "operation", "error_type", "rejection_code"})
 
-<<<<<<< HEAD
-=======
 	webhookRequest := metrics.NewCounterVec(
 		&metrics.CounterOpts{
 			Namespace:      namespace,
@@ -236,17 +206,12 @@ func newAdmissionMetrics() *AdmissionMetrics {
 		},
 		[]string{"name", "type", "operation", "code", "rejected"})
 
->>>>>>> upstream/master
 	step.mustRegister()
 	controller.mustRegister()
 	webhook.mustRegister()
 	legacyregistry.MustRegister(webhookRejection)
-<<<<<<< HEAD
-	return &AdmissionMetrics{step: step, controller: controller, webhook: webhook, webhookRejection: webhookRejection}
-=======
 	legacyregistry.MustRegister(webhookRequest)
 	return &AdmissionMetrics{step: step, controller: controller, webhook: webhook, webhookRejection: webhookRejection, webhookRequest: webhookRequest}
->>>>>>> upstream/master
 }
 
 func (m *AdmissionMetrics) reset() {
@@ -266,10 +231,6 @@ func (m *AdmissionMetrics) ObserveAdmissionController(ctx context.Context, elaps
 }
 
 // ObserveWebhook records admission related metrics for a admission webhook.
-<<<<<<< HEAD
-func (m *AdmissionMetrics) ObserveWebhook(ctx context.Context, elapsed time.Duration, rejected bool, attr admission.Attributes, stepType string, extraLabels ...string) {
-	m.webhook.observe(ctx, elapsed, append(extraLabels, stepType, string(attr.GetOperation()), strconv.FormatBool(rejected))...)
-=======
 func (m *AdmissionMetrics) ObserveWebhook(ctx context.Context, name string, elapsed time.Duration, rejected bool, attr admission.Attributes, stepType string, code int) {
 	// We truncate codes greater than 600 to keep the cardinality bounded.
 	if code > 600 {
@@ -277,7 +238,6 @@ func (m *AdmissionMetrics) ObserveWebhook(ctx context.Context, name string, elap
 	}
 	m.webhookRequest.WithContext(ctx).WithLabelValues(name, stepType, string(attr.GetOperation()), strconv.Itoa(code), strconv.FormatBool(rejected)).Inc()
 	m.webhook.observe(ctx, elapsed, name, stepType, string(attr.GetOperation()), strconv.FormatBool(rejected))
->>>>>>> upstream/master
 }
 
 // ObserveWebhookRejection records admission related metrics for an admission webhook rejection.
@@ -295,42 +255,6 @@ type metricSet struct {
 	latenciesSummary *metrics.SummaryVec
 }
 
-<<<<<<< HEAD
-func newMetricSet(name string, labels []string, helpTemplate string, hasSummary bool) *metricSet {
-	var summary *metrics.SummaryVec
-	if hasSummary {
-		summary = metrics.NewSummaryVec(
-			&metrics.SummaryOpts{
-				Namespace:      namespace,
-				Subsystem:      subsystem,
-				Name:           fmt.Sprintf("%s_admission_duration_seconds_summary", name),
-				Help:           fmt.Sprintf(helpTemplate, "latency summary in seconds"),
-				MaxAge:         latencySummaryMaxAge,
-				StabilityLevel: metrics.ALPHA,
-			},
-			labels,
-		)
-	}
-
-	return &metricSet{
-		latencies: metrics.NewHistogramVec(
-			&metrics.HistogramOpts{
-				Namespace:      namespace,
-				Subsystem:      subsystem,
-				Name:           fmt.Sprintf("%s_admission_duration_seconds", name),
-				Help:           fmt.Sprintf(helpTemplate, "latency histogram in seconds"),
-				Buckets:        latencyBuckets,
-				StabilityLevel: metrics.ALPHA,
-			},
-			labels,
-		),
-
-		latenciesSummary: summary,
-	}
-}
-
-=======
->>>>>>> upstream/master
 // MustRegister registers all the prometheus metrics in the metricSet.
 func (m *metricSet) mustRegister() {
 	legacyregistry.MustRegister(m.latencies)

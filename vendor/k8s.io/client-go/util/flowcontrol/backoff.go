@@ -17,19 +17,12 @@ limitations under the License.
 package flowcontrol
 
 import (
-<<<<<<< HEAD
-	"sync"
-	"time"
-
-	"k8s.io/apimachinery/pkg/util/clock"
-=======
 	"math/rand"
 	"sync"
 	"time"
 
 	"k8s.io/utils/clock"
 	testingclock "k8s.io/utils/clock/testing"
->>>>>>> upstream/master
 	"k8s.io/utils/integer"
 )
 
@@ -44,25 +37,6 @@ type Backoff struct {
 	defaultDuration time.Duration
 	maxDuration     time.Duration
 	perItemBackoff  map[string]*backoffEntry
-<<<<<<< HEAD
-}
-
-func NewFakeBackOff(initial, max time.Duration, tc *clock.FakeClock) *Backoff {
-	return &Backoff{
-		perItemBackoff:  map[string]*backoffEntry{},
-		Clock:           tc,
-		defaultDuration: initial,
-		maxDuration:     max,
-	}
-}
-
-func NewBackOff(initial, max time.Duration) *Backoff {
-	return &Backoff{
-		perItemBackoff:  map[string]*backoffEntry{},
-		Clock:           clock.RealClock{},
-		defaultDuration: initial,
-		maxDuration:     max,
-=======
 	rand            *rand.Rand
 
 	// maxJitterFactor adds jitter to the exponentially backed off delay.
@@ -100,7 +74,6 @@ func newBackoff(clock clock.Clock, initial, max time.Duration, maxJitterFactor f
 		maxDuration:     max,
 		maxJitterFactor: maxJitterFactor,
 		rand:            random,
->>>>>>> upstream/master
 	}
 }
 
@@ -123,15 +96,10 @@ func (p *Backoff) Next(id string, eventTime time.Time) {
 	entry, ok := p.perItemBackoff[id]
 	if !ok || hasExpired(eventTime, entry.lastUpdate, p.maxDuration) {
 		entry = p.initEntryUnsafe(id)
-<<<<<<< HEAD
-	} else {
-		delay := entry.backoff * 2 // exponential
-=======
 		entry.backoff += p.jitter(entry.backoff)
 	} else {
 		delay := entry.backoff * 2       // exponential
 		delay += p.jitter(entry.backoff) // add some jitter to the delay
->>>>>>> upstream/master
 		entry.backoff = time.Duration(integer.Int64Min(int64(delay), int64(p.maxDuration)))
 	}
 	entry.lastUpdate = p.Clock.Now()
@@ -199,8 +167,6 @@ func (p *Backoff) initEntryUnsafe(id string) *backoffEntry {
 	return entry
 }
 
-<<<<<<< HEAD
-=======
 func (p *Backoff) jitter(delay time.Duration) time.Duration {
 	if p.rand == nil {
 		return 0
@@ -209,7 +175,6 @@ func (p *Backoff) jitter(delay time.Duration) time.Duration {
 	return time.Duration(p.rand.Float64() * p.maxJitterFactor * float64(delay))
 }
 
->>>>>>> upstream/master
 // After 2*maxDuration we restart the backoff factor to the beginning
 func hasExpired(eventTime time.Time, lastUpdate time.Time, maxDuration time.Duration) bool {
 	return eventTime.Sub(lastUpdate) > maxDuration*2 // consider stable if it's ok for twice the maxDuration

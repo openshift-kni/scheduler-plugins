@@ -58,13 +58,8 @@ func (o *Options) Validate() []error {
 
 // AddFlags adds flags for exposing component metrics.
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-<<<<<<< HEAD
-	if o != nil {
-		o = NewOptions()
-=======
 	if o == nil {
 		return
->>>>>>> upstream/master
 	}
 	fs.StringVar(&o.ShowHiddenMetricsForVersion, "show-hidden-metrics-for-version", o.ShowHiddenMetricsForVersion,
 		"The previous version for which you want to show hidden metrics. "+

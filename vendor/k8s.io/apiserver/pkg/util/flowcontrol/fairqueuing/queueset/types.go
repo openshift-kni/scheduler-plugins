@@ -28,11 +28,7 @@ import (
 )
 
 // request is a temporary container for "requests" with additional
-<<<<<<< HEAD
-// tracking fields required for the functionality FQScheduler
-=======
 // tracking fields required for QueueSet functionality.
->>>>>>> upstream/master
 type request struct {
 	ctx context.Context
 
@@ -45,31 +41,17 @@ type request struct {
 	// a queue.
 	queue *queue
 
-<<<<<<< HEAD
-	// startTime is the real time when the request began executing
-	startTime time.Time
-
-	// width of the request
-	width fcrequest.Width
-=======
 	// estimated amount of work of the request
 	workEstimate completedWorkEstimate
->>>>>>> upstream/master
 
 	// decision gets set to a `requestDecision` indicating what to do
 	// with this request.  It gets set exactly once, when the request
 	// is removed from its queue.  The value will be decisionReject,
-<<<<<<< HEAD
-	// decisionCancel, or decisionExecute; decisionTryAnother never
-	// appears here.
-	decision promise.LockingWriteOnce
-=======
 	// decisionCancel, or decisionExecute.
 	//
 	// decision.Set is called with the queueSet locked.
 	// decision.Get is called without the queueSet locked.
 	decision promise.WriteOnce
->>>>>>> upstream/master
 
 	// arrivalTime is the real time when the request entered this system
 	arrivalTime time.Time
@@ -78,31 +60,6 @@ type request struct {
 	// log messages
 	descr1, descr2 interface{}
 
-<<<<<<< HEAD
-	// Indicates whether client has called Request::Wait()
-	waitStarted bool
-
-	queueNoteFn fq.QueueNoteFn
-
-	// Removes this request from its queue. If the request is not put into a
-	// a queue it will be nil.
-	removeFromQueueFn removeFromFIFOFunc
-}
-
-// queue is an array of requests with additional metadata required for
-// the FQScheduler
-type queue struct {
-	// The requests are stored in a FIFO list.
-	requests fifo
-
-	// virtualStart is the virtual time (virtual seconds since process
-	// startup) when the oldest request in the queue (if there is any)
-	// started virtually executing
-	virtualStart float64
-
-	requestsExecuting int
-	index             int
-=======
 	queueNoteFn fq.QueueNoteFn
 
 	// The preceding fields are filled in at creation and not modified since;
@@ -145,28 +102,12 @@ type queue struct {
 
 	// index is the position of this queue among those in its queueSet.
 	index int
->>>>>>> upstream/master
 
 	// seatsInUse is the total number of "seats" currently occupied
 	// by all the requests that are currently executing in this queue.
 	seatsInUse int
 }
 
-<<<<<<< HEAD
-// Enqueue enqueues a request into the queue and
-// sets the removeFromQueueFn of the request appropriately.
-func (q *queue) Enqueue(request *request) {
-	request.removeFromQueueFn = q.requests.Enqueue(request)
-}
-
-// Dequeue dequeues a request from the queue
-func (q *queue) Dequeue() (*request, bool) {
-	request, ok := q.requests.Dequeue()
-	return request, ok
-}
-
-func (q *queue) dump(includeDetails bool) debug.QueueDump {
-=======
 // queueSum tracks the sum of initial seats, max seats, and
 // totalWork from all requests in a given queue
 type queueSum struct {
@@ -204,7 +145,6 @@ func (qs *queueSet) computeFinalWork(we *fcrequest.WorkEstimate) fcrequest.SeatS
 }
 
 func (q *queue) dumpLocked(includeDetails bool) debug.QueueDump {
->>>>>>> upstream/master
 	digest := make([]debug.RequestDump, q.requests.Length())
 	i := 0
 	q.requests.Walk(func(r *request) bool {
@@ -213,10 +153,7 @@ func (q *queue) dumpLocked(includeDetails bool) debug.QueueDump {
 		digest[i].FlowDistinguisher = r.flowDistinguisher
 		digest[i].ArriveTime = r.arrivalTime
 		digest[i].StartTime = r.startTime
-<<<<<<< HEAD
-=======
 		digest[i].WorkEstimate = r.workEstimate.WorkEstimate
->>>>>>> upstream/master
 		if includeDetails {
 			userInfo, _ := genericrequest.UserFrom(r.ctx)
 			digest[i].UserName = userInfo.GetName()
@@ -228,13 +165,6 @@ func (q *queue) dumpLocked(includeDetails bool) debug.QueueDump {
 		i++
 		return true
 	})
-<<<<<<< HEAD
-	return debug.QueueDump{
-		VirtualStart:      q.virtualStart,
-		Requests:          digest,
-		ExecutingRequests: q.requestsExecuting,
-		SeatsInUse:        q.seatsInUse,
-=======
 
 	sum := q.requests.QueueSum()
 	queueSum := debug.QueueSum{
@@ -249,6 +179,5 @@ func (q *queue) dumpLocked(includeDetails bool) debug.QueueDump {
 		ExecutingRequests: q.requestsExecuting,
 		SeatsInUse:        q.seatsInUse,
 		QueueSum:          queueSum,
->>>>>>> upstream/master
 	}
 }

@@ -19,10 +19,7 @@ package admission
 import (
 	"context"
 	"fmt"
-<<<<<<< HEAD
-=======
 	"sync"
->>>>>>> upstream/master
 
 	auditinternal "k8s.io/apiserver/pkg/apis/audit"
 	"k8s.io/apiserver/pkg/audit"
@@ -31,14 +28,10 @@ import (
 // auditHandler logs annotations set by other admission handlers
 type auditHandler struct {
 	Interface
-<<<<<<< HEAD
-	ae *auditinternal.Event
-=======
 	// TODO: move the lock near the Annotations field of the audit event so it is always protected from concurrent access.
 	// to protect the 'Annotations' map of the audit event from concurrent writes
 	mutex sync.Mutex
 	ae    *auditinternal.Event
->>>>>>> upstream/master
 }
 
 var _ Interface = &auditHandler{}
@@ -53,17 +46,10 @@ func WithAudit(i Interface, ae *auditinternal.Event) Interface {
 	if i == nil {
 		return i
 	}
-<<<<<<< HEAD
-	return &auditHandler{i, ae}
-}
-
-func (handler auditHandler) Admit(ctx context.Context, a Attributes, o ObjectInterfaces) error {
-=======
 	return &auditHandler{Interface: i, ae: ae}
 }
 
 func (handler *auditHandler) Admit(ctx context.Context, a Attributes, o ObjectInterfaces) error {
->>>>>>> upstream/master
 	if !handler.Interface.Handles(a.GetOperation()) {
 		return nil
 	}
@@ -78,11 +64,7 @@ func (handler *auditHandler) Admit(ctx context.Context, a Attributes, o ObjectIn
 	return err
 }
 
-<<<<<<< HEAD
-func (handler auditHandler) Validate(ctx context.Context, a Attributes, o ObjectInterfaces) error {
-=======
 func (handler *auditHandler) Validate(ctx context.Context, a Attributes, o ObjectInterfaces) error {
->>>>>>> upstream/master
 	if !handler.Interface.Handles(a.GetOperation()) {
 		return nil
 	}
@@ -106,12 +88,6 @@ func ensureAnnotationGetter(a Attributes) error {
 	return fmt.Errorf("attributes must be an instance of privateAnnotationsGetter or AnnotationsGetter")
 }
 
-<<<<<<< HEAD
-func (handler auditHandler) logAnnotations(a Attributes) {
-	if handler.ae == nil {
-		return
-	}
-=======
 func (handler *auditHandler) logAnnotations(a Attributes) {
 	if handler.ae == nil {
 		return
@@ -119,7 +95,6 @@ func (handler *auditHandler) logAnnotations(a Attributes) {
 	handler.mutex.Lock()
 	defer handler.mutex.Unlock()
 
->>>>>>> upstream/master
 	switch a := a.(type) {
 	case privateAnnotationsGetter:
 		for key, value := range a.getAnnotations(handler.ae.Level) {

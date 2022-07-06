@@ -98,14 +98,10 @@ const (
 //      data to determine if an update is required.
 //  5.  A new timestamped dir is created
 //  6.  The payload is written to the new timestamped directory
-<<<<<<< HEAD
-//  7.  Symlinks and directory for new user-visible files are created (if needed).
-=======
 //  7.  A symlink to the new timestamped directory ..data_tmp is created that will
 //      become the new data directory
 //  8.  The new data directory symlink is renamed to the data directory; rename is atomic
 //  9.  Symlinks and directory for new user-visible files are created (if needed).
->>>>>>> upstream/master
 //
 //      For example, consider the files:
 //        <target-dir>/podName
@@ -120,15 +116,9 @@ const (
 //      The data directory itself is a link to a timestamped directory with
 //      the real data:
 //        <target-dir>/..data          -> ..2016_02_01_15_04_05.12345678/
-<<<<<<< HEAD
-//  8.  A symlink to the new timestamped directory ..data_tmp is created that will
-//      become the new data directory
-//  9.  The new data directory symlink is renamed to the data directory; rename is atomic
-=======
 //      NOTE(claudiub): We need to create these symlinks AFTER we've finished creating and
 //      linking everything else. On Windows, if a target does not exist, the created symlink
 //      will not work properly if the target ends up being a directory.
->>>>>>> upstream/master
 // 10.  Old paths are removed from the user-visible portion of the target directory
 // 11.  The previous timestamped directory is removed, if it exists
 func (w *AtomicWriter) Write(payload map[string]FileProjection) error {
@@ -191,15 +181,6 @@ func (w *AtomicWriter) Write(payload map[string]FileProjection) error {
 	klog.V(4).Infof("%s: performed write of new data to ts data directory: %s", w.logContext, tsDir)
 
 	// (7)
-<<<<<<< HEAD
-	if err = w.createUserVisibleFiles(cleanPayload); err != nil {
-		klog.Errorf("%s: error creating visible symlinks in %s: %v", w.logContext, w.targetDir, err)
-		return err
-	}
-
-	// (8)
-=======
->>>>>>> upstream/master
 	newDataDirPath := filepath.Join(w.targetDir, newDataDirName)
 	if err = os.Symlink(tsDirName, newDataDirPath); err != nil {
 		os.RemoveAll(tsDir)
@@ -207,11 +188,7 @@ func (w *AtomicWriter) Write(payload map[string]FileProjection) error {
 		return err
 	}
 
-<<<<<<< HEAD
-	// (9)
-=======
 	// (8)
->>>>>>> upstream/master
 	if runtime.GOOS == "windows" {
 		os.Remove(dataDirPath)
 		err = os.Symlink(tsDirName, dataDirPath)
@@ -226,15 +203,12 @@ func (w *AtomicWriter) Write(payload map[string]FileProjection) error {
 		return err
 	}
 
-<<<<<<< HEAD
-=======
 	// (9)
 	if err = w.createUserVisibleFiles(cleanPayload); err != nil {
 		klog.Errorf("%s: error creating visible symlinks in %s: %v", w.logContext, w.targetDir, err)
 		return err
 	}
 
->>>>>>> upstream/master
 	// (10)
 	if err = w.removeUserVisiblePaths(pathsToRemove); err != nil {
 		klog.Errorf("%s: error removing old visible symlinks: %v", w.logContext, err)

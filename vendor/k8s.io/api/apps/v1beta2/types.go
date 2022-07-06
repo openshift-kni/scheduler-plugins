@@ -169,8 +169,6 @@ type RollingUpdateStatefulSetStrategy struct {
 	Partition *int32 `json:"partition,omitempty" protobuf:"varint,1,opt,name=partition"`
 }
 
-<<<<<<< HEAD
-=======
 // PersistentVolumeClaimRetentionPolicyType is a string enumeration of the policies that will determine
 // when volumes from the VolumeClaimTemplates will be deleted when the controlling StatefulSet is
 // deleted or scaled down.
@@ -205,7 +203,6 @@ type StatefulSetPersistentVolumeClaimRetentionPolicy struct {
 	WhenScaled PersistentVolumeClaimRetentionPolicyType `json:"whenScaled,omitempty" protobuf:"bytes,2,opt,name=whenScaled,casttype=PersistentVolumeClaimRetentionPolicyType"`
 }
 
->>>>>>> upstream/master
 // A StatefulSetSpec is the specification of a StatefulSet.
 type StatefulSetSpec struct {
 	// replicas is the desired number of replicas of the given Template.
@@ -272,15 +269,12 @@ type StatefulSetSpec struct {
 	// This is an alpha field and requires enabling StatefulSetMinReadySeconds feature gate.
 	// +optional
 	MinReadySeconds int32 `json:"minReadySeconds,omitempty" protobuf:"varint,9,opt,name=minReadySeconds"`
-<<<<<<< HEAD
-=======
 
 	// PersistentVolumeClaimRetentionPolicy describes the policy used for PVCs created from
 	// the StatefulSet VolumeClaimTemplates. This requires the
 	// StatefulSetAutoDeletePVC feature gate to be enabled, which is alpha.
 	// +optional
 	PersistentVolumeClaimRetentionPolicy *StatefulSetPersistentVolumeClaimRetentionPolicy `json:"persistentVolumeClaimRetentionPolicy,omitempty" protobuf:"bytes,10,opt,name=persistentVolumeClaimRetentionPolicy"`
->>>>>>> upstream/master
 }
 
 // StatefulSetStatus represents the current state of a StatefulSet.
@@ -293,11 +287,7 @@ type StatefulSetStatus struct {
 	// replicas is the number of Pods created by the StatefulSet controller.
 	Replicas int32 `json:"replicas" protobuf:"varint,2,opt,name=replicas"`
 
-<<<<<<< HEAD
-	// readyReplicas is the number of Pods created by the StatefulSet controller that have a Ready Condition.
-=======
 	// readyReplicas is the number of pods created by this StatefulSet controller with a Ready Condition.
->>>>>>> upstream/master
 	ReadyReplicas int32 `json:"readyReplicas,omitempty" protobuf:"varint,3,opt,name=readyReplicas"`
 
 	// currentReplicas is the number of Pods created by the StatefulSet controller from the StatefulSet version
@@ -329,15 +319,8 @@ type StatefulSetStatus struct {
 	Conditions []StatefulSetCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,10,rep,name=conditions"`
 
 	// Total number of available pods (ready for at least minReadySeconds) targeted by this StatefulSet.
-<<<<<<< HEAD
-	// This is an alpha field and requires enabling StatefulSetMinReadySeconds feature gate.
-	// Remove omitempty when graduating to beta
-	// +optional
-	AvailableReplicas int32 `json:"availableReplicas,omitempty" protobuf:"varint,11,opt,name=availableReplicas"`
-=======
 	// This is a beta field and enabled/disabled by StatefulSetMinReadySeconds feature gate.
 	AvailableReplicas int32 `json:"availableReplicas" protobuf:"varint,11,opt,name=availableReplicas"`
->>>>>>> upstream/master
 }
 
 type StatefulSetConditionType string
@@ -518,11 +501,7 @@ type DeploymentStatus struct {
 	// +optional
 	UpdatedReplicas int32 `json:"updatedReplicas,omitempty" protobuf:"varint,3,opt,name=updatedReplicas"`
 
-<<<<<<< HEAD
-	// Total number of ready pods targeted by this deployment.
-=======
 	// readyReplicas is the number of pods targeted by this Deployment controller with a Ready Condition.
->>>>>>> upstream/master
 	// +optional
 	ReadyReplicas int32 `json:"readyReplicas,omitempty" protobuf:"varint,7,opt,name=readyReplicas"`
 
@@ -715,13 +694,8 @@ type DaemonSetStatus struct {
 	// More info: https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/
 	DesiredNumberScheduled int32 `json:"desiredNumberScheduled" protobuf:"varint,3,opt,name=desiredNumberScheduled"`
 
-<<<<<<< HEAD
-	// The number of nodes that should be running the daemon pod and have one
-	// or more of the daemon pod running and ready.
-=======
 	// Total number of nodes that should be running the daemon pod and have one
 	// or more of the daemon pod running with a Ready Condition by passing the readinessProbe.
->>>>>>> upstream/master
 	NumberReady int32 `json:"numberReady" protobuf:"varint,4,opt,name=numberReady"`
 
 	// The most recent generation observed by the daemon set controller.
@@ -924,11 +898,7 @@ type ReplicaSetStatus struct {
 	// +optional
 	FullyLabeledReplicas int32 `json:"fullyLabeledReplicas,omitempty" protobuf:"varint,2,opt,name=fullyLabeledReplicas"`
 
-<<<<<<< HEAD
-	// The number of ready replicas for this replica set.
-=======
 	// readyReplicas is the number of pods targeted by this ReplicaSet controller with a Ready Condition.
->>>>>>> upstream/master
 	// +optional
 	ReadyReplicas int32 `json:"readyReplicas,omitempty" protobuf:"varint,4,opt,name=readyReplicas"`
 

@@ -318,11 +318,6 @@ func Packages(context *generator.Context, arguments *args.GeneratorArgs) generat
 		}
 		if len(inputTags) == 1 {
 			var err error
-<<<<<<< HEAD
-			typesPkg, err = context.AddDirectory(filepath.Join(pkg.Path, inputTags[0]))
-			if err != nil {
-				klog.Fatalf("cannot import package %s", inputTags[0])
-=======
 
 			inputPath := inputTags[0]
 			if strings.HasPrefix(inputPath, "./") || strings.HasPrefix(inputPath, "../") {
@@ -335,7 +330,6 @@ func Packages(context *generator.Context, arguments *args.GeneratorArgs) generat
 			typesPkg, err = context.AddDirectory(inputPath)
 			if err != nil {
 				klog.Fatalf("cannot import package %s", inputPath)
->>>>>>> upstream/master
 			}
 			// update context.Order to the latest context.Universe
 			orderer := namer.Orderer{Namer: namer.NewPublicNamer(1)}

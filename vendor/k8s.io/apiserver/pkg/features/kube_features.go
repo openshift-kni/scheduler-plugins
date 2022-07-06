@@ -170,8 +170,6 @@ const (
 	//
 	// Add support for distributed tracing in the API Server
 	APIServerTracing featuregate.Feature = "APIServerTracing"
-<<<<<<< HEAD
-=======
 
 	// owner: @jiahuif
 	// kep: http://kep.k8s.io/2887
@@ -201,7 +199,6 @@ const (
 	//
 	// Enables server-side field validation.
 	ServerSideFieldValidation featuregate.Feature = "ServerSideFieldValidation"
->>>>>>> upstream/master
 )
 
 func init() {
@@ -212,26 +209,6 @@ func init() {
 // To add a new feature, define a key for it above and add it here. The features will be
 // available throughout Kubernetes binaries.
 var defaultKubernetesFeatureGates = map[featuregate.Feature]featuregate.FeatureSpec{
-<<<<<<< HEAD
-	StreamingProxyRedirects:  {Default: false, PreRelease: featuregate.Deprecated},
-	ValidateProxyRedirects:   {Default: true, PreRelease: featuregate.Deprecated},
-	AdvancedAuditing:         {Default: true, PreRelease: featuregate.GA},
-	APIResponseCompression:   {Default: true, PreRelease: featuregate.Beta},
-	APIListChunking:          {Default: true, PreRelease: featuregate.Beta},
-	DryRun:                   {Default: true, PreRelease: featuregate.GA},
-	RemainingItemCount:       {Default: true, PreRelease: featuregate.Beta},
-	ServerSideApply:          {Default: true, PreRelease: featuregate.GA},
-	StorageVersionHash:       {Default: true, PreRelease: featuregate.Beta},
-	StorageVersionAPI:        {Default: false, PreRelease: featuregate.Alpha},
-	WatchBookmark:            {Default: true, PreRelease: featuregate.GA, LockToDefault: true},
-	APIPriorityAndFairness:   {Default: true, PreRelease: featuregate.Beta},
-	RemoveSelfLink:           {Default: true, PreRelease: featuregate.Beta},
-	SelectorIndex:            {Default: true, PreRelease: featuregate.GA, LockToDefault: true},
-	WarningHeaders:           {Default: true, PreRelease: featuregate.GA, LockToDefault: true},
-	EfficientWatchResumption: {Default: true, PreRelease: featuregate.Beta},
-	APIServerIdentity:        {Default: false, PreRelease: featuregate.Alpha},
-	APIServerTracing:         {Default: false, PreRelease: featuregate.Alpha},
-=======
 	StreamingProxyRedirects:             {Default: false, PreRelease: featuregate.Deprecated},
 	ValidateProxyRedirects:              {Default: true, PreRelease: featuregate.Deprecated},
 	AdvancedAuditing:                    {Default: true, PreRelease: featuregate.GA},
@@ -254,5 +231,4 @@ var defaultKubernetesFeatureGates = map[featuregate.Feature]featuregate.FeatureS
 	CustomResourceValidationExpressions: {Default: false, PreRelease: featuregate.Alpha},
 	OpenAPIV3:                           {Default: false, PreRelease: featuregate.Alpha},
 	ServerSideFieldValidation:           {Default: false, PreRelease: featuregate.Alpha},
->>>>>>> upstream/master
 }

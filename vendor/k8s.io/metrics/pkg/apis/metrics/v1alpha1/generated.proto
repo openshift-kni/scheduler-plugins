@@ -41,12 +41,9 @@ message ContainerMetrics {
 
 // NodeMetrics sets resource usage metrics of a node.
 message NodeMetrics {
-<<<<<<< HEAD
-=======
   // Standard object's metadata.
   // More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
   // +optional
->>>>>>> upstream/master
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   // The following fields define time interval from which metrics were
@@ -71,12 +68,9 @@ message NodeMetricsList {
 
 // PodMetrics sets resource usage metrics of a pod.
 message PodMetrics {
-<<<<<<< HEAD
-=======
   // Standard object's metadata.
   // More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
   // +optional
->>>>>>> upstream/master
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   // The following fields define time interval from which metrics were

@@ -58,16 +58,11 @@ var (
 
 	apiHTTPClient = &http.Client{
 		Transport: &http.Transport{
-<<<<<<< HEAD
-			Proxy: http.ProxyFromEnvironment,
-			Dial:  limitDial,
-=======
 			Proxy:               http.ProxyFromEnvironment,
 			Dial:                limitDial,
 			MaxIdleConns:        1000,
 			MaxIdleConnsPerHost: 10000,
 			IdleConnTimeout:     90 * time.Second,
->>>>>>> upstream/master
 		},
 	}
 

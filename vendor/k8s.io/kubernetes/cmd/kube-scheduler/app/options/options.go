@@ -20,10 +20,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-<<<<<<< HEAD
-	"strconv"
-=======
->>>>>>> upstream/master
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -31,11 +27,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/uuid"
 	apiserveroptions "k8s.io/apiserver/pkg/server/options"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
-<<<<<<< HEAD
-=======
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/dynamic/dynamicinformer"
->>>>>>> upstream/master
 	clientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -51,29 +44,12 @@ import (
 	schedulerappconfig "k8s.io/kubernetes/cmd/kube-scheduler/app/config"
 	"k8s.io/kubernetes/pkg/scheduler"
 	kubeschedulerconfig "k8s.io/kubernetes/pkg/scheduler/apis/config"
-<<<<<<< HEAD
-	"k8s.io/kubernetes/pkg/scheduler/apis/config/latest"
-	"k8s.io/kubernetes/pkg/scheduler/apis/config/validation"
-=======
 	"k8s.io/kubernetes/pkg/scheduler/apis/config/validation"
 	netutils "k8s.io/utils/net"
->>>>>>> upstream/master
 )
 
 // Options has all the params needed to run a Scheduler
 type Options struct {
-<<<<<<< HEAD
-	// The default values. These are overridden if ConfigFile is set or by values in InsecureServing.
-	ComponentConfig kubeschedulerconfig.KubeSchedulerConfiguration
-
-	SecureServing           *apiserveroptions.SecureServingOptionsWithLoopback
-	CombinedInsecureServing *CombinedInsecureServingOptions
-	Authentication          *apiserveroptions.DelegatingAuthenticationOptions
-	Authorization           *apiserveroptions.DelegatingAuthorizationOptions
-	Metrics                 *metrics.Options
-	Logs                    *logs.Options
-	Deprecated              *DeprecatedOptions
-=======
 	// The default values.
 	ComponentConfig *kubeschedulerconfig.KubeSchedulerConfiguration
 
@@ -84,7 +60,6 @@ type Options struct {
 	Logs           *logs.Options
 	Deprecated     *DeprecatedOptions
 	LeaderElection *componentbaseconfig.LeaderElectionConfiguration
->>>>>>> upstream/master
 
 	// ConfigFile is the location of the scheduler server's configuration file.
 	ConfigFile string
@@ -93,26 +68,6 @@ type Options struct {
 	WriteConfigTo string
 
 	Master string
-<<<<<<< HEAD
-}
-
-// NewOptions returns default scheduler app options.
-func NewOptions() (*Options, error) {
-	o := &Options{
-		SecureServing: apiserveroptions.NewSecureServingOptions().WithLoopback(),
-		CombinedInsecureServing: &CombinedInsecureServingOptions{
-			Healthz: (&apiserveroptions.DeprecatedInsecureServingOptions{
-				BindNetwork: "tcp",
-			}).WithLoopback(),
-			Metrics: (&apiserveroptions.DeprecatedInsecureServingOptions{
-				BindNetwork: "tcp"}).WithLoopback(),
-		},
-		Authentication: apiserveroptions.NewDelegatingAuthenticationOptions(),
-		Authorization:  apiserveroptions.NewDelegatingAuthorizationOptions(),
-		Deprecated: &DeprecatedOptions{
-			UseLegacyPolicyConfig:    false,
-			PolicyConfigMapNamespace: metav1.NamespaceSystem,
-=======
 
 	// Flags hold the parsed CLI flags.
 	Flags *cliflag.NamedFlagSets
@@ -133,7 +88,6 @@ func NewOptions() *Options {
 			ResourceLock:      "leases",
 			ResourceName:      "kube-scheduler",
 			ResourceNamespace: "kube-system",
->>>>>>> upstream/master
 		},
 		Metrics: metrics.NewOptions(),
 		Logs:    logs.NewOptions(),
@@ -148,105 +102,6 @@ func NewOptions() *Options {
 	o.SecureServing.ServerCert.PairName = "kube-scheduler"
 	o.SecureServing.BindPort = kubeschedulerconfig.DefaultKubeSchedulerPort
 
-<<<<<<< HEAD
-	return o, nil
-}
-
-// Complete completes the remaining instantiation of the options obj.
-// In particular, it injects the latest internal versioned ComponentConfig.
-func (o *Options) Complete(nfs *cliflag.NamedFlagSets) error {
-	cfg, err := latest.Default()
-	if err != nil {
-		return err
-	}
-
-	hhost, hport, err := splitHostIntPort(cfg.HealthzBindAddress)
-	if err != nil {
-		return err
-	}
-	// Obtain CLI args related with insecure serving.
-	// If not specified in command line, derive the default settings from cfg.
-	insecureServing := nfs.FlagSet("insecure serving")
-	if !insecureServing.Changed("address") {
-		o.CombinedInsecureServing.BindAddress = hhost
-	}
-	if !insecureServing.Changed("port") {
-		o.CombinedInsecureServing.BindPort = hport
-	}
-	// Obtain deprecated CLI args. Set them to cfg if specified in command line.
-	deprecated := nfs.FlagSet("deprecated")
-	if deprecated.Changed("profiling") {
-		cfg.EnableProfiling = o.ComponentConfig.EnableProfiling
-	}
-	if deprecated.Changed("contention-profiling") {
-		cfg.EnableContentionProfiling = o.ComponentConfig.EnableContentionProfiling
-	}
-	if deprecated.Changed("kubeconfig") {
-		cfg.ClientConnection.Kubeconfig = o.ComponentConfig.ClientConnection.Kubeconfig
-	}
-	if deprecated.Changed("kube-api-content-type") {
-		cfg.ClientConnection.ContentType = o.ComponentConfig.ClientConnection.ContentType
-	}
-	if deprecated.Changed("kube-api-qps") {
-		cfg.ClientConnection.QPS = o.ComponentConfig.ClientConnection.QPS
-	}
-	if deprecated.Changed("kube-api-burst") {
-		cfg.ClientConnection.Burst = o.ComponentConfig.ClientConnection.Burst
-	}
-	if deprecated.Changed("lock-object-namespace") {
-		cfg.LeaderElection.ResourceNamespace = o.ComponentConfig.LeaderElection.ResourceNamespace
-	}
-	if deprecated.Changed("lock-object-name") {
-		cfg.LeaderElection.ResourceName = o.ComponentConfig.LeaderElection.ResourceName
-	}
-	// Obtain CLI args related with leaderelection. Set them to cfg if specified in command line.
-	leaderelection := nfs.FlagSet("leader election")
-	if leaderelection.Changed("leader-elect") {
-		cfg.LeaderElection.LeaderElect = o.ComponentConfig.LeaderElection.LeaderElect
-	}
-	if leaderelection.Changed("leader-elect-lease-duration") {
-		cfg.LeaderElection.LeaseDuration = o.ComponentConfig.LeaderElection.LeaseDuration
-	}
-	if leaderelection.Changed("leader-elect-renew-deadline") {
-		cfg.LeaderElection.RenewDeadline = o.ComponentConfig.LeaderElection.RenewDeadline
-	}
-	if leaderelection.Changed("leader-elect-retry-period") {
-		cfg.LeaderElection.RetryPeriod = o.ComponentConfig.LeaderElection.RetryPeriod
-	}
-	if leaderelection.Changed("leader-elect-resource-lock") {
-		cfg.LeaderElection.ResourceLock = o.ComponentConfig.LeaderElection.ResourceLock
-	}
-	if leaderelection.Changed("leader-elect-resource-name") {
-		cfg.LeaderElection.ResourceName = o.ComponentConfig.LeaderElection.ResourceName
-	}
-	if leaderelection.Changed("leader-elect-resource-namespace") {
-		cfg.LeaderElection.ResourceNamespace = o.ComponentConfig.LeaderElection.ResourceNamespace
-	}
-
-	o.ComponentConfig = *cfg
-	return nil
-}
-
-func splitHostIntPort(s string) (string, int, error) {
-	host, port, err := net.SplitHostPort(s)
-	if err != nil {
-		return "", 0, err
-	}
-	portInt, err := strconv.Atoi(port)
-	if err != nil {
-		return "", 0, err
-	}
-	return host, portInt, err
-}
-
-// Flags returns flags for a specific scheduler by section name
-func (o *Options) Flags() (nfs cliflag.NamedFlagSets) {
-	fs := nfs.FlagSet("misc")
-	fs.StringVar(&o.ConfigFile, "config", o.ConfigFile, `The path to the configuration file. The following flags can overwrite fields in this file:
-  --policy-config-file
-  --policy-configmap
-  --policy-configmap-namespace`)
-=======
 	o.initFlags()
 
 	return o
@@ -327,85 +182,41 @@ func (o *Options) initFlags() {
 	nfs := cliflag.NamedFlagSets{}
 	fs := nfs.FlagSet("misc")
 	fs.StringVar(&o.ConfigFile, "config", o.ConfigFile, "The path to the configuration file.")
->>>>>>> upstream/master
 	fs.StringVar(&o.WriteConfigTo, "write-config-to", o.WriteConfigTo, "If set, write the configuration values to this file and exit.")
 	fs.StringVar(&o.Master, "master", o.Master, "The address of the Kubernetes API server (overrides any value in kubeconfig)")
 
 	o.SecureServing.AddFlags(nfs.FlagSet("secure serving"))
-<<<<<<< HEAD
-	o.CombinedInsecureServing.AddFlags(nfs.FlagSet("insecure serving"))
-	o.Authentication.AddFlags(nfs.FlagSet("authentication"))
-	o.Authorization.AddFlags(nfs.FlagSet("authorization"))
-	o.Deprecated.AddFlags(nfs.FlagSet("deprecated"), &o.ComponentConfig)
-
-	options.BindLeaderElectionFlags(&o.ComponentConfig.LeaderElection, nfs.FlagSet("leader election"))
-=======
 	o.Authentication.AddFlags(nfs.FlagSet("authentication"))
 	o.Authorization.AddFlags(nfs.FlagSet("authorization"))
 	o.Deprecated.AddFlags(nfs.FlagSet("deprecated"))
 	options.BindLeaderElectionFlags(o.LeaderElection, nfs.FlagSet("leader election"))
->>>>>>> upstream/master
 	utilfeature.DefaultMutableFeatureGate.AddFlag(nfs.FlagSet("feature gate"))
 	o.Metrics.AddFlags(nfs.FlagSet("metrics"))
 	o.Logs.AddFlags(nfs.FlagSet("logs"))
 
-<<<<<<< HEAD
-	return nfs
-=======
 	o.Flags = &nfs
->>>>>>> upstream/master
 }
 
 // ApplyTo applies the scheduler options to the given scheduler app configuration.
 func (o *Options) ApplyTo(c *schedulerappconfig.Config) error {
 	if len(o.ConfigFile) == 0 {
-<<<<<<< HEAD
-		c.ComponentConfig = o.ComponentConfig
-
-		o.Deprecated.ApplyTo(c)
-
-		if err := o.CombinedInsecureServing.ApplyTo(c, &c.ComponentConfig); err != nil {
-			return err
-		}
-=======
 		// If the --config arg is not specified, honor the deprecated as well as leader election CLI args.
 		o.ApplyDeprecated()
 		o.ApplyLeaderElectionTo(o.ComponentConfig)
 		c.ComponentConfig = *o.ComponentConfig
->>>>>>> upstream/master
 	} else {
 		cfg, err := loadConfigFromFile(o.ConfigFile)
 		if err != nil {
 			return err
 		}
-<<<<<<< HEAD
-=======
 		// If the --config arg is specified, honor the leader election CLI args only.
 		o.ApplyLeaderElectionTo(cfg)
 
->>>>>>> upstream/master
 		if err := validation.ValidateKubeSchedulerConfiguration(cfg); err != nil {
 			return err
 		}
 
 		c.ComponentConfig = *cfg
-<<<<<<< HEAD
-
-		// apply any deprecated Policy flags, if applicable
-		o.Deprecated.ApplyTo(c)
-
-		// use the loaded config file only, with the exception of --address and --port.
-		if err := o.CombinedInsecureServing.ApplyToFromLoadedConfig(c, &c.ComponentConfig); err != nil {
-			return err
-		}
-	}
-
-	// If the user is using the legacy policy config, clear the profiles, they will be set
-	// on scheduler instantiation based on the configurations in the policy file.
-	if c.LegacyPolicySource != nil {
-		c.ComponentConfig.Profiles = nil
-=======
->>>>>>> upstream/master
 	}
 
 	if err := o.SecureServing.ApplyTo(&c.SecureServing, &c.LoopbackClientConfig); err != nil {
@@ -420,10 +231,6 @@ func (o *Options) ApplyTo(c *schedulerappconfig.Config) error {
 		}
 	}
 	o.Metrics.Apply()
-<<<<<<< HEAD
-	o.Logs.Apply()
-=======
->>>>>>> upstream/master
 	return nil
 }
 
@@ -431,26 +238,14 @@ func (o *Options) ApplyTo(c *schedulerappconfig.Config) error {
 func (o *Options) Validate() []error {
 	var errs []error
 
-<<<<<<< HEAD
-	if err := validation.ValidateKubeSchedulerConfiguration(&o.ComponentConfig); err != nil {
-		errs = append(errs, err.Errors()...)
-	}
-	errs = append(errs, o.SecureServing.Validate()...)
-	errs = append(errs, o.CombinedInsecureServing.Validate()...)
-=======
 	if err := validation.ValidateKubeSchedulerConfiguration(o.ComponentConfig); err != nil {
 		errs = append(errs, err.Errors()...)
 	}
 	errs = append(errs, o.SecureServing.Validate()...)
->>>>>>> upstream/master
 	errs = append(errs, o.Authentication.Validate()...)
 	errs = append(errs, o.Authorization.Validate()...)
 	errs = append(errs, o.Deprecated.Validate()...)
 	errs = append(errs, o.Metrics.Validate()...)
-<<<<<<< HEAD
-	errs = append(errs, o.Logs.Validate()...)
-=======
->>>>>>> upstream/master
 
 	return errs
 }
@@ -458,11 +253,7 @@ func (o *Options) Validate() []error {
 // Config return a scheduler config object
 func (o *Options) Config() (*schedulerappconfig.Config, error) {
 	if o.SecureServing != nil {
-<<<<<<< HEAD
-		if err := o.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{net.ParseIP("127.0.0.1")}); err != nil {
-=======
 		if err := o.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{netutils.ParseIPSloppy("127.0.0.1")}); err != nil {
->>>>>>> upstream/master
 			return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
 		}
 	}
@@ -504,11 +295,8 @@ func (o *Options) Config() (*schedulerappconfig.Config, error) {
 	c.Client = client
 	c.KubeConfig = kubeConfig
 	c.InformerFactory = scheduler.NewInformerFactory(client, 0)
-<<<<<<< HEAD
-=======
 	dynClient := dynamic.NewForConfigOrDie(kubeConfig)
 	c.DynInformerFactory = dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynClient, 0, corev1.NamespaceAll, nil)
->>>>>>> upstream/master
 	c.LeaderElection = leaderElectionConfig
 
 	return c, nil

@@ -34,10 +34,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
-<<<<<<< HEAD
-=======
 	utiljson "k8s.io/apimachinery/pkg/util/json"
->>>>>>> upstream/master
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/admission"
 	admissionmetrics "k8s.io/apiserver/pkg/admission/metrics"
@@ -46,10 +43,7 @@ import (
 	"k8s.io/apiserver/pkg/admission/plugin/webhook/generic"
 	webhookrequest "k8s.io/apiserver/pkg/admission/plugin/webhook/request"
 	auditinternal "k8s.io/apiserver/pkg/apis/audit"
-<<<<<<< HEAD
-=======
 	endpointsrequest "k8s.io/apiserver/pkg/endpoints/request"
->>>>>>> upstream/master
 	webhookutil "k8s.io/apiserver/pkg/util/webhook"
 	"k8s.io/apiserver/pkg/warning"
 	utiltrace "k8s.io/utils/trace"
@@ -69,11 +63,6 @@ const (
 	MutationAuditAnnotationFailedOpenKeyPrefix string = "failed-open." + MutationAuditAnnotationPrefix
 )
 
-<<<<<<< HEAD
-var encodingjson = json.CaseSensitiveJSONIterator()
-
-=======
->>>>>>> upstream/master
 type mutatingDispatcher struct {
 	cm     *webhookutil.ClientManager
 	plugin *Plugin
@@ -159,19 +148,6 @@ func (a *mutatingDispatcher) Dispatch(ctx context.Context, attr admission.Attrib
 			case *webhookutil.ErrCallingWebhook:
 				if !ignoreClientCallFailures {
 					rejected = true
-<<<<<<< HEAD
-					admissionmetrics.Metrics.ObserveWebhookRejection(ctx, hook.Name, "admit", string(versionedAttr.Attributes.GetOperation()), admissionmetrics.WebhookRejectionCallingWebhookError, 0)
-				}
-			case *webhookutil.ErrWebhookRejection:
-				rejected = true
-				admissionmetrics.Metrics.ObserveWebhookRejection(ctx, hook.Name, "admit", string(versionedAttr.Attributes.GetOperation()), admissionmetrics.WebhookRejectionNoError, int(err.Status.ErrStatus.Code))
-			default:
-				rejected = true
-				admissionmetrics.Metrics.ObserveWebhookRejection(ctx, hook.Name, "admit", string(versionedAttr.Attributes.GetOperation()), admissionmetrics.WebhookRejectionAPIServerInternalError, 0)
-			}
-		}
-		admissionmetrics.Metrics.ObserveWebhook(ctx, time.Since(t), rejected, versionedAttr.Attributes, "admit", hook.Name)
-=======
 					admissionmetrics.Metrics.ObserveWebhookRejection(ctx, hook.Name, "admit", string(versionedAttr.Attributes.GetOperation()), admissionmetrics.WebhookRejectionCallingWebhookError, int(err.Status.ErrStatus.Code))
 				}
 				admissionmetrics.Metrics.ObserveWebhook(ctx, hook.Name, time.Since(t), rejected, versionedAttr.Attributes, "admit", int(err.Status.ErrStatus.Code))
@@ -187,7 +163,6 @@ func (a *mutatingDispatcher) Dispatch(ctx context.Context, attr admission.Attrib
 		} else {
 			admissionmetrics.Metrics.ObserveWebhook(ctx, hook.Name, time.Since(t), rejected, versionedAttr.Attributes, "admit", 200)
 		}
->>>>>>> upstream/master
 		if changed {
 			// Patch had changed the object. Prepare to reinvoke all previous webhooks that are eligible for re-invocation.
 			webhookReinvokeCtx.RequireReinvokingPreviouslyInvokedPlugins()
@@ -242,11 +217,7 @@ func (a *mutatingDispatcher) callAttrMutatingHook(ctx context.Context, h *admiss
 	defer func() { annotator.addMutationAnnotation(changed) }()
 	if attr.Attributes.IsDryRun() {
 		if h.SideEffects == nil {
-<<<<<<< HEAD
-			return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("Webhook SideEffects is nil")}
-=======
 			return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("Webhook SideEffects is nil"), Status: apierrors.NewBadRequest("Webhook SideEffects is nil")}
->>>>>>> upstream/master
 		}
 		if !(*h.SideEffects == admissionregistrationv1.SideEffectClassNone || *h.SideEffects == admissionregistrationv1.SideEffectClassNoneOnDryRun) {
 			return false, webhookerrors.NewDryRunUnsupportedErr(h.Name)
@@ -255,20 +226,12 @@ func (a *mutatingDispatcher) callAttrMutatingHook(ctx context.Context, h *admiss
 
 	uid, request, response, err := webhookrequest.CreateAdmissionObjects(attr, invocation)
 	if err != nil {
-<<<<<<< HEAD
-		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("could not create admission objects: %w", err)}
-=======
 		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("could not create admission objects: %w", err), Status: apierrors.NewBadRequest("error creating admission objects")}
->>>>>>> upstream/master
 	}
 	// Make the webhook request
 	client, err := invocation.Webhook.GetRESTClient(a.cm)
 	if err != nil {
-<<<<<<< HEAD
-		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("could not get REST client: %w", err)}
-=======
 		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("could not get REST client: %w", err), Status: apierrors.NewBadRequest("error getting REST client")}
->>>>>>> upstream/master
 	}
 	trace := utiltrace.New("Call mutating webhook",
 		utiltrace.Field{"configuration", configurationName},
@@ -301,10 +264,6 @@ func (a *mutatingDispatcher) callAttrMutatingHook(ctx context.Context, h *admiss
 		}
 	}
 
-<<<<<<< HEAD
-	if err := r.Do(ctx).Into(response); err != nil {
-		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("failed to call webhook: %w", err)}
-=======
 	do := func() { err = r.Do(ctx).Into(response) }
 	if wd, ok := endpointsrequest.WebhookDurationFrom(ctx); ok {
 		tmp := do
@@ -319,17 +278,12 @@ func (a *mutatingDispatcher) callAttrMutatingHook(ctx context.Context, h *admiss
 			status = apierrors.NewBadRequest("error calling webhook")
 		}
 		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("failed to call webhook: %w", err), Status: status}
->>>>>>> upstream/master
 	}
 	trace.Step("Request completed")
 
 	result, err := webhookrequest.VerifyAdmissionResponse(uid, true, response)
 	if err != nil {
-<<<<<<< HEAD
-		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("received invalid webhook response: %w", err)}
-=======
 		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("received invalid webhook response: %w", err), Status: apierrors.NewServiceUnavailable("error validating webhook response")}
->>>>>>> upstream/master
 	}
 
 	for k, v := range result.AuditAnnotations {
@@ -377,11 +331,7 @@ func (a *mutatingDispatcher) callAttrMutatingHook(ctx context.Context, h *admiss
 			return false, apierrors.NewInternalError(err)
 		}
 	default:
-<<<<<<< HEAD
-		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("unsupported patch type %q", result.PatchType)}
-=======
 		return false, &webhookutil.ErrCallingWebhook{WebhookName: h.Name, Reason: fmt.Errorf("unsupported patch type %q", result.PatchType), Status: webhookerrors.ToStatusErr(h.Name, result.Result)}
->>>>>>> upstream/master
 	}
 
 	var newVersionedObject runtime.Object
@@ -500,11 +450,7 @@ func mutationAnnotationValue(configuration, webhook string, mutated bool) (strin
 		Webhook:       webhook,
 		Mutated:       mutated,
 	}
-<<<<<<< HEAD
-	bytes, err := encodingjson.Marshal(m)
-=======
 	bytes, err := utiljson.Marshal(m)
->>>>>>> upstream/master
 	return string(bytes), err
 }
 
@@ -515,10 +461,6 @@ func jsonPatchAnnotationValue(configuration, webhook string, patch interface{}) 
 		Patch:         patch,
 		PatchType:     string(admissionv1.PatchTypeJSONPatch),
 	}
-<<<<<<< HEAD
-	bytes, err := encodingjson.Marshal(p)
-=======
 	bytes, err := utiljson.Marshal(p)
->>>>>>> upstream/master
 	return string(bytes), err
 }

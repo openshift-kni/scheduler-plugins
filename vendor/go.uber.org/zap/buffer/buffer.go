@@ -106,8 +106,6 @@ func (b *Buffer) Write(bs []byte) (int, error) {
 	return len(bs), nil
 }
 
-<<<<<<< HEAD
-=======
 // WriteByte writes a single byte to the Buffer.
 //
 // Error returned is always nil, function signature is compatible
@@ -126,7 +124,6 @@ func (b *Buffer) WriteString(s string) (int, error) {
 	return len(s), nil
 }
 
->>>>>>> upstream/master
 // TrimNewline trims any final "\n" byte from the end of the buffer.
 func (b *Buffer) TrimNewline() {
 	if i := len(b.bs) - 1; i >= 0 {

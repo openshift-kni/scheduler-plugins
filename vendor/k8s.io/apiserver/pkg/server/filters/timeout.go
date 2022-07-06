@@ -30,10 +30,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/endpoints/metrics"
 	apirequest "k8s.io/apiserver/pkg/endpoints/request"
-<<<<<<< HEAD
-=======
 	"k8s.io/apiserver/pkg/endpoints/responsewriter"
->>>>>>> upstream/master
 )
 
 // WithTimeoutForNonLongRunningRequests times out non-long-running requests after the time given by timeout.
@@ -94,12 +91,8 @@ func (t *timeoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// resultCh is used as both errCh and stopCh
 	resultCh := make(chan interface{})
-<<<<<<< HEAD
-	tw := newTimeoutWriter(w)
-=======
 	var tw timeoutWriter
 	tw, w = newTimeoutWriter(w)
->>>>>>> upstream/master
 	go func() {
 		defer func() {
 			err := recover()
@@ -114,11 +107,7 @@ func (t *timeoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			resultCh <- err
 		}()
-<<<<<<< HEAD
-		t.handler.ServeHTTP(tw, r)
-=======
 		t.handler.ServeHTTP(w, r)
->>>>>>> upstream/master
 	}()
 	select {
 	case err := <-resultCh:
@@ -159,29 +148,6 @@ type timeoutWriter interface {
 	timeout(*apierrors.StatusError)
 }
 
-<<<<<<< HEAD
-func newTimeoutWriter(w http.ResponseWriter) timeoutWriter {
-	base := &baseTimeoutWriter{w: w}
-
-	_, notifiable := w.(http.CloseNotifier)
-	_, hijackable := w.(http.Hijacker)
-
-	switch {
-	case notifiable && hijackable:
-		return &closeHijackTimeoutWriter{base}
-	case notifiable:
-		return &closeTimeoutWriter{base}
-	case hijackable:
-		return &hijackTimeoutWriter{base}
-	default:
-		return base
-	}
-}
-
-type baseTimeoutWriter struct {
-	w http.ResponseWriter
-
-=======
 func newTimeoutWriter(w http.ResponseWriter) (timeoutWriter, http.ResponseWriter) {
 	base := &baseTimeoutWriter{w: w, handlerHeaders: w.Header().Clone()}
 	wrapped := responsewriter.WrapForHTTP1Or2(base)
@@ -198,7 +164,6 @@ type baseTimeoutWriter struct {
 	// headers written by the normal handler
 	handlerHeaders http.Header
 
->>>>>>> upstream/master
 	mu sync.Mutex
 	// if the timeout handler has timeout
 	timedOut bool
@@ -208,13 +173,10 @@ type baseTimeoutWriter struct {
 	hijacked bool
 }
 
-<<<<<<< HEAD
-=======
 func (tw *baseTimeoutWriter) Unwrap() http.ResponseWriter {
 	return tw.w
 }
 
->>>>>>> upstream/master
 func (tw *baseTimeoutWriter) Header() http.Header {
 	tw.mu.Lock()
 	defer tw.mu.Unlock()
@@ -223,11 +185,7 @@ func (tw *baseTimeoutWriter) Header() http.Header {
 		return http.Header{}
 	}
 
-<<<<<<< HEAD
-	return tw.w.Header()
-=======
 	return tw.handlerHeaders
->>>>>>> upstream/master
 }
 
 func (tw *baseTimeoutWriter) Write(p []byte) (int, error) {
@@ -241,14 +199,10 @@ func (tw *baseTimeoutWriter) Write(p []byte) (int, error) {
 		return 0, http.ErrHijacked
 	}
 
-<<<<<<< HEAD
-	tw.wroteHeader = true
-=======
 	if !tw.wroteHeader {
 		copyHeaders(tw.w.Header(), tw.handlerHeaders)
 		tw.wroteHeader = true
 	}
->>>>>>> upstream/master
 	return tw.w.Write(p)
 }
 
@@ -260,15 +214,9 @@ func (tw *baseTimeoutWriter) Flush() {
 		return
 	}
 
-<<<<<<< HEAD
-	if flusher, ok := tw.w.(http.Flusher); ok {
-		flusher.Flush()
-	}
-=======
 	// the outer ResponseWriter object returned by WrapForHTTP1Or2 implements
 	// http.Flusher if the inner object (tw.w) implements http.Flusher.
 	tw.w.(http.Flusher).Flush()
->>>>>>> upstream/master
 }
 
 func (tw *baseTimeoutWriter) WriteHeader(code int) {
@@ -279,23 +227,17 @@ func (tw *baseTimeoutWriter) WriteHeader(code int) {
 		return
 	}
 
-<<<<<<< HEAD
-=======
 	copyHeaders(tw.w.Header(), tw.handlerHeaders)
->>>>>>> upstream/master
 	tw.wroteHeader = true
 	tw.w.WriteHeader(code)
 }
 
-<<<<<<< HEAD
-=======
 func copyHeaders(dst, src http.Header) {
 	for k, v := range src {
 		dst[k] = v
 	}
 }
 
->>>>>>> upstream/master
 func (tw *baseTimeoutWriter) timeout(err *apierrors.StatusError) {
 	tw.mu.Lock()
 	defer tw.mu.Unlock()
@@ -328,11 +270,7 @@ func (tw *baseTimeoutWriter) timeout(err *apierrors.StatusError) {
 	}
 }
 
-<<<<<<< HEAD
-func (tw *baseTimeoutWriter) closeNotify() <-chan bool {
-=======
 func (tw *baseTimeoutWriter) CloseNotify() <-chan bool {
->>>>>>> upstream/master
 	tw.mu.Lock()
 	defer tw.mu.Unlock()
 
@@ -342,65 +280,24 @@ func (tw *baseTimeoutWriter) CloseNotify() <-chan bool {
 		return done
 	}
 
-<<<<<<< HEAD
-	return tw.w.(http.CloseNotifier).CloseNotify()
-}
-
-func (tw *baseTimeoutWriter) hijack() (net.Conn, *bufio.ReadWriter, error) {
-=======
 	// the outer ResponseWriter object returned by WrapForHTTP1Or2 implements
 	// http.CloseNotifier if the inner object (tw.w) implements http.CloseNotifier.
 	return tw.w.(http.CloseNotifier).CloseNotify()
 }
 
 func (tw *baseTimeoutWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
->>>>>>> upstream/master
 	tw.mu.Lock()
 	defer tw.mu.Unlock()
 
 	if tw.timedOut {
 		return nil, nil, http.ErrHandlerTimeout
 	}
-<<<<<<< HEAD
-=======
 
 	// the outer ResponseWriter object returned by WrapForHTTP1Or2 implements
 	// http.Hijacker if the inner object (tw.w) implements http.Hijacker.
->>>>>>> upstream/master
 	conn, rw, err := tw.w.(http.Hijacker).Hijack()
 	if err == nil {
 		tw.hijacked = true
 	}
 	return conn, rw, err
 }
-<<<<<<< HEAD
-
-type closeTimeoutWriter struct {
-	*baseTimeoutWriter
-}
-
-func (tw *closeTimeoutWriter) CloseNotify() <-chan bool {
-	return tw.closeNotify()
-}
-
-type hijackTimeoutWriter struct {
-	*baseTimeoutWriter
-}
-
-func (tw *hijackTimeoutWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
-	return tw.hijack()
-}
-
-type closeHijackTimeoutWriter struct {
-	*baseTimeoutWriter
-}
-
-func (tw *closeHijackTimeoutWriter) CloseNotify() <-chan bool {
-	return tw.closeNotify()
-}
-
-func (tw *closeHijackTimeoutWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
-	return tw.hijack()
-}
-=======
->>>>>>> upstream/master

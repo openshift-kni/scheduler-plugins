@@ -17,11 +17,6 @@ limitations under the License.
 package noderesources
 
 import (
-<<<<<<< HEAD
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-=======
 	"github.com/google/go-cmp/cmp/cmpopts"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -31,7 +26,6 @@ import (
 
 var (
 	ignoreBadValueDetail = cmpopts.IgnoreFields(field.Error{}, "BadValue", "Detail")
->>>>>>> upstream/master
 )
 
 func makeNode(node string, milliCPU, memory int64) *v1.Node {

@@ -19,11 +19,8 @@ package cacher
 import (
 	"sync"
 	"time"
-<<<<<<< HEAD
-=======
 
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 )
 
 const (
@@ -51,16 +48,6 @@ type timeBudget interface {
 
 type timeBudgetImpl struct {
 	sync.Mutex
-<<<<<<< HEAD
-	budget time.Duration
-
-	refresh   time.Duration
-	maxBudget time.Duration
-}
-
-func newTimeBudget(stopCh <-chan struct{}) timeBudget {
-	result := &timeBudgetImpl{
-=======
 	clock     clock.Clock
 	budget    time.Duration
 	maxBudget time.Duration
@@ -72,37 +59,10 @@ func newTimeBudget(stopCh <-chan struct{}) timeBudget {
 func newTimeBudget() timeBudget {
 	result := &timeBudgetImpl{
 		clock:     clock.RealClock{},
->>>>>>> upstream/master
 		budget:    time.Duration(0),
 		refresh:   refreshPerSecond,
 		maxBudget: maxBudget,
 	}
-<<<<<<< HEAD
-	go result.periodicallyRefresh(stopCh)
-	return result
-}
-
-func (t *timeBudgetImpl) periodicallyRefresh(stopCh <-chan struct{}) {
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			t.Lock()
-			if t.budget = t.budget + t.refresh; t.budget > t.maxBudget {
-				t.budget = t.maxBudget
-			}
-			t.Unlock()
-		case <-stopCh:
-			return
-		}
-	}
-}
-
-func (t *timeBudgetImpl) takeAvailable() time.Duration {
-	t.Lock()
-	defer t.Unlock()
-=======
 	result.last = result.clock.Now()
 	return result
 }
@@ -121,7 +81,6 @@ func (t *timeBudgetImpl) takeAvailable() time.Duration {
 		t.budget = t.maxBudget
 	}
 	t.last = now
->>>>>>> upstream/master
 	result := t.budget
 	t.budget = time.Duration(0)
 	return result
@@ -134,11 +93,8 @@ func (t *timeBudgetImpl) returnUnused(unused time.Duration) {
 		// We used more than allowed.
 		return
 	}
-<<<<<<< HEAD
-=======
 	// add the unused time directly to the budget
 	// takeAvailable() will take into account the elapsed time
->>>>>>> upstream/master
 	if t.budget = t.budget + unused; t.budget > t.maxBudget {
 		t.budget = t.maxBudget
 	}

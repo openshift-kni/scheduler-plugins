@@ -108,14 +108,6 @@ func (sched *Scheduler) deleteNodeFromCache(obj interface{}) {
 		return
 	}
 	klog.V(3).InfoS("Delete event for node", "node", klog.KObj(node))
-<<<<<<< HEAD
-	// NOTE: Updates must be written to scheduler cache before invalidating
-	// equivalence cache, because we could snapshot equivalence cache after the
-	// invalidation and then snapshot the cache itself. If the cache is
-	// snapshotted before updates are written, we would update equivalence
-	// cache with stale information which is based on snapshot of old cache.
-=======
->>>>>>> upstream/master
 	if err := sched.SchedulerCache.RemoveNode(node); err != nil {
 		klog.ErrorS(err, "Scheduler cache RemoveNode failed")
 	}
@@ -177,16 +169,12 @@ func (sched *Scheduler) deletePodFromSchedulingQueue(obj interface{}) {
 		klog.ErrorS(err, "Unable to get profile", "pod", klog.KObj(pod))
 		return
 	}
-<<<<<<< HEAD
-	fwk.RejectWaitingPod(pod.UID)
-=======
 	// If a waiting pod is rejected, it indicates it's previously assumed and we're
 	// removing it from the scheduler cache. In this case, signal a AssignedPodDelete
 	// event to immediately retry some unscheduled Pods.
 	if fwk.RejectWaitingPod(pod.UID) {
 		sched.SchedulingQueue.MoveAllToActiveOrBackoffQueue(queue.AssignedPodDelete, nil)
 	}
->>>>>>> upstream/master
 }
 
 func (sched *Scheduler) addPodToCache(obj interface{}) {
@@ -225,14 +213,6 @@ func (sched *Scheduler) updatePodInCache(oldObj, newObj interface{}) {
 		return
 	}
 
-<<<<<<< HEAD
-	// NOTE: Updates must be written to scheduler cache before invalidating
-	// equivalence cache, because we could snapshot equivalence cache after the
-	// invalidation and then snapshot the cache itself. If the cache is
-	// snapshotted before updates are written, we would update equivalence
-	// cache with stale information which is based on snapshot of old cache.
-=======
->>>>>>> upstream/master
 	if err := sched.SchedulerCache.UpdatePod(oldPod, newPod); err != nil {
 		klog.ErrorS(err, "Scheduler cache UpdatePod failed", "oldPod", klog.KObj(oldPod), "newPod", klog.KObj(newPod))
 	}
@@ -257,14 +237,6 @@ func (sched *Scheduler) deletePodFromCache(obj interface{}) {
 		return
 	}
 	klog.V(3).InfoS("Delete event for scheduled pod", "pod", klog.KObj(pod))
-<<<<<<< HEAD
-	// NOTE: Updates must be written to scheduler cache before invalidating
-	// equivalence cache, because we could snapshot equivalence cache after the
-	// invalidation and then snapshot the cache itself. If the cache is
-	// snapshotted before updates are written, we would update equivalence
-	// cache with stale information which is based on snapshot of old cache.
-=======
->>>>>>> upstream/master
 	if err := sched.SchedulerCache.RemovePod(pod); err != nil {
 		klog.ErrorS(err, "Scheduler cache RemovePod failed", "pod", klog.KObj(pod))
 	}
@@ -298,15 +270,10 @@ func addAllEventHandlers(
 				case *v1.Pod:
 					return assignedPod(t)
 				case cache.DeletedFinalStateUnknown:
-<<<<<<< HEAD
-					if pod, ok := t.Obj.(*v1.Pod); ok {
-						return assignedPod(pod)
-=======
 					if _, ok := t.Obj.(*v1.Pod); ok {
 						// The carried object may be stale, so we don't use it to check if
 						// it's assigned or not. Attempting to cleanup anyways.
 						return true
->>>>>>> upstream/master
 					}
 					utilruntime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, sched))
 					return false
@@ -331,13 +298,9 @@ func addAllEventHandlers(
 					return !assignedPod(t) && responsibleForPod(t, sched.Profiles)
 				case cache.DeletedFinalStateUnknown:
 					if pod, ok := t.Obj.(*v1.Pod); ok {
-<<<<<<< HEAD
-						return !assignedPod(pod) && responsibleForPod(pod, sched.Profiles)
-=======
 						// The carried object may be stale, so we don't use it to check if
 						// it's assigned or not.
 						return responsibleForPod(pod, sched.Profiles)
->>>>>>> upstream/master
 					}
 					utilruntime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, sched))
 					return false
@@ -440,16 +403,6 @@ func addAllEventHandlers(
 					},
 				)
 			}
-<<<<<<< HEAD
-		case framework.Service:
-			// ServiceAffinity: affected by the selector of the service is updated.
-			// Also, if new service is added, equivalence cache will also become invalid since
-			// existing pods may be "captured" by this service and change this predicate result.
-			informerFactory.Core().V1().Services().Informer().AddEventHandler(
-				buildEvtResHandler(at, framework.Service, "Service"),
-			)
-=======
->>>>>>> upstream/master
 		default:
 			// Tests may not instantiate dynInformerFactory.
 			if dynInformerFactory == nil {
@@ -473,10 +426,6 @@ func addAllEventHandlers(
 			dynInformer.AddEventHandler(
 				buildEvtResHandler(at, gvk, strings.Title(gvr.Resource)),
 			)
-<<<<<<< HEAD
-			go dynInformer.Run(sched.StopEverything)
-=======
->>>>>>> upstream/master
 		}
 	}
 }

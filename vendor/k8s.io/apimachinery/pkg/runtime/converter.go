@@ -22,10 +22,7 @@ import (
 	"math"
 	"os"
 	"reflect"
-<<<<<<< HEAD
-=======
 	"sort"
->>>>>>> upstream/master
 	"strconv"
 	"strings"
 	"sync"
@@ -113,26 +110,18 @@ type unstructuredConverter struct {
 // to Go types via reflection. It performs mismatch detection automatically and is intended for use by external
 // test tools. Use DefaultUnstructuredConverter if you do not explicitly need mismatch detection.
 func NewTestUnstructuredConverter(comparison conversion.Equalities) UnstructuredConverter {
-<<<<<<< HEAD
-=======
 	return NewTestUnstructuredConverterWithValidation(comparison)
 }
 
 // NewTestUnstrucutredConverterWithValidation allows for access to
 // FromUnstructuredWithValidation from within tests.
 func NewTestUnstructuredConverterWithValidation(comparison conversion.Equalities) *unstructuredConverter {
->>>>>>> upstream/master
 	return &unstructuredConverter{
 		mismatchDetection: true,
 		comparison:        comparison,
 	}
 }
 
-<<<<<<< HEAD
-// FromUnstructured converts an object from map[string]interface{} representation into a concrete type.
-// It uses encoding/json/Unmarshaler if object implements it or reflection if not.
-func (c *unstructuredConverter) FromUnstructured(u map[string]interface{}, obj interface{}) error {
-=======
 // fromUnstructuredContext provides options for informing the converter
 // the state of its recursive walk through the conversion process.
 type fromUnstructuredContext struct {
@@ -246,21 +235,16 @@ func (c *fromUnstructuredContext) pushKey(key string) {
 // It uses encoding/json/Unmarshaler if object implements it or reflection if not.
 // It takes a validationDirective that indicates how to behave when it encounters unknown fields.
 func (c *unstructuredConverter) FromUnstructuredWithValidation(u map[string]interface{}, obj interface{}, returnUnknownFields bool) error {
->>>>>>> upstream/master
 	t := reflect.TypeOf(obj)
 	value := reflect.ValueOf(obj)
 	if t.Kind() != reflect.Ptr || value.IsNil() {
 		return fmt.Errorf("FromUnstructured requires a non-nil pointer to an object, got %v", t)
 	}
-<<<<<<< HEAD
-	err := fromUnstructured(reflect.ValueOf(u), value.Elem())
-=======
 
 	fromUnstructuredContext := &fromUnstructuredContext{
 		returnUnknownFields: returnUnknownFields,
 	}
 	err := fromUnstructured(reflect.ValueOf(u), value.Elem(), fromUnstructuredContext)
->>>>>>> upstream/master
 	if c.mismatchDetection {
 		newObj := reflect.New(t.Elem()).Interface()
 		newErr := fromUnstructuredViaJSON(u, newObj)
@@ -271,9 +255,6 @@ func (c *unstructuredConverter) FromUnstructuredWithValidation(u map[string]inte
 			klog.Fatalf("FromUnstructured mismatch\nobj1: %#v\nobj2: %#v", obj, newObj)
 		}
 	}
-<<<<<<< HEAD
-	return err
-=======
 	if err != nil {
 		return err
 	}
@@ -291,7 +272,6 @@ func (c *unstructuredConverter) FromUnstructuredWithValidation(u map[string]inte
 // It uses encoding/json/Unmarshaler if object implements it or reflection if not.
 func (c *unstructuredConverter) FromUnstructured(u map[string]interface{}, obj interface{}) error {
 	return c.FromUnstructuredWithValidation(u, obj, false)
->>>>>>> upstream/master
 }
 
 func fromUnstructuredViaJSON(u map[string]interface{}, obj interface{}) error {
@@ -302,11 +282,7 @@ func fromUnstructuredViaJSON(u map[string]interface{}, obj interface{}) error {
 	return json.Unmarshal(data, obj)
 }
 
-<<<<<<< HEAD
-func fromUnstructured(sv, dv reflect.Value) error {
-=======
 func fromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) error {
->>>>>>> upstream/master
 	sv = unwrapInterface(sv)
 	if !sv.IsValid() {
 		dv.Set(reflect.Zero(dv.Type()))
@@ -374,15 +350,6 @@ func fromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) error 
 
 	switch dt.Kind() {
 	case reflect.Map:
-<<<<<<< HEAD
-		return mapFromUnstructured(sv, dv)
-	case reflect.Slice:
-		return sliceFromUnstructured(sv, dv)
-	case reflect.Ptr:
-		return pointerFromUnstructured(sv, dv)
-	case reflect.Struct:
-		return structFromUnstructured(sv, dv)
-=======
 		return mapFromUnstructured(sv, dv, ctx)
 	case reflect.Slice:
 		return sliceFromUnstructured(sv, dv, ctx)
@@ -390,16 +357,12 @@ func fromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) error 
 		return pointerFromUnstructured(sv, dv, ctx)
 	case reflect.Struct:
 		return structFromUnstructured(sv, dv, ctx)
->>>>>>> upstream/master
 	case reflect.Interface:
 		return interfaceFromUnstructured(sv, dv)
 	default:
 		return fmt.Errorf("unrecognized type: %v", dt.Kind())
 	}
-<<<<<<< HEAD
-=======
 
->>>>>>> upstream/master
 }
 
 func fieldInfoFromField(structType reflect.Type, field int) *fieldInfo {
@@ -450,11 +413,7 @@ func unwrapInterface(v reflect.Value) reflect.Value {
 	return v
 }
 
-<<<<<<< HEAD
-func mapFromUnstructured(sv, dv reflect.Value) error {
-=======
 func mapFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) error {
->>>>>>> upstream/master
 	st, dt := sv.Type(), dv.Type()
 	if st.Kind() != reflect.Map {
 		return fmt.Errorf("cannot restore map from %v", st.Kind())
@@ -472,11 +431,7 @@ func mapFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) err
 	for _, key := range sv.MapKeys() {
 		value := reflect.New(dt.Elem()).Elem()
 		if val := unwrapInterface(sv.MapIndex(key)); val.IsValid() {
-<<<<<<< HEAD
-			if err := fromUnstructured(val, value); err != nil {
-=======
 			if err := fromUnstructured(val, value, ctx); err != nil {
->>>>>>> upstream/master
 				return err
 			}
 		} else {
@@ -491,11 +446,7 @@ func mapFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) err
 	return nil
 }
 
-<<<<<<< HEAD
-func sliceFromUnstructured(sv, dv reflect.Value) error {
-=======
 func sliceFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) error {
->>>>>>> upstream/master
 	st, dt := sv.Type(), dv.Type()
 	if st.Kind() == reflect.String && dt.Elem().Kind() == reflect.Uint8 {
 		// We store original []byte representation as string.
@@ -527,12 +478,6 @@ func sliceFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) e
 		return nil
 	}
 	dv.Set(reflect.MakeSlice(dt, sv.Len(), sv.Cap()))
-<<<<<<< HEAD
-	for i := 0; i < sv.Len(); i++ {
-		if err := fromUnstructured(sv.Index(i), dv.Index(i)); err != nil {
-			return err
-		}
-=======
 
 	pathLen := len(ctx.parentPath)
 	defer func() {
@@ -544,16 +489,11 @@ func sliceFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) e
 			return err
 		}
 		ctx.parentPath = ctx.parentPath[:pathLen]
->>>>>>> upstream/master
 	}
 	return nil
 }
 
-<<<<<<< HEAD
-func pointerFromUnstructured(sv, dv reflect.Value) error {
-=======
 func pointerFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) error {
->>>>>>> upstream/master
 	st, dt := sv.Type(), dv.Type()
 
 	if st.Kind() == reflect.Ptr && sv.IsNil() {
@@ -563,15 +503,6 @@ func pointerFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext)
 	dv.Set(reflect.New(dt.Elem()))
 	switch st.Kind() {
 	case reflect.Ptr, reflect.Interface:
-<<<<<<< HEAD
-		return fromUnstructured(sv.Elem(), dv.Elem())
-	default:
-		return fromUnstructured(sv, dv.Elem())
-	}
-}
-
-func structFromUnstructured(sv, dv reflect.Value) error {
-=======
 		return fromUnstructured(sv.Elem(), dv.Elem(), ctx)
 	default:
 		return fromUnstructured(sv, dv.Elem(), ctx)
@@ -579,14 +510,11 @@ func structFromUnstructured(sv, dv reflect.Value) error {
 }
 
 func structFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) error {
->>>>>>> upstream/master
 	st, dt := sv.Type(), dv.Type()
 	if st.Kind() != reflect.Map {
 		return fmt.Errorf("cannot restore struct from: %v", st.Kind())
 	}
 
-<<<<<<< HEAD
-=======
 	pathLen := len(ctx.parentPath)
 	svInlined := ctx.isInlined
 	defer func() {
@@ -596,24 +524,11 @@ func structFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) 
 	if !svInlined {
 		ctx.pushMatchedKeyTracker()
 	}
->>>>>>> upstream/master
 	for i := 0; i < dt.NumField(); i++ {
 		fieldInfo := fieldInfoFromField(dt, i)
 		fv := dv.Field(i)
 
 		if len(fieldInfo.name) == 0 {
-<<<<<<< HEAD
-			// This field is inlined.
-			if err := fromUnstructured(sv, fv); err != nil {
-				return err
-			}
-		} else {
-			value := unwrapInterface(sv.MapIndex(fieldInfo.nameValue))
-			if value.IsValid() {
-				if err := fromUnstructured(value, fv); err != nil {
-					return err
-				}
-=======
 			// This field is inlined, recurse into fromUnstructured again
 			// with the same set of matched keys.
 			ctx.isInlined = true
@@ -637,18 +552,14 @@ func structFromUnstructured(sv, dv reflect.Value, ctx *fromUnstructuredContext) 
 				}
 				ctx.parentPath = ctx.parentPath[:pathLen]
 				ctx.isInlined = svInlined
->>>>>>> upstream/master
 			} else {
 				fv.Set(reflect.Zero(fv.Type()))
 			}
 		}
 	}
-<<<<<<< HEAD
-=======
 	if !svInlined {
 		ctx.popAndVerifyMatchedKeys(sv)
 	}
->>>>>>> upstream/master
 	return nil
 }
 

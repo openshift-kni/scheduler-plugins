@@ -1,6 +1,4 @@
 # Changelog
-<<<<<<< HEAD
-=======
 All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
@@ -57,7 +55,6 @@ for their contributions to this release.
 [#949]: https://github.com/uber-go/zap/pull/949
 [#961]: https://github.com/uber-go/zap/pull/961
 [#971]: https://github.com/uber-go/zap/pull/971
->>>>>>> upstream/master
 
 ## 1.17.0 (25 May 2021)
 

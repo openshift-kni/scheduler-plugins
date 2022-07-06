@@ -6,13 +6,10 @@ package http2
 
 import "strings"
 
-<<<<<<< HEAD
-=======
 // The HTTP protocols are defined in terms of ASCII, not Unicode. This file
 // contains helper functions which may use Unicode-aware functions which would
 // otherwise be unsafe and could introduce vulnerabilities if used improperly.
 
->>>>>>> upstream/master
 // asciiEqualFold is strings.EqualFold, ASCII only. It reports whether s and t
 // are equal, ASCII-case-insensitively.
 func asciiEqualFold(s, t string) bool {

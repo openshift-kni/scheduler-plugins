@@ -225,10 +225,7 @@ type openAPITypeWriter struct {
 	*generator.SnippetWriter
 	context                *generator.Context
 	refTypes               map[string]*types.Type
-<<<<<<< HEAD
-=======
 	enumContext            *enumContext
->>>>>>> upstream/master
 	GetDefinitionInterface *types.Type
 }
 
@@ -237,10 +234,7 @@ func newOpenAPITypeWriter(sw *generator.SnippetWriter, c *generator.Context) ope
 		SnippetWriter: sw,
 		context:       c,
 		refTypes:      map[string]*types.Type{},
-<<<<<<< HEAD
-=======
 		enumContext:   newEnumContext(c),
->>>>>>> upstream/master
 	}
 }
 
@@ -556,11 +550,7 @@ func mustEnforceDefault(t *types.Type, omitEmpty bool) (interface{}, error) {
 }
 
 func (g openAPITypeWriter) generateDefault(comments []string, t *types.Type, omitEmpty bool) error {
-<<<<<<< HEAD
-	t = resolveAliasType(t)
-=======
 	t = resolveAliasAndEmbeddedType(t)
->>>>>>> upstream/master
 	def, err := defaultFromComments(comments)
 	if err != nil {
 		return err
@@ -637,15 +627,11 @@ func (g openAPITypeWriter) generateProperty(m *types.Member, parent *types.Type)
 		return err
 	}
 	g.Do("SchemaProps: spec.SchemaProps{\n", nil)
-<<<<<<< HEAD
-	g.generateDescription(m.CommentLines)
-=======
 	var extraComments []string
 	if enumType, isEnum := g.enumContext.EnumType(m.Type); isEnum {
 		extraComments = enumType.DescriptionLines()
 	}
 	g.generateDescription(append(m.CommentLines, extraComments...))
->>>>>>> upstream/master
 	jsonTags := getJsonTags(m)
 	if len(jsonTags) > 1 && jsonTags[1] == "string" {
 		g.generateSimpleProperty("string", "")
@@ -661,13 +647,10 @@ func (g openAPITypeWriter) generateProperty(m *types.Member, parent *types.Type)
 	typeString, format := openapi.OpenAPITypeFormat(t.String())
 	if typeString != "" {
 		g.generateSimpleProperty(typeString, format)
-<<<<<<< HEAD
-=======
 		if enumType, isEnum := g.enumContext.EnumType(m.Type); isEnum {
 			// original type is an enum, add "Enum: " and the values
 			g.Do("Enum: []interface{}{$.$}", strings.Join(enumType.ValueStrings(), ", "))
 		}
->>>>>>> upstream/master
 		g.Do("},\n},\n", nil)
 		return nil
 	}
@@ -701,25 +684,18 @@ func (g openAPITypeWriter) generateReferenceProperty(t *types.Type) {
 	g.Do("Ref: ref(\"$.$\"),\n", t.Name.String())
 }
 
-<<<<<<< HEAD
-func resolveAliasType(t *types.Type) *types.Type {
-=======
 func resolveAliasAndEmbeddedType(t *types.Type) *types.Type {
->>>>>>> upstream/master
 	var prev *types.Type
 	for prev != t {
 		prev = t
 		if t.Kind == types.Alias {
 			t = t.Underlying
 		}
-<<<<<<< HEAD
-=======
 		if t.Kind == types.Struct {
 			if len(t.Members) == 1 && t.Members[0].Embedded {
 				t = t.Members[0].Type
 			}
 		}
->>>>>>> upstream/master
 	}
 	return t
 }

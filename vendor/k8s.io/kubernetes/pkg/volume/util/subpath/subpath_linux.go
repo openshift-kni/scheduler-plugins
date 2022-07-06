@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 //go:build linux
->>>>>>> upstream/master
 // +build linux
 
 /*
@@ -33,10 +30,6 @@ import (
 
 	"golang.org/x/sys/unix"
 	"k8s.io/klog/v2"
-<<<<<<< HEAD
-	"k8s.io/kubernetes/pkg/volume/util/hostutil"
-=======
->>>>>>> upstream/master
 	"k8s.io/mount-utils"
 )
 
@@ -116,21 +109,12 @@ func prepareSubpathTarget(mounter mount.Interface, subpath Subpath) (bool, strin
 		notMount = true
 	}
 	if !notMount {
-<<<<<<< HEAD
-		linuxHostUtil := hostutil.NewHostUtil()
-		mntInfo, err := linuxHostUtil.FindMountInfo(bindPathTarget)
-		if err != nil {
-			return false, "", fmt.Errorf("error calling findMountInfo for %s: %s", bindPathTarget, err)
-		}
-		if mntInfo.Root != subpath.Path {
-=======
 		// It's already mounted, so check if it's bind-mounted to the same path
 		samePath, err := checkSubPathFileEqual(subpath, bindPathTarget)
 		if err != nil {
 			return false, "", fmt.Errorf("error checking subpath mount info for %s: %s", bindPathTarget, err)
 		}
 		if !samePath {
->>>>>>> upstream/master
 			// It's already mounted but not what we want, unmount it
 			if err = mounter.Unmount(bindPathTarget); err != nil {
 				return false, "", fmt.Errorf("error ummounting %s: %s", bindPathTarget, err)
@@ -171,8 +155,6 @@ func prepareSubpathTarget(mounter mount.Interface, subpath Subpath) (bool, strin
 	return false, bindPathTarget, nil
 }
 
-<<<<<<< HEAD
-=======
 func checkSubPathFileEqual(subpath Subpath, bindMountTarget string) (bool, error) {
 	s, err := os.Lstat(subpath.Path)
 	if err != nil {
@@ -190,7 +172,6 @@ func checkSubPathFileEqual(subpath Subpath, bindMountTarget string) (bool, error
 	return true, nil
 }
 
->>>>>>> upstream/master
 func getSubpathBindTarget(subpath Subpath) string {
 	// containerName is DNS label, i.e. safe as a directory name.
 	return filepath.Join(subpath.PodDir, containerSubPathDirectoryName, subpath.VolumeName, subpath.ContainerName, strconv.Itoa(subpath.VolumeMountIndex))

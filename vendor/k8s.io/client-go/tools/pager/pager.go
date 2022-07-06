@@ -78,10 +78,7 @@ func (p *ListPager) List(ctx context.Context, options metav1.ListOptions) (runti
 		options.Limit = p.PageSize
 	}
 	requestedResourceVersion := options.ResourceVersion
-<<<<<<< HEAD
-=======
 	requestedResourceVersionMatch := options.ResourceVersionMatch
->>>>>>> upstream/master
 	var list *metainternalversion.List
 	paginatedResult := false
 
@@ -106,10 +103,7 @@ func (p *ListPager) List(ctx context.Context, options metav1.ListOptions) (runti
 			options.Limit = 0
 			options.Continue = ""
 			options.ResourceVersion = requestedResourceVersion
-<<<<<<< HEAD
-=======
 			options.ResourceVersionMatch = requestedResourceVersionMatch
->>>>>>> upstream/master
 			result, err := p.PageFn(ctx, options)
 			return result, paginatedResult, err
 		}
@@ -143,18 +137,11 @@ func (p *ListPager) List(ctx context.Context, options metav1.ListOptions) (runti
 
 		// set the next loop up
 		options.Continue = m.GetContinue()
-<<<<<<< HEAD
-		// Clear the ResourceVersion on the subsequent List calls to avoid the
-		// `specifying resource version is not allowed when using continue` error.
-		// See https://github.com/kubernetes/kubernetes/issues/85221#issuecomment-553748143.
-		options.ResourceVersion = ""
-=======
 		// Clear the ResourceVersion(Match) on the subsequent List calls to avoid the
 		// `specifying resource version is not allowed when using continue` error.
 		// See https://github.com/kubernetes/kubernetes/issues/85221#issuecomment-553748143.
 		options.ResourceVersion = ""
 		options.ResourceVersionMatch = ""
->>>>>>> upstream/master
 		// At this point, result is already paginated.
 		paginatedResult = true
 	}

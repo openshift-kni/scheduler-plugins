@@ -51,10 +51,7 @@ var (
 	modshell32  = NewLazySystemDLL("shell32.dll")
 	moduser32   = NewLazySystemDLL("user32.dll")
 	moduserenv  = NewLazySystemDLL("userenv.dll")
-<<<<<<< HEAD
-=======
 	modversion  = NewLazySystemDLL("version.dll")
->>>>>>> upstream/master
 	modwintrust = NewLazySystemDLL("wintrust.dll")
 	modws2_32   = NewLazySystemDLL("ws2_32.dll")
 	modwtsapi32 = NewLazySystemDLL("wtsapi32.dll")
@@ -118,10 +115,7 @@ var (
 	procOpenThreadToken                                      = modadvapi32.NewProc("OpenThreadToken")
 	procQueryServiceConfig2W                                 = modadvapi32.NewProc("QueryServiceConfig2W")
 	procQueryServiceConfigW                                  = modadvapi32.NewProc("QueryServiceConfigW")
-<<<<<<< HEAD
-=======
 	procQueryServiceDynamicInformation                       = modadvapi32.NewProc("QueryServiceDynamicInformation")
->>>>>>> upstream/master
 	procQueryServiceLockStatusW                              = modadvapi32.NewProc("QueryServiceLockStatusW")
 	procQueryServiceStatus                                   = modadvapi32.NewProc("QueryServiceStatus")
 	procQueryServiceStatusEx                                 = modadvapi32.NewProc("QueryServiceStatusEx")
@@ -132,10 +126,7 @@ var (
 	procRegQueryInfoKeyW                                     = modadvapi32.NewProc("RegQueryInfoKeyW")
 	procRegQueryValueExW                                     = modadvapi32.NewProc("RegQueryValueExW")
 	procRegisterEventSourceW                                 = modadvapi32.NewProc("RegisterEventSourceW")
-<<<<<<< HEAD
-=======
 	procRegisterServiceCtrlHandlerExW                        = modadvapi32.NewProc("RegisterServiceCtrlHandlerExW")
->>>>>>> upstream/master
 	procReportEventW                                         = modadvapi32.NewProc("ReportEventW")
 	procRevertToSelf                                         = modadvapi32.NewProc("RevertToSelf")
 	procSetEntriesInAclW                                     = modadvapi32.NewProc("SetEntriesInAclW")
@@ -315,10 +306,7 @@ var (
 	procReadConsoleW                                         = modkernel32.NewProc("ReadConsoleW")
 	procReadDirectoryChangesW                                = modkernel32.NewProc("ReadDirectoryChangesW")
 	procReadFile                                             = modkernel32.NewProc("ReadFile")
-<<<<<<< HEAD
-=======
 	procReadProcessMemory                                    = modkernel32.NewProc("ReadProcessMemory")
->>>>>>> upstream/master
 	procReleaseMutex                                         = modkernel32.NewProc("ReleaseMutex")
 	procRemoveDirectoryW                                     = modkernel32.NewProc("RemoveDirectoryW")
 	procResetEvent                                           = modkernel32.NewProc("ResetEvent")
@@ -361,23 +349,16 @@ var (
 	procVirtualFree                                          = modkernel32.NewProc("VirtualFree")
 	procVirtualLock                                          = modkernel32.NewProc("VirtualLock")
 	procVirtualProtect                                       = modkernel32.NewProc("VirtualProtect")
-<<<<<<< HEAD
-	procVirtualUnlock                                        = modkernel32.NewProc("VirtualUnlock")
-=======
 	procVirtualProtectEx                                     = modkernel32.NewProc("VirtualProtectEx")
 	procVirtualQuery                                         = modkernel32.NewProc("VirtualQuery")
 	procVirtualQueryEx                                       = modkernel32.NewProc("VirtualQueryEx")
 	procVirtualUnlock                                        = modkernel32.NewProc("VirtualUnlock")
 	procWTSGetActiveConsoleSessionId                         = modkernel32.NewProc("WTSGetActiveConsoleSessionId")
->>>>>>> upstream/master
 	procWaitForMultipleObjects                               = modkernel32.NewProc("WaitForMultipleObjects")
 	procWaitForSingleObject                                  = modkernel32.NewProc("WaitForSingleObject")
 	procWriteConsoleW                                        = modkernel32.NewProc("WriteConsoleW")
 	procWriteFile                                            = modkernel32.NewProc("WriteFile")
-<<<<<<< HEAD
-=======
 	procWriteProcessMemory                                   = modkernel32.NewProc("WriteProcessMemory")
->>>>>>> upstream/master
 	procAcceptEx                                             = modmswsock.NewProc("AcceptEx")
 	procGetAcceptExSockaddrs                                 = modmswsock.NewProc("GetAcceptExSockaddrs")
 	procTransmitFile                                         = modmswsock.NewProc("TransmitFile")
@@ -387,10 +368,6 @@ var (
 	procNtCreateFile                                         = modntdll.NewProc("NtCreateFile")
 	procNtCreateNamedPipeFile                                = modntdll.NewProc("NtCreateNamedPipeFile")
 	procNtQueryInformationProcess                            = modntdll.NewProc("NtQueryInformationProcess")
-<<<<<<< HEAD
-	procNtSetInformationProcess                              = modntdll.NewProc("NtSetInformationProcess")
-	procRtlDefaultNpAcl                                      = modntdll.NewProc("RtlDefaultNpAcl")
-=======
 	procNtQuerySystemInformation                             = modntdll.NewProc("NtQuerySystemInformation")
 	procNtSetInformationFile                                 = modntdll.NewProc("NtSetInformationFile")
 	procNtSetInformationProcess                              = modntdll.NewProc("NtSetInformationProcess")
@@ -398,7 +375,6 @@ var (
 	procRtlAddFunctionTable                                  = modntdll.NewProc("RtlAddFunctionTable")
 	procRtlDefaultNpAcl                                      = modntdll.NewProc("RtlDefaultNpAcl")
 	procRtlDeleteFunctionTable                               = modntdll.NewProc("RtlDeleteFunctionTable")
->>>>>>> upstream/master
 	procRtlDosPathNameToNtPathName_U_WithStatus              = modntdll.NewProc("RtlDosPathNameToNtPathName_U_WithStatus")
 	procRtlDosPathNameToRelativeNtPathName_U_WithStatus      = modntdll.NewProc("RtlDosPathNameToRelativeNtPathName_U_WithStatus")
 	procRtlGetCurrentPeb                                     = modntdll.NewProc("RtlGetCurrentPeb")
@@ -414,16 +390,12 @@ var (
 	procCoTaskMemFree                                        = modole32.NewProc("CoTaskMemFree")
 	procCoUninitialize                                       = modole32.NewProc("CoUninitialize")
 	procStringFromGUID2                                      = modole32.NewProc("StringFromGUID2")
-<<<<<<< HEAD
-	procEnumProcesses                                        = modpsapi.NewProc("EnumProcesses")
-=======
 	procEnumProcessModules                                   = modpsapi.NewProc("EnumProcessModules")
 	procEnumProcessModulesEx                                 = modpsapi.NewProc("EnumProcessModulesEx")
 	procEnumProcesses                                        = modpsapi.NewProc("EnumProcesses")
 	procGetModuleBaseNameW                                   = modpsapi.NewProc("GetModuleBaseNameW")
 	procGetModuleFileNameExW                                 = modpsapi.NewProc("GetModuleFileNameExW")
 	procGetModuleInformation                                 = modpsapi.NewProc("GetModuleInformation")
->>>>>>> upstream/master
 	procSubscribeServiceChangeNotifications                  = modsechost.NewProc("SubscribeServiceChangeNotifications")
 	procUnsubscribeServiceChangeNotifications                = modsechost.NewProc("UnsubscribeServiceChangeNotifications")
 	procGetUserNameExW                                       = modsecur32.NewProc("GetUserNameExW")
@@ -438,12 +410,9 @@ var (
 	procCreateEnvironmentBlock                               = moduserenv.NewProc("CreateEnvironmentBlock")
 	procDestroyEnvironmentBlock                              = moduserenv.NewProc("DestroyEnvironmentBlock")
 	procGetUserProfileDirectoryW                             = moduserenv.NewProc("GetUserProfileDirectoryW")
-<<<<<<< HEAD
-=======
 	procGetFileVersionInfoSizeW                              = modversion.NewProc("GetFileVersionInfoSizeW")
 	procGetFileVersionInfoW                                  = modversion.NewProc("GetFileVersionInfoW")
 	procVerQueryValueW                                       = modversion.NewProc("VerQueryValueW")
->>>>>>> upstream/master
 	procWinVerifyTrustEx                                     = modwintrust.NewProc("WinVerifyTrustEx")
 	procFreeAddrInfoW                                        = modws2_32.NewProc("FreeAddrInfoW")
 	procGetAddrInfoW                                         = modws2_32.NewProc("GetAddrInfoW")
@@ -1008,8 +977,6 @@ func QueryServiceConfig(service Handle, serviceConfig *QUERY_SERVICE_CONFIG, buf
 	return
 }
 
-<<<<<<< HEAD
-=======
 func QueryServiceDynamicInformation(service Handle, infoLevel uint32, dynamicInfo unsafe.Pointer) (err error) {
 	err = procQueryServiceDynamicInformation.Find()
 	if err != nil {
@@ -1022,7 +989,6 @@ func QueryServiceDynamicInformation(service Handle, infoLevel uint32, dynamicInf
 	return
 }
 
->>>>>>> upstream/master
 func QueryServiceLockStatus(mgr Handle, lockStatus *QUERY_SERVICE_LOCK_STATUS, bufSize uint32, bytesNeeded *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procQueryServiceLockStatusW.Addr(), 4, uintptr(mgr), uintptr(unsafe.Pointer(lockStatus)), uintptr(bufSize), uintptr(unsafe.Pointer(bytesNeeded)), 0, 0)
 	if r1 == 0 {
@@ -1112,8 +1078,6 @@ func RegisterEventSource(uncServerName *uint16, sourceName *uint16) (handle Hand
 	return
 }
 
-<<<<<<< HEAD
-=======
 func RegisterServiceCtrlHandlerEx(serviceName *uint16, handlerProc uintptr, context uintptr) (handle Handle, err error) {
 	r0, _, e1 := syscall.Syscall(procRegisterServiceCtrlHandlerExW.Addr(), 3, uintptr(unsafe.Pointer(serviceName)), uintptr(handlerProc), uintptr(context))
 	handle = Handle(r0)
@@ -1123,7 +1087,6 @@ func RegisterServiceCtrlHandlerEx(serviceName *uint16, handlerProc uintptr, cont
 	return
 }
 
->>>>>>> upstream/master
 func ReportEvent(log Handle, etype uint16, category uint16, eventId uint32, usrSId uintptr, numStrings uint16, dataSize uint32, strings **uint16, rawData *byte) (err error) {
 	r1, _, e1 := syscall.Syscall9(procReportEventW.Addr(), 9, uintptr(log), uintptr(etype), uintptr(category), uintptr(eventId), uintptr(usrSId), uintptr(numStrings), uintptr(dataSize), uintptr(unsafe.Pointer(strings)), uintptr(unsafe.Pointer(rawData)))
 	if r1 == 0 {
@@ -2710,8 +2673,6 @@ func ReadFile(handle Handle, buf []byte, done *uint32, overlapped *Overlapped) (
 	return
 }
 
-<<<<<<< HEAD
-=======
 func ReadProcessMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (err error) {
 	r1, _, e1 := syscall.Syscall6(procReadProcessMemory.Addr(), 5, uintptr(process), uintptr(baseAddress), uintptr(unsafe.Pointer(buffer)), uintptr(size), uintptr(unsafe.Pointer(numberOfBytesRead)), 0)
 	if r1 == 0 {
@@ -2720,7 +2681,6 @@ func ReadProcessMemory(process Handle, baseAddress uintptr, buffer *byte, size u
 	return
 }
 
->>>>>>> upstream/master
 func ReleaseMutex(mutex Handle) (err error) {
 	r1, _, e1 := syscall.Syscall(procReleaseMutex.Addr(), 1, uintptr(mutex), 0, 0)
 	if r1 == 0 {
@@ -3075,8 +3035,6 @@ func VirtualProtect(address uintptr, size uintptr, newprotect uint32, oldprotect
 	return
 }
 
-<<<<<<< HEAD
-=======
 func VirtualProtectEx(process Handle, address uintptr, size uintptr, newProtect uint32, oldProtect *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procVirtualProtectEx.Addr(), 5, uintptr(process), uintptr(address), uintptr(size), uintptr(newProtect), uintptr(unsafe.Pointer(oldProtect)), 0)
 	if r1 == 0 {
@@ -3101,7 +3059,6 @@ func VirtualQueryEx(process Handle, address uintptr, buffer *MemoryBasicInformat
 	return
 }
 
->>>>>>> upstream/master
 func VirtualUnlock(addr uintptr, length uintptr) (err error) {
 	r1, _, e1 := syscall.Syscall(procVirtualUnlock.Addr(), 2, uintptr(addr), uintptr(length), 0)
 	if r1 == 0 {
@@ -3110,15 +3067,12 @@ func VirtualUnlock(addr uintptr, length uintptr) (err error) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 func WTSGetActiveConsoleSessionId() (sessionID uint32) {
 	r0, _, _ := syscall.Syscall(procWTSGetActiveConsoleSessionId.Addr(), 0, 0, 0, 0)
 	sessionID = uint32(r0)
 	return
 }
 
->>>>>>> upstream/master
 func waitForMultipleObjects(count uint32, handles uintptr, waitAll bool, waitMilliseconds uint32) (event uint32, err error) {
 	var _p0 uint32
 	if waitAll {
@@ -3161,8 +3115,6 @@ func WriteFile(handle Handle, buf []byte, done *uint32, overlapped *Overlapped) 
 	return
 }
 
-<<<<<<< HEAD
-=======
 func WriteProcessMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesWritten *uintptr) (err error) {
 	r1, _, e1 := syscall.Syscall6(procWriteProcessMemory.Addr(), 5, uintptr(process), uintptr(baseAddress), uintptr(unsafe.Pointer(buffer)), uintptr(size), uintptr(unsafe.Pointer(numberOfBytesWritten)), 0)
 	if r1 == 0 {
@@ -3171,7 +3123,6 @@ func WriteProcessMemory(process Handle, baseAddress uintptr, buffer *byte, size 
 	return
 }
 
->>>>>>> upstream/master
 func AcceptEx(ls Handle, as Handle, buf *byte, rxdatalen uint32, laddrlen uint32, raddrlen uint32, recvd *uint32, overlapped *Overlapped) (err error) {
 	r1, _, e1 := syscall.Syscall9(procAcceptEx.Addr(), 8, uintptr(ls), uintptr(as), uintptr(unsafe.Pointer(buf)), uintptr(rxdatalen), uintptr(laddrlen), uintptr(raddrlen), uintptr(unsafe.Pointer(recvd)), uintptr(unsafe.Pointer(overlapped)), 0)
 	if r1 == 0 {
@@ -3241,8 +3192,6 @@ func NtQueryInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe
 	return
 }
 
-<<<<<<< HEAD
-=======
 func NtQuerySystemInformation(sysInfoClass int32, sysInfo unsafe.Pointer, sysInfoLen uint32, retLen *uint32) (ntstatus error) {
 	r0, _, _ := syscall.Syscall6(procNtQuerySystemInformation.Addr(), 4, uintptr(sysInfoClass), uintptr(sysInfo), uintptr(sysInfoLen), uintptr(unsafe.Pointer(retLen)), 0, 0)
 	if r0 != 0 {
@@ -3259,7 +3208,6 @@ func NtSetInformationFile(handle Handle, iosb *IO_STATUS_BLOCK, inBuffer *byte, 
 	return
 }
 
->>>>>>> upstream/master
 func NtSetInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe.Pointer, procInfoLen uint32) (ntstatus error) {
 	r0, _, _ := syscall.Syscall6(procNtSetInformationProcess.Addr(), 4, uintptr(proc), uintptr(procInfoClass), uintptr(procInfo), uintptr(procInfoLen), 0, 0)
 	if r0 != 0 {
@@ -3268,8 +3216,6 @@ func NtSetInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe.P
 	return
 }
 
-<<<<<<< HEAD
-=======
 func NtSetSystemInformation(sysInfoClass int32, sysInfo unsafe.Pointer, sysInfoLen uint32) (ntstatus error) {
 	r0, _, _ := syscall.Syscall(procNtSetSystemInformation.Addr(), 3, uintptr(sysInfoClass), uintptr(sysInfo), uintptr(sysInfoLen))
 	if r0 != 0 {
@@ -3284,7 +3230,6 @@ func RtlAddFunctionTable(functionTable *RUNTIME_FUNCTION, entryCount uint32, bas
 	return
 }
 
->>>>>>> upstream/master
 func RtlDefaultNpAcl(acl **ACL) (ntstatus error) {
 	r0, _, _ := syscall.Syscall(procRtlDefaultNpAcl.Addr(), 1, uintptr(unsafe.Pointer(acl)), 0, 0)
 	if r0 != 0 {
@@ -3293,15 +3238,12 @@ func RtlDefaultNpAcl(acl **ACL) (ntstatus error) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 func RtlDeleteFunctionTable(functionTable *RUNTIME_FUNCTION) (ret bool) {
 	r0, _, _ := syscall.Syscall(procRtlDeleteFunctionTable.Addr(), 1, uintptr(unsafe.Pointer(functionTable)), 0, 0)
 	ret = r0 != 0
 	return
 }
 
->>>>>>> upstream/master
 func RtlDosPathNameToNtPathName(dosName *uint16, ntName *NTUnicodeString, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) {
 	r0, _, _ := syscall.Syscall6(procRtlDosPathNameToNtPathName_U_WithStatus.Addr(), 4, uintptr(unsafe.Pointer(dosName)), uintptr(unsafe.Pointer(ntName)), uintptr(unsafe.Pointer(ntFileNamePart)), uintptr(unsafe.Pointer(relativeName)), 0, 0)
 	if r0 != 0 {
@@ -3401,8 +3343,6 @@ func stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int32) (chars int32) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 func EnumProcessModules(process Handle, module *Handle, cb uint32, cbNeeded *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procEnumProcessModules.Addr(), 4, uintptr(process), uintptr(unsafe.Pointer(module)), uintptr(cb), uintptr(unsafe.Pointer(cbNeeded)), 0, 0)
 	if r1 == 0 {
@@ -3419,7 +3359,6 @@ func EnumProcessModulesEx(process Handle, module *Handle, cb uint32, cbNeeded *u
 	return
 }
 
->>>>>>> upstream/master
 func EnumProcesses(processIds []uint32, bytesReturned *uint32) (err error) {
 	var _p0 *uint32
 	if len(processIds) > 0 {
@@ -3432,8 +3371,6 @@ func EnumProcesses(processIds []uint32, bytesReturned *uint32) (err error) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 func GetModuleBaseName(process Handle, module Handle, baseName *uint16, size uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procGetModuleBaseNameW.Addr(), 4, uintptr(process), uintptr(module), uintptr(unsafe.Pointer(baseName)), uintptr(size), 0, 0)
 	if r1 == 0 {
@@ -3458,7 +3395,6 @@ func GetModuleInformation(process Handle, module Handle, modinfo *ModuleInfo, cb
 	return
 }
 
->>>>>>> upstream/master
 func SubscribeServiceChangeNotifications(service Handle, eventType uint32, callback uintptr, callbackCtx uintptr, subscription *uintptr) (ret error) {
 	ret = procSubscribeServiceChangeNotifications.Find()
 	if ret != nil {
@@ -3581,8 +3517,6 @@ func GetUserProfileDirectory(t Token, dir *uint16, dirLen *uint32) (err error) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 func GetFileVersionInfoSize(filename string, zeroHandle *Handle) (bufSize uint32, err error) {
 	var _p0 *uint16
 	_p0, err = syscall.UTF16PtrFromString(filename)
@@ -3635,7 +3569,6 @@ func _VerQueryValue(block unsafe.Pointer, subBlock *uint16, pointerToBufferPoint
 	return
 }
 
->>>>>>> upstream/master
 func WinVerifyTrustEx(hwnd HWND, actionId *GUID, data *WinTrustData) (ret error) {
 	r0, _, _ := syscall.Syscall(procWinVerifyTrustEx.Addr(), 3, uintptr(hwnd), uintptr(unsafe.Pointer(actionId)), uintptr(unsafe.Pointer(data)))
 	if r0 != 0 {

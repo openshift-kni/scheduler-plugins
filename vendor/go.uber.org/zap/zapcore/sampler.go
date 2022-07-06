@@ -197,15 +197,6 @@ func (s *sampler) Check(ent Entry, ce *CheckedEntry) *CheckedEntry {
 		return ce
 	}
 
-<<<<<<< HEAD
-	counter := s.counts.get(ent.Level, ent.Message)
-	n := counter.IncCheckReset(ent.Time, s.tick)
-	if n > s.first && (n-s.first)%s.thereafter != 0 {
-		s.hook(ent, LogDropped)
-		return ce
-	}
-	s.hook(ent, LogSampled)
-=======
 	if ent.Level >= _minLevel && ent.Level <= _maxLevel {
 		counter := s.counts.get(ent.Level, ent.Message)
 		n := counter.IncCheckReset(ent.Time, s.tick)
@@ -215,6 +206,5 @@ func (s *sampler) Check(ent Entry, ce *CheckedEntry) *CheckedEntry {
 		}
 		s.hook(ent, LogSampled)
 	}
->>>>>>> upstream/master
 	return s.Core.Check(ent, ce)
 }

@@ -18,19 +18,12 @@ package util
 
 import (
 	gobuild "go/build"
-<<<<<<< HEAD
-	"path"
-	"path/filepath"
-	"reflect"
-	"strings"
-=======
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
->>>>>>> upstream/master
 )
 
 type empty struct{}
@@ -64,11 +57,6 @@ func hasSubdir(root, dir string) (rel string, ok bool) {
 	return filepath.ToSlash(dir[len(root):]), true
 }
 
-<<<<<<< HEAD
-// BoilerplatePath uses the boilerplate in code-generator by calculating the relative path to it.
-func BoilerplatePath() string {
-	return path.Join(reflect.TypeOf(empty{}).PkgPath(), "/../../hack/boilerplate.go.txt")
-=======
 // BoilerplatePath returns the path to the boilerplate file in code-generator,
 // or "" if the default boilerplate.go.txt file cannot be located.
 func BoilerplatePath() string {
@@ -100,7 +88,6 @@ func BoilerplatePath() string {
 	}
 	// cannot be located, invoker will have to explicitly specify boilerplate file
 	return ""
->>>>>>> upstream/master
 }
 
 // Vendorless trims vendor prefix from a package path to make it canonical

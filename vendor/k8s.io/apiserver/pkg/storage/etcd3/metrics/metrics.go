@@ -85,8 +85,6 @@ var (
 		},
 		[]string{},
 	)
-<<<<<<< HEAD
-=======
 	listStorageCount = compbasemetrics.NewCounterVec(
 		&compbasemetrics.CounterOpts{
 			Name:           "apiserver_storage_list_total",
@@ -119,7 +117,6 @@ var (
 		},
 		[]string{"resource"},
 	)
->>>>>>> upstream/master
 )
 
 var registerMetrics sync.Once
@@ -134,13 +131,10 @@ func Register() {
 		legacyregistry.MustRegister(dbTotalSize)
 		legacyregistry.MustRegister(etcdBookmarkCounts)
 		legacyregistry.MustRegister(etcdLeaseObjectCounts)
-<<<<<<< HEAD
-=======
 		legacyregistry.MustRegister(listStorageCount)
 		legacyregistry.MustRegister(listStorageNumFetched)
 		legacyregistry.MustRegister(listStorageNumSelectorEvals)
 		legacyregistry.MustRegister(listStorageNumReturned)
->>>>>>> upstream/master
 	})
 }
 
@@ -181,8 +175,6 @@ func UpdateLeaseObjectCount(count int64) {
 	// See pkg/storage/etcd3/lease_manager.go
 	etcdLeaseObjectCounts.WithLabelValues().Observe(float64(count))
 }
-<<<<<<< HEAD
-=======
 
 // RecordListEtcd3Metrics notes various metrics of the cost to serve a LIST request
 func RecordStorageListMetrics(resource string, numFetched, numEvald, numReturned int) {
@@ -191,4 +183,3 @@ func RecordStorageListMetrics(resource string, numFetched, numEvald, numReturned
 	listStorageNumSelectorEvals.WithLabelValues(resource).Add(float64(numEvald))
 	listStorageNumReturned.WithLabelValues(resource).Add(float64(numReturned))
 }
->>>>>>> upstream/master

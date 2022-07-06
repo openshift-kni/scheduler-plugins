@@ -14,12 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-<<<<<<< HEAD
-=======
 // Package logs contains support for logging options, flags and setup.
 // Commands must explicitly enable command line flags. They no longer
 // get added automatically when importing this package.
->>>>>>> upstream/master
 package logs
 
 import (
@@ -34,19 +31,6 @@ import (
 )
 
 const logFlushFreqFlagName = "log-flush-frequency"
-<<<<<<< HEAD
-
-var logFlushFreq = pflag.Duration(logFlushFreqFlagName, 5*time.Second, "Maximum number of seconds between log flushes")
-
-func init() {
-	klog.InitFlags(flag.CommandLine)
-}
-
-// AddFlags registers this package's flags on arbitrary FlagSets, such that they point to the
-// same value as the global flags.
-func AddFlags(fs *pflag.FlagSet) {
-	fs.AddFlag(pflag.Lookup(logFlushFreqFlagName))
-=======
 const deprecated = "will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components"
 
 // TODO (https://github.com/kubernetes/kubernetes/issues/105310): once klog
@@ -172,7 +156,6 @@ func AddGoFlags(fs *flag.FlagSet, opts ...Option) {
 		}
 		fs.Var(f.Value, f.Name, usage)
 	})
->>>>>>> upstream/master
 }
 
 // KlogWriter serves as a bridge between the standard log package and the glog package.
@@ -184,19 +167,6 @@ func (writer KlogWriter) Write(data []byte) (n int, err error) {
 	return len(data), nil
 }
 
-<<<<<<< HEAD
-// InitLogs initializes logs the way we want for kubernetes.
-func InitLogs() {
-	log.SetOutput(KlogWriter{})
-	log.SetFlags(0)
-	// The default glog flush interval is 5 seconds.
-	go wait.Forever(klog.Flush, *logFlushFreq)
-}
-
-// FlushLogs flushes logs immediately.
-func FlushLogs() {
-	klog.Flush()
-=======
 // InitLogs initializes logs the way we want for Kubernetes.
 // It should be called after parsing flags. If called before that,
 // it will use the default log settings.
@@ -218,7 +188,6 @@ func FlushLogs() {
 	if logrFlush != nil {
 		logrFlush()
 	}
->>>>>>> upstream/master
 }
 
 // NewLogger creates a new log.Logger which sends logs to klog.Info.

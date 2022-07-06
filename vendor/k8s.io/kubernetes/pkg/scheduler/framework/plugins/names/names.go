@@ -23,22 +23,10 @@ const (
 	ImageLocality                   = "ImageLocality"
 	InterPodAffinity                = "InterPodAffinity"
 	NodeAffinity                    = "NodeAffinity"
-<<<<<<< HEAD
-	NodeLabel                       = "NodeLabel"
-	NodeName                        = "NodeName"
-	NodePorts                       = "NodePorts"
-	NodePreferAvoidPods             = "NodePreferAvoidPods"
-	NodeResourcesBalancedAllocation = "NodeResourcesBalancedAllocation"
-	NodeResourcesFit                = "NodeResourcesFit"
-	NodeResourcesLeastAllocated     = "NodeResourcesLeastAllocated"
-	NodeResourcesMostAllocated      = "NodeResourcesMostAllocated"
-	RequestedToCapacityRatio        = "RequestedToCapacityRatio"
-=======
 	NodeName                        = "NodeName"
 	NodePorts                       = "NodePorts"
 	NodeResourcesBalancedAllocation = "NodeResourcesBalancedAllocation"
 	NodeResourcesFit                = "NodeResourcesFit"
->>>>>>> upstream/master
 	NodeUnschedulable               = "NodeUnschedulable"
 	NodeVolumeLimits                = "NodeVolumeLimits"
 	AzureDiskLimits                 = "AzureDiskLimits"

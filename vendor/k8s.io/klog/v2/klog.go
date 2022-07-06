@@ -509,11 +509,7 @@ type loggingT struct {
 	addDirHeader bool
 
 	// If set, all output will be redirected unconditionally to the provided logr.Logger
-<<<<<<< HEAD
-	logr logr.Logger
-=======
 	logr *logr.Logger
->>>>>>> upstream/master
 
 	// If true, messages will not be propagated to lower severity log levels
 	oneOutput bool
@@ -702,19 +698,11 @@ func (buf *buffer) someDigits(i, d int) int {
 	return copy(buf.tmp[i:], buf.tmp[j:])
 }
 
-<<<<<<< HEAD
-func (l *loggingT) println(s severity, logr logr.Logger, filter LogFilter, args ...interface{}) {
-	buf, file, line := l.header(s, 0)
-	// if logr is set, we clear the generated header as we rely on the backing
-	// logr implementation to print headers
-	if logr != nil {
-=======
 func (l *loggingT) println(s severity, logger *logr.Logger, filter LogFilter, args ...interface{}) {
 	buf, file, line := l.header(s, 0)
 	// if logger is set, we clear the generated header as we rely on the backing
 	// logger implementation to print headers
 	if logger != nil {
->>>>>>> upstream/master
 		l.putBuffer(buf)
 		buf = l.getBuffer()
 	}
@@ -722,20 +710,6 @@ func (l *loggingT) println(s severity, logger *logr.Logger, filter LogFilter, ar
 		args = filter.Filter(args)
 	}
 	fmt.Fprintln(buf, args...)
-<<<<<<< HEAD
-	l.output(s, logr, buf, 0 /* depth */, file, line, false)
-}
-
-func (l *loggingT) print(s severity, logr logr.Logger, filter LogFilter, args ...interface{}) {
-	l.printDepth(s, logr, filter, 1, args...)
-}
-
-func (l *loggingT) printDepth(s severity, logr logr.Logger, filter LogFilter, depth int, args ...interface{}) {
-	buf, file, line := l.header(s, depth)
-	// if logr is set, we clear the generated header as we rely on the backing
-	// logr implementation to print headers
-	if logr != nil {
-=======
 	l.output(s, logger, buf, 0 /* depth */, file, line, false)
 }
 
@@ -748,7 +722,6 @@ func (l *loggingT) printDepth(s severity, logger *logr.Logger, filter LogFilter,
 	// if logr is set, we clear the generated header as we rely on the backing
 	// logr implementation to print headers
 	if logger != nil {
->>>>>>> upstream/master
 		l.putBuffer(buf)
 		buf = l.getBuffer()
 	}
@@ -759,16 +732,6 @@ func (l *loggingT) printDepth(s severity, logger *logr.Logger, filter LogFilter,
 	if buf.Bytes()[buf.Len()-1] != '\n' {
 		buf.WriteByte('\n')
 	}
-<<<<<<< HEAD
-	l.output(s, logr, buf, depth, file, line, false)
-}
-
-func (l *loggingT) printf(s severity, logr logr.Logger, filter LogFilter, format string, args ...interface{}) {
-	buf, file, line := l.header(s, 0)
-	// if logr is set, we clear the generated header as we rely on the backing
-	// logr implementation to print headers
-	if logr != nil {
-=======
 	l.output(s, logger, buf, depth, file, line, false)
 }
 
@@ -777,7 +740,6 @@ func (l *loggingT) printf(s severity, logger *logr.Logger, filter LogFilter, for
 	// if logr is set, we clear the generated header as we rely on the backing
 	// logr implementation to print headers
 	if logger != nil {
->>>>>>> upstream/master
 		l.putBuffer(buf)
 		buf = l.getBuffer()
 	}
@@ -788,29 +750,17 @@ func (l *loggingT) printf(s severity, logger *logr.Logger, filter LogFilter, for
 	if buf.Bytes()[buf.Len()-1] != '\n' {
 		buf.WriteByte('\n')
 	}
-<<<<<<< HEAD
-	l.output(s, logr, buf, 0 /* depth */, file, line, false)
-=======
 	l.output(s, logger, buf, 0 /* depth */, file, line, false)
->>>>>>> upstream/master
 }
 
 // printWithFileLine behaves like print but uses the provided file and line number.  If
 // alsoLogToStderr is true, the log message always appears on standard error; it
 // will also appear in the log file unless --logtostderr is set.
-<<<<<<< HEAD
-func (l *loggingT) printWithFileLine(s severity, logr logr.Logger, filter LogFilter, file string, line int, alsoToStderr bool, args ...interface{}) {
-	buf := l.formatHeader(s, file, line)
-	// if logr is set, we clear the generated header as we rely on the backing
-	// logr implementation to print headers
-	if logr != nil {
-=======
 func (l *loggingT) printWithFileLine(s severity, logger *logr.Logger, filter LogFilter, file string, line int, alsoToStderr bool, args ...interface{}) {
 	buf := l.formatHeader(s, file, line)
 	// if logr is set, we clear the generated header as we rely on the backing
 	// logr implementation to print headers
 	if logger != nil {
->>>>>>> upstream/master
 		l.putBuffer(buf)
 		buf = l.getBuffer()
 	}
@@ -821,18 +771,6 @@ func (l *loggingT) printWithFileLine(s severity, logger *logr.Logger, filter Log
 	if buf.Bytes()[buf.Len()-1] != '\n' {
 		buf.WriteByte('\n')
 	}
-<<<<<<< HEAD
-	l.output(s, logr, buf, 2 /* depth */, file, line, alsoToStderr)
-}
-
-// if loggr is specified, will call loggr.Error, otherwise output with logging module.
-func (l *loggingT) errorS(err error, loggr logr.Logger, filter LogFilter, depth int, msg string, keysAndValues ...interface{}) {
-	if filter != nil {
-		msg, keysAndValues = filter.FilterS(msg, keysAndValues)
-	}
-	if loggr != nil {
-		logr.WithCallDepth(loggr, depth+2).Error(err, msg, keysAndValues...)
-=======
 	l.output(s, logger, buf, 2 /* depth */, file, line, alsoToStderr)
 }
 
@@ -843,28 +781,18 @@ func (l *loggingT) errorS(err error, logger *logr.Logger, filter LogFilter, dept
 	}
 	if logger != nil {
 		logger.WithCallDepth(depth+2).Error(err, msg, keysAndValues...)
->>>>>>> upstream/master
 		return
 	}
 	l.printS(err, errorLog, depth+1, msg, keysAndValues...)
 }
 
 // if loggr is specified, will call loggr.Info, otherwise output with logging module.
-<<<<<<< HEAD
-func (l *loggingT) infoS(loggr logr.Logger, filter LogFilter, depth int, msg string, keysAndValues ...interface{}) {
-	if filter != nil {
-		msg, keysAndValues = filter.FilterS(msg, keysAndValues)
-	}
-	if loggr != nil {
-		logr.WithCallDepth(loggr, depth+2).Info(msg, keysAndValues...)
-=======
 func (l *loggingT) infoS(logger *logr.Logger, filter LogFilter, depth int, msg string, keysAndValues ...interface{}) {
 	if filter != nil {
 		msg, keysAndValues = filter.FilterS(msg, keysAndValues)
 	}
 	if logger != nil {
 		logger.WithCallDepth(depth+2).Info(msg, keysAndValues...)
->>>>>>> upstream/master
 		return
 	}
 	l.printS(nil, infoLog, depth+1, msg, keysAndValues...)
@@ -934,19 +862,13 @@ func (rb *redirectBuffer) Write(bytes []byte) (n int, err error) {
 // Use as:
 //   ...
 //   klog.SetLogger(zapr.NewLogger(zapLog))
-<<<<<<< HEAD
-=======
 //
 // To remove a backing logr implemention, use ClearLogger. Setting an
 // empty logger with SetLogger(logr.Logger{}) does not work.
->>>>>>> upstream/master
 func SetLogger(logr logr.Logger) {
 	logging.mu.Lock()
 	defer logging.mu.Unlock()
 
-<<<<<<< HEAD
-	logging.logr = logr
-=======
 	logging.logr = &logr
 }
 
@@ -957,7 +879,6 @@ func ClearLogger() {
 	defer logging.mu.Unlock()
 
 	logging.logr = nil
->>>>>>> upstream/master
 }
 
 // SetOutput sets the output destination for all severities
@@ -995,11 +916,7 @@ func LogToStderr(stderr bool) {
 }
 
 // output writes the data to the log files and releases the buffer.
-<<<<<<< HEAD
-func (l *loggingT) output(s severity, log logr.Logger, buf *buffer, depth int, file string, line int, alsoToStderr bool) {
-=======
 func (l *loggingT) output(s severity, log *logr.Logger, buf *buffer, depth int, file string, line int, alsoToStderr bool) {
->>>>>>> upstream/master
 	l.mu.Lock()
 	if l.traceLocation.isSet() {
 		if l.traceLocation.match(file, line) {
@@ -1011,15 +928,9 @@ func (l *loggingT) output(s severity, log *logr.Logger, buf *buffer, depth int, 
 		// TODO: set 'severity' and caller information as structured log info
 		// keysAndValues := []interface{}{"severity", severityName[s], "file", file, "line", line}
 		if s == errorLog {
-<<<<<<< HEAD
-			logr.WithCallDepth(l.logr, depth+3).Error(nil, string(data))
-		} else {
-			logr.WithCallDepth(log, depth+3).Info(string(data))
-=======
 			l.logr.WithCallDepth(depth+3).Error(nil, string(data))
 		} else {
 			log.WithCallDepth(depth + 3).Info(string(data))
->>>>>>> upstream/master
 		}
 	} else if l.toStderr {
 		os.Stderr.Write(data)
@@ -1370,11 +1281,7 @@ func (l *loggingT) setV(pc uintptr) Level {
 // See the documentation of V for more information.
 type Verbose struct {
 	enabled bool
-<<<<<<< HEAD
-	logr    logr.Logger
-=======
 	logr    *logr.Logger
->>>>>>> upstream/master
 	filter  LogFilter
 }
 
@@ -1382,12 +1289,8 @@ func newVerbose(level Level, b bool) Verbose {
 	if logging.logr == nil {
 		return Verbose{b, nil, logging.filter}
 	}
-<<<<<<< HEAD
-	return Verbose{b, logging.logr.V(int(level)), logging.filter}
-=======
 	v := logging.logr.V(int(level))
 	return Verbose{b, &v, logging.filter}
->>>>>>> upstream/master
 }
 
 // V reports whether verbosity at the call site is at least the requested level.
@@ -1425,11 +1328,6 @@ func V(level Level) Verbose {
 		if runtime.Callers(2, logging.pcs[:]) == 0 {
 			return newVerbose(level, false)
 		}
-<<<<<<< HEAD
-		v, ok := logging.vmap[logging.pcs[0]]
-		if !ok {
-			v = logging.setV(logging.pcs[0])
-=======
 		// runtime.Callers returns "return PCs", but we want
 		// to look up the symbolic information for the call,
 		// so subtract 1 from the PC. runtime.CallersFrames
@@ -1438,7 +1336,6 @@ func V(level Level) Verbose {
 		v, ok := logging.vmap[pc]
 		if !ok {
 			v = logging.setV(pc)
->>>>>>> upstream/master
 		}
 		return newVerbose(level, v >= level)
 	}
@@ -1694,8 +1591,6 @@ func (ref ObjectRef) String() string {
 	return ref.Name
 }
 
-<<<<<<< HEAD
-=======
 // MarshalLog ensures that loggers with support for structured output will log
 // as a struct by removing the String method via a custom type.
 func (ref ObjectRef) MarshalLog() interface{} {
@@ -1705,7 +1600,6 @@ func (ref ObjectRef) MarshalLog() interface{} {
 
 var _ logr.Marshaler = ObjectRef{}
 
->>>>>>> upstream/master
 // KMetadata is a subset of the kubernetes k8s.io/apimachinery/pkg/apis/meta/v1.Object interface
 // this interface may expand in the future, but will always be a subset of the
 // kubernetes k8s.io/apimachinery/pkg/apis/meta/v1.Object interface
@@ -1736,8 +1630,6 @@ func KRef(namespace, name string) ObjectRef {
 		Namespace: namespace,
 	}
 }
-<<<<<<< HEAD
-=======
 
 // KObjs returns slice of ObjectRef from an slice of ObjectMeta
 func KObjs(arg interface{}) []ObjectRef {
@@ -1755,4 +1647,3 @@ func KObjs(arg interface{}) []ObjectRef {
 	}
 	return objectRefs
 }
->>>>>>> upstream/master

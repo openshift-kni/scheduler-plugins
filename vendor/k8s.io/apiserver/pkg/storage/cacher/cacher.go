@@ -31,27 +31,17 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-<<<<<<< HEAD
-	"k8s.io/apimachinery/pkg/util/clock"
-=======
->>>>>>> upstream/master
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/apiserver/pkg/features"
 	"k8s.io/apiserver/pkg/storage"
-<<<<<<< HEAD
-=======
 	"k8s.io/apiserver/pkg/storage/cacher/metrics"
->>>>>>> upstream/master
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	utilflowcontrol "k8s.io/apiserver/pkg/util/flowcontrol"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
-<<<<<<< HEAD
-=======
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 	utiltrace "k8s.io/utils/trace"
 )
 
@@ -202,11 +192,7 @@ func (t *watcherBookmarkTimeBuckets) addWatcher(w *cacheWatcher) bool {
 	if bucketID < t.startBucketID {
 		bucketID = t.startBucketID
 	}
-<<<<<<< HEAD
-	watchers, _ := t.watchersBuckets[bucketID]
-=======
 	watchers := t.watchersBuckets[bucketID]
->>>>>>> upstream/master
 	t.watchersBuckets[bucketID] = append(watchers, w)
 	return true
 }
@@ -246,11 +232,8 @@ type Cacher struct {
 	// Incoming events that should be dispatched to watchers.
 	incoming chan watchCacheEvent
 
-<<<<<<< HEAD
-=======
 	resourcePrefix string
 
->>>>>>> upstream/master
 	sync.RWMutex
 
 	// Before accessing the cacher's cache, wait for the ready to be ok.
@@ -349,10 +332,7 @@ func NewCacherFromConfig(config Config) (*Cacher, error) {
 	}
 	objType := reflect.TypeOf(obj)
 	cacher := &Cacher{
-<<<<<<< HEAD
-=======
 		resourcePrefix: config.ResourcePrefix,
->>>>>>> upstream/master
 		ready:          newReady(),
 		storage:        config.Storage,
 		objectType:     objType,
@@ -366,11 +346,7 @@ func NewCacherFromConfig(config Config) (*Cacher, error) {
 		},
 		// TODO: Figure out the correct value for the buffer size.
 		incoming:              make(chan watchCacheEvent, 100),
-<<<<<<< HEAD
-		dispatchTimeoutBudget: newTimeBudget(stopCh),
-=======
 		dispatchTimeoutBudget: newTimeBudget(),
->>>>>>> upstream/master
 		// We need to (potentially) stop both:
 		// - wait.Until go-routine
 		// - reflector.ListAndWatch
@@ -540,16 +516,6 @@ func (c *Cacher) Watch(ctx context.Context, key string, opts storage.ListOptions
 		return newErrWatcher(err), nil
 	}
 
-<<<<<<< HEAD
-	// With some events already sent, update resourceVersion so that
-	// events that were buffered and not yet processed won't be delivered
-	// to this watcher second time causing going back in time.
-	if len(initEvents) > 0 {
-		watchRV = initEvents[len(initEvents)-1].ResourceVersion
-	}
-
-=======
->>>>>>> upstream/master
 	func() {
 		c.Lock()
 		defer c.Unlock()
@@ -564,11 +530,7 @@ func (c *Cacher) Watch(ctx context.Context, key string, opts storage.ListOptions
 		c.watcherIdx++
 	}()
 
-<<<<<<< HEAD
-	go watcher.process(ctx, initEvents, watchRV)
-=======
 	go watcher.processEvents(ctx, initEvents, watchRV)
->>>>>>> upstream/master
 	return watcher, nil
 }
 
@@ -628,11 +590,8 @@ func (c *Cacher) Get(ctx context.Context, key string, opts storage.GetOptions, o
 	return nil
 }
 
-<<<<<<< HEAD
-=======
 // NOTICE: Keep in sync with shouldListFromStorage function in
 //  staging/src/k8s.io/apiserver/pkg/util/flowcontrol/request/list_work_estimator.go
->>>>>>> upstream/master
 func shouldDelegateList(opts storage.ListOptions) bool {
 	resourceVersion := opts.ResourceVersion
 	pred := opts.Predicate
@@ -756,11 +715,7 @@ func (c *Cacher) List(ctx context.Context, key string, opts storage.ListOptions,
 	}
 	filter := filterWithAttrsFunction(key, pred)
 
-<<<<<<< HEAD
-	objs, readResourceVersion, err := c.watchCache.WaitUntilFreshAndList(listRV, pred.MatcherIndex(), trace)
-=======
 	objs, readResourceVersion, indexUsed, err := c.watchCache.WaitUntilFreshAndList(listRV, pred.MatcherIndex(), trace)
->>>>>>> upstream/master
 	if err != nil {
 		return err
 	}
@@ -786,10 +741,7 @@ func (c *Cacher) List(ctx context.Context, key string, opts storage.ListOptions,
 			return err
 		}
 	}
-<<<<<<< HEAD
-=======
 	metrics.RecordListCacheMetrics(c.resourcePrefix, indexUsed, len(objs), listVal.Len())
->>>>>>> upstream/master
 	return nil
 }
 
@@ -975,16 +927,11 @@ func (c *Cacher) dispatchEvent(event *watchCacheEvent) {
 			timeout := c.dispatchTimeoutBudget.takeAvailable()
 			c.timer.Reset(timeout)
 
-<<<<<<< HEAD
-			// Make sure every watcher will try to send event without blocking first,
-			// even if the timer has already expired.
-=======
 			// Send event to all blocked watchers. As long as timer is running,
 			// `add` will wait for the watcher to unblock. After timeout,
 			// `add` will not wait, but immediately close a still blocked watcher.
 			// Hence, every watcher gets the chance to unblock itself while timer
 			// is running, not only the first ones in the list.
->>>>>>> upstream/master
 			timer := c.timer
 			for _, watcher := range c.blockedWatchers {
 				if !watcher.add(event, timer) {
@@ -1438,11 +1385,7 @@ func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
 	}
 }
 
-<<<<<<< HEAD
-func (c *cacheWatcher) process(ctx context.Context, initEvents []*watchCacheEvent, resourceVersion uint64) {
-=======
 func (c *cacheWatcher) processEvents(ctx context.Context, initEvents []*watchCacheEvent, resourceVersion uint64) {
->>>>>>> upstream/master
 	defer utilruntime.HandleCrash()
 
 	// Check how long we are processing initEvents.
@@ -1463,11 +1406,6 @@ func (c *cacheWatcher) processEvents(ctx context.Context, initEvents []*watchCac
 	for _, event := range initEvents {
 		c.sendWatchCacheEvent(event)
 	}
-<<<<<<< HEAD
-	objType := c.objectType.String()
-	if len(initEvents) > 0 {
-		initCounter.WithLabelValues(objType).Add(float64(len(initEvents)))
-=======
 
 	objType := c.objectType.String()
 	if len(initEvents) > 0 {
@@ -1477,20 +1415,16 @@ func (c *cacheWatcher) processEvents(ctx context.Context, initEvents []*watchCac
 		// won't be delivered to this watcher second time causing
 		// going back in time.
 		resourceVersion = initEvents[len(initEvents)-1].ResourceVersion
->>>>>>> upstream/master
 	}
 	processingTime := time.Since(startTime)
 	if processingTime > initProcessThreshold {
 		klog.V(2).Infof("processing %d initEvents of %s (%s) took %v", len(initEvents), objType, c.identifier, processingTime)
 	}
 
-<<<<<<< HEAD
-=======
 	c.process(ctx, resourceVersion)
 }
 
 func (c *cacheWatcher) process(ctx context.Context, resourceVersion uint64) {
->>>>>>> upstream/master
 	// At this point we already start processing incoming watch events.
 	// However, the init event can still be processed because their serialization
 	// and sending to the client happens asynchrnously.

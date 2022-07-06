@@ -165,13 +165,8 @@ message DaemonSetStatus {
   // More info: https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/
   optional int32 desiredNumberScheduled = 3;
 
-<<<<<<< HEAD
-  // The number of nodes that should be running the daemon pod and have one
-  // or more of the daemon pod running and ready.
-=======
   // numberReady is the number of nodes that should be running the daemon pod and have one
   // or more of the daemon pod running with a Ready Condition.
->>>>>>> upstream/master
   optional int32 numberReady = 4;
 
   // The most recent generation observed by the daemon set controller.
@@ -327,11 +322,7 @@ message DeploymentStatus {
   // +optional
   optional int32 updatedReplicas = 3;
 
-<<<<<<< HEAD
-  // Total number of ready pods targeted by this deployment.
-=======
   // readyReplicas is the number of pods targeted by this Deployment with a Ready Condition.
->>>>>>> upstream/master
   // +optional
   optional int32 readyReplicas = 7;
 
@@ -466,11 +457,7 @@ message ReplicaSetStatus {
   // +optional
   optional int32 fullyLabeledReplicas = 2;
 
-<<<<<<< HEAD
-  // The number of ready replicas for this replica set.
-=======
   // readyReplicas is the number of pods targeted by this ReplicaSet with a Ready Condition.
->>>>>>> upstream/master
   // +optional
   optional int32 readyReplicas = 4;
 
@@ -624,8 +611,6 @@ message StatefulSetList {
   repeated StatefulSet items = 2;
 }
 
-<<<<<<< HEAD
-=======
 // StatefulSetPersistentVolumeClaimRetentionPolicy describes the policy used for PVCs
 // created from the StatefulSet VolumeClaimTemplates.
 message StatefulSetPersistentVolumeClaimRetentionPolicy {
@@ -643,7 +628,6 @@ message StatefulSetPersistentVolumeClaimRetentionPolicy {
   optional string whenScaled = 2;
 }
 
->>>>>>> upstream/master
 // A StatefulSetSpec is the specification of a StatefulSet.
 message StatefulSetSpec {
   // replicas is the desired number of replicas of the given Template.
@@ -710,8 +694,6 @@ message StatefulSetSpec {
   // This is an alpha field and requires enabling StatefulSetMinReadySeconds feature gate.
   // +optional
   optional int32 minReadySeconds = 9;
-<<<<<<< HEAD
-=======
 
   // persistentVolumeClaimRetentionPolicy describes the lifecycle of persistent
   // volume claims created from volumeClaimTemplates. By default, all persistent
@@ -721,7 +703,6 @@ message StatefulSetSpec {
   // down. This requires the StatefulSetAutoDeletePVC feature gate to be enabled,
   // which is alpha.  +optional
   optional StatefulSetPersistentVolumeClaimRetentionPolicy persistentVolumeClaimRetentionPolicy = 10;
->>>>>>> upstream/master
 }
 
 // StatefulSetStatus represents the current state of a StatefulSet.
@@ -734,11 +715,7 @@ message StatefulSetStatus {
   // replicas is the number of Pods created by the StatefulSet controller.
   optional int32 replicas = 2;
 
-<<<<<<< HEAD
-  // readyReplicas is the number of Pods created by the StatefulSet controller that have a Ready Condition.
-=======
   // readyReplicas is the number of pods created for this StatefulSet with a Ready Condition.
->>>>>>> upstream/master
   optional int32 readyReplicas = 3;
 
   // currentReplicas is the number of Pods created by the StatefulSet controller from the StatefulSet version
@@ -770,13 +747,7 @@ message StatefulSetStatus {
   repeated StatefulSetCondition conditions = 10;
 
   // Total number of available pods (ready for at least minReadySeconds) targeted by this statefulset.
-<<<<<<< HEAD
-  // This is an alpha field and requires enabling StatefulSetMinReadySeconds feature gate.
-  // Remove omitempty when graduating to beta
-  // +optional
-=======
   // This is a beta field and enabled/disabled by StatefulSetMinReadySeconds feature gate.
->>>>>>> upstream/master
   optional int32 availableReplicas = 11;
 }
 

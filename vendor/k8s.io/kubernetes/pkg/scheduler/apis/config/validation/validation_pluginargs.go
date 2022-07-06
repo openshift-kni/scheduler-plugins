@@ -87,38 +87,6 @@ func validateHardPodAffinityWeight(path *field.Path, w int32) error {
 	return nil
 }
 
-<<<<<<< HEAD
-// ValidateNodeLabelArgs validates that NodeLabelArgs are correct.
-func ValidateNodeLabelArgs(path *field.Path, args *config.NodeLabelArgs) error {
-	var allErrs field.ErrorList
-
-	allErrs = append(allErrs, validateNoConflict(args.PresentLabels, args.AbsentLabels,
-		path.Child("presentLabels"), path.Child("absentLabels"))...)
-	allErrs = append(allErrs, validateNoConflict(args.PresentLabelsPreference, args.AbsentLabelsPreference,
-		path.Child("presentLabelsPreference"), path.Child("absentLabelsPreference"))...)
-
-	return allErrs.ToAggregate()
-}
-
-// validateNoConflict validates that presentLabels and absentLabels do not conflict.
-func validateNoConflict(presentLabels, absentLabels []string, presentPath, absentPath *field.Path) field.ErrorList {
-	var allErrs field.ErrorList
-
-	m := make(map[string]int, len(presentLabels)) // label -> index
-	for i, l := range presentLabels {
-		m[l] = i
-	}
-	for i, l := range absentLabels {
-		if j, ok := m[l]; ok {
-			allErrs = append(allErrs, field.Invalid(presentPath.Index(j), l,
-				fmt.Sprintf("conflict with %v", absentPath.Index(i).String())))
-		}
-	}
-	return allErrs
-}
-
-=======
->>>>>>> upstream/master
 // ValidatePodTopologySpreadArgs validates that PodTopologySpreadArgs are correct.
 // It replicates the validation from pkg/apis/core/validation.validateTopologySpreadConstraints
 // with an additional check for .labelSelector to be nil.
@@ -196,17 +164,6 @@ func validateConstraintNotRepeat(path *field.Path, constraints []v1.TopologySpre
 	return nil
 }
 
-<<<<<<< HEAD
-// ValidateRequestedToCapacityRatioArgs validates that RequestedToCapacityRatioArgs are correct.
-func ValidateRequestedToCapacityRatioArgs(path *field.Path, args *config.RequestedToCapacityRatioArgs) error {
-	var allErrs field.ErrorList
-	allErrs = append(allErrs, validateFunctionShape(args.Shape, path.Child("shape"))...)
-	allErrs = append(allErrs, validateResourcesNoMax(args.Resources, path.Child("resources"))...)
-	return allErrs.ToAggregate()
-}
-
-=======
->>>>>>> upstream/master
 func validateFunctionShape(shape []config.UtilizationShapePoint, path *field.Path) field.ErrorList {
 	const (
 		minUtilization = 0
@@ -244,31 +201,6 @@ func validateFunctionShape(shape []config.UtilizationShapePoint, path *field.Pat
 	return allErrs
 }
 
-<<<<<<< HEAD
-// weight of resource is allowed to exceed 100, this is only applicable to `RequestedToCapacityRatio` plugin for backwards compatibility reason.
-func validateResourcesNoMax(resources []config.ResourceSpec, p *field.Path) field.ErrorList {
-	var allErrs field.ErrorList
-	for i, r := range resources {
-		if r.Weight < 1 {
-			allErrs = append(allErrs, field.Invalid(p.Index(i).Child("weight"), r.Weight,
-				fmt.Sprintf("resource weight of %s not in valid range [1, inf)", r.Name)))
-		}
-	}
-	return allErrs
-}
-
-// ValidateNodeResourcesLeastAllocatedArgs validates that NodeResourcesLeastAllocatedArgs are correct.
-func ValidateNodeResourcesLeastAllocatedArgs(path *field.Path, args *config.NodeResourcesLeastAllocatedArgs) error {
-	return validateResources(args.Resources, path.Child("resources")).ToAggregate()
-}
-
-// ValidateNodeResourcesMostAllocatedArgs validates that NodeResourcesMostAllocatedArgs are correct.
-func ValidateNodeResourcesMostAllocatedArgs(path *field.Path, args *config.NodeResourcesMostAllocatedArgs) error {
-	return validateResources(args.Resources, path.Child("resources")).ToAggregate()
-}
-
-=======
->>>>>>> upstream/master
 func validateResources(resources []config.ResourceSpec, p *field.Path) field.ErrorList {
 	var allErrs field.ErrorList
 	for i, resource := range resources {
@@ -320,10 +252,6 @@ func ValidateNodeAffinityArgs(path *field.Path, args *config.NodeAffinityArgs) e
 	return errors.Flatten(errors.NewAggregate(errs))
 }
 
-<<<<<<< HEAD
-// ValidateVolumeBindingArgs validates that VolumeBindingArgs are set correctly.
-func ValidateVolumeBindingArgs(path *field.Path, args *config.VolumeBindingArgs) error {
-=======
 // VolumeBindingArgsValidationOptions contains the different settings for validation.
 type VolumeBindingArgsValidationOptions struct {
 	AllowVolumeCapacityPriority bool
@@ -338,18 +266,13 @@ func ValidateVolumeBindingArgs(path *field.Path, args *config.VolumeBindingArgs)
 
 // ValidateVolumeBindingArgs validates that VolumeBindingArgs with scheduler features.
 func ValidateVolumeBindingArgsWithOptions(path *field.Path, args *config.VolumeBindingArgs, opts VolumeBindingArgsValidationOptions) error {
->>>>>>> upstream/master
 	var allErrs field.ErrorList
 
 	if args.BindTimeoutSeconds < 0 {
 		allErrs = append(allErrs, field.Invalid(path.Child("bindTimeoutSeconds"), args.BindTimeoutSeconds, "invalid BindTimeoutSeconds, should not be a negative value"))
 	}
 
-<<<<<<< HEAD
-	if utilfeature.DefaultFeatureGate.Enabled(features.VolumeCapacityPriority) {
-=======
 	if opts.AllowVolumeCapacityPriority {
->>>>>>> upstream/master
 		allErrs = append(allErrs, validateFunctionShape(args.Shape, path.Child("shape"))...)
 	} else if args.Shape != nil {
 		// When the feature is off, return an error if the config is not nil.
@@ -383,11 +306,7 @@ func ValidateNodeResourcesFitArgs(path *field.Path, args *config.NodeResourcesFi
 
 	if args.ScoringStrategy != nil {
 		allErrs = append(allErrs, validateResources(args.ScoringStrategy.Resources, path.Child("resources"))...)
-<<<<<<< HEAD
-		if args.ScoringStrategy.RequestedToCapacityRatio != nil && len(args.ScoringStrategy.RequestedToCapacityRatio.Shape) > 0 {
-=======
 		if args.ScoringStrategy.RequestedToCapacityRatio != nil {
->>>>>>> upstream/master
 			allErrs = append(allErrs, validateFunctionShape(args.ScoringStrategy.RequestedToCapacityRatio.Shape, path.Child("shape"))...)
 		}
 	}

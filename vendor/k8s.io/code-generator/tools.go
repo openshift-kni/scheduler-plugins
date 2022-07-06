@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 //go:build tools
->>>>>>> upstream/master
 // +build tools
 
 /*
@@ -22,11 +19,7 @@ limitations under the License.
 
 // This package contains code generation utilities
 // This package imports things required by build scripts, to force `go mod` to see them as dependencies
-<<<<<<< HEAD
-package tools
-=======
 package codegenerator
->>>>>>> upstream/master
 
 import (
 	_ "k8s.io/code-generator/cmd/client-gen"

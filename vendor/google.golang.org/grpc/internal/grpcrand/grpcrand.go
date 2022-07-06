@@ -31,14 +31,6 @@ var (
 	mu sync.Mutex
 )
 
-<<<<<<< HEAD
-// Int63n implements rand.Int63n on the grpcrand global source.
-func Int63n(n int64) int64 {
-	mu.Lock()
-	res := r.Int63n(n)
-	mu.Unlock()
-	return res
-=======
 // Int implements rand.Int on the grpcrand global source.
 func Int() int {
 	mu.Lock()
@@ -51,30 +43,18 @@ func Int63n(n int64) int64 {
 	mu.Lock()
 	defer mu.Unlock()
 	return r.Int63n(n)
->>>>>>> upstream/master
 }
 
 // Intn implements rand.Intn on the grpcrand global source.
 func Intn(n int) int {
 	mu.Lock()
-<<<<<<< HEAD
-	res := r.Intn(n)
-	mu.Unlock()
-	return res
-=======
 	defer mu.Unlock()
 	return r.Intn(n)
->>>>>>> upstream/master
 }
 
 // Float64 implements rand.Float64 on the grpcrand global source.
 func Float64() float64 {
 	mu.Lock()
-<<<<<<< HEAD
-	res := r.Float64()
-	mu.Unlock()
-	return res
-=======
 	defer mu.Unlock()
 	return r.Float64()
 }
@@ -84,5 +64,4 @@ func Uint64() uint64 {
 	mu.Lock()
 	defer mu.Unlock()
 	return r.Uint64()
->>>>>>> upstream/master
 }

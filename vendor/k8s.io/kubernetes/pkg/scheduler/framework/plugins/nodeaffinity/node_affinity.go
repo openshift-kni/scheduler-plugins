@@ -158,12 +158,6 @@ func (pl *NodeAffinity) Score(ctx context.Context, state *framework.CycleState, 
 	}
 
 	node := nodeInfo.Node()
-<<<<<<< HEAD
-	if node == nil {
-		return 0, framework.AsStatus(fmt.Errorf("getting node %q from Snapshot: %w", nodeName, err))
-	}
-=======
->>>>>>> upstream/master
 
 	var count int64
 	if pl.addedPrefSchedTerms != nil {

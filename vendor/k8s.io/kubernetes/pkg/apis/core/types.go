@@ -111,11 +111,7 @@ type VolumeSource struct {
 	// +optional
 	FlexVolume *FlexVolumeSource
 
-<<<<<<< HEAD
-	// Cinder represents a cinder volume attached and mounted on kubelets host machine.
-=======
 	// Cinder represents a cinder volume attached and mounted on kubelet's host machine.
->>>>>>> upstream/master
 	// +optional
 	Cinder *CinderVolumeSource
 
@@ -139,29 +135,17 @@ type VolumeSource struct {
 	// ConfigMap represents a configMap that should populate this volume
 	// +optional
 	ConfigMap *ConfigMapVolumeSource
-<<<<<<< HEAD
-	// VsphereVolume represents a vSphere volume attached and mounted on kubelets host machine
-=======
 	// VsphereVolume represents a vSphere volume attached and mounted on kubelet's host machine
->>>>>>> upstream/master
 	// +optional
 	VsphereVolume *VsphereVirtualDiskVolumeSource
 	// AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.
 	// +optional
 	AzureDisk *AzureDiskVolumeSource
-<<<<<<< HEAD
-	// PhotonPersistentDisk represents a Photon Controller persistent disk attached and mounted on kubelets host machine
-	PhotonPersistentDisk *PhotonPersistentDiskVolumeSource
-	// Items for all in one resources secrets, configmaps, and downward API
-	Projected *ProjectedVolumeSource
-	// PortworxVolume represents a portworx volume attached and mounted on kubelets host machine
-=======
 	// PhotonPersistentDisk represents a Photon Controller persistent disk attached and mounted on kubelet's host machine
 	PhotonPersistentDisk *PhotonPersistentDiskVolumeSource
 	// Items for all in one resources secrets, configmaps, and downward API
 	Projected *ProjectedVolumeSource
 	// PortworxVolume represents a portworx volume attached and mounted on kubelet's host machine
->>>>>>> upstream/master
 	// +optional
 	PortworxVolume *PortworxVolumeSource
 	// ScaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.
@@ -198,12 +182,6 @@ type VolumeSource struct {
 	// A pod can use both types of ephemeral volumes and
 	// persistent volumes at the same time.
 	//
-<<<<<<< HEAD
-	// This is a beta feature and only available when the GenericEphemeralVolume
-	// feature gate is enabled.
-	//
-=======
->>>>>>> upstream/master
 	// +optional
 	Ephemeral *EphemeralVolumeSource
 }
@@ -245,11 +223,7 @@ type PersistentVolumeSource struct {
 	// provisioned/attached using an exec based plugin.
 	// +optional
 	FlexVolume *FlexPersistentVolumeSource
-<<<<<<< HEAD
-	// Cinder represents a cinder volume attached and mounted on kubelets host machine.
-=======
 	// Cinder represents a cinder volume attached and mounted on kubelet's host machine.
->>>>>>> upstream/master
 	// +optional
 	Cinder *CinderPersistentVolumeSource
 	// CephFS represents a Ceph FS mount on the host that shares a pod's lifetime
@@ -264,25 +238,15 @@ type PersistentVolumeSource struct {
 	// AzureFile represents an Azure File Service mount on the host and bind mount to the pod.
 	// +optional
 	AzureFile *AzureFilePersistentVolumeSource
-<<<<<<< HEAD
-	// VsphereVolume represents a vSphere volume attached and mounted on kubelets host machine
-=======
 	// VsphereVolume represents a vSphere volume attached and mounted on kubelet's host machine
->>>>>>> upstream/master
 	// +optional
 	VsphereVolume *VsphereVirtualDiskVolumeSource
 	// AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.
 	// +optional
 	AzureDisk *AzureDiskVolumeSource
-<<<<<<< HEAD
-	// PhotonPersistentDisk represents a Photon Controller persistent disk attached and mounted on kubelets host machine
-	PhotonPersistentDisk *PhotonPersistentDiskVolumeSource
-	// PortworxVolume represents a portworx volume attached and mounted on kubelets host machine
-=======
 	// PhotonPersistentDisk represents a Photon Controller persistent disk attached and mounted on kubelet's host machine
 	PhotonPersistentDisk *PhotonPersistentDiskVolumeSource
 	// PortworxVolume represents a portworx volume attached and mounted on kubelet's host machine
->>>>>>> upstream/master
 	// +optional
 	PortworxVolume *PortworxVolumeSource
 	// ScaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.
@@ -466,12 +430,9 @@ type PersistentVolumeClaimSpec struct {
 	// +optional
 	Selector *metav1.LabelSelector
 	// Resources represents the minimum resources required
-<<<<<<< HEAD
-=======
 	// If RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements
 	// that are lower than previous value but must still be higher than capacity recorded in the
 	// status field of the claim.
->>>>>>> upstream/master
 	// +optional
 	Resources ResourceRequirements
 	// VolumeName is the binding reference to the PersistentVolume backing this
@@ -528,8 +489,6 @@ const (
 	PersistentVolumeClaimFileSystemResizePending PersistentVolumeClaimConditionType = "FileSystemResizePending"
 )
 
-<<<<<<< HEAD
-=======
 // +enum
 type PersistentVolumeClaimResizeStatus string
 
@@ -550,7 +509,6 @@ const (
 	PersistentVolumeClaimNodeExpansionFailed PersistentVolumeClaimResizeStatus = "NodeExpansionFailed"
 )
 
->>>>>>> upstream/master
 // PersistentVolumeClaimCondition represents the current condition of PV claim
 type PersistentVolumeClaimCondition struct {
 	Type   PersistentVolumeClaimConditionType
@@ -578,8 +536,6 @@ type PersistentVolumeClaimStatus struct {
 	Capacity ResourceList
 	// +optional
 	Conditions []PersistentVolumeClaimCondition
-<<<<<<< HEAD
-=======
 	// The storage resource within AllocatedResources tracks the capacity allocated to a PVC. It may
 	// be larger than the actual capacity when a volume expansion operation is requested.
 	// For storage quota, the larger value from allocatedResources and PVC.spec.resources is used.
@@ -598,7 +554,6 @@ type PersistentVolumeClaimStatus struct {
 	// +featureGate=RecoverVolumeExpansionFailure
 	// +optional
 	ResizeStatus *PersistentVolumeClaimResizeStatus
->>>>>>> upstream/master
 }
 
 // PersistentVolumeAccessMode defines various access modes for PV.
@@ -1703,11 +1658,7 @@ type LocalVolumeSource struct {
 	// Filesystem type to mount.
 	// It applies only when the Path is a block device.
 	// Must be a filesystem type supported by the host operating system.
-<<<<<<< HEAD
-	// Ex. "ext4", "xfs", "ntfs". The default value is to auto-select a fileystem if unspecified.
-=======
 	// Ex. "ext4", "xfs", "ntfs". The default value is to auto-select a filesystem if unspecified.
->>>>>>> upstream/master
 	// +optional
 	FSType *string
 }
@@ -2112,11 +2063,7 @@ type ExecAction struct {
 // alive or ready to receive traffic.
 type Probe struct {
 	// The action taken to determine the health of a container
-<<<<<<< HEAD
-	Handler
-=======
 	ProbeHandler
->>>>>>> upstream/master
 	// Length of time before health checking is activated.  In seconds.
 	// +optional
 	InitialDelaySeconds int32
@@ -2282,16 +2229,9 @@ type Container struct {
 	TTY bool
 }
 
-<<<<<<< HEAD
-// Handler defines a specific action that should be taken
-// TODO: pass structured data to these actions, and document that data here.
-type Handler struct {
-	// One and only one of the following should be specified.
-=======
 // ProbeHandler defines a specific action that should be taken in a probe.
 // One and only one of the fields must be specified.
 type ProbeHandler struct {
->>>>>>> upstream/master
 	// Exec specifies the action to take.
 	// +optional
 	Exec *ExecAction
@@ -2299,11 +2239,6 @@ type ProbeHandler struct {
 	// +optional
 	HTTPGet *HTTPGetAction
 	// TCPSocket specifies an action involving a TCP port.
-<<<<<<< HEAD
-	// TODO: implement a realistic TCP lifecycle hook
-	// +optional
-	TCPSocket *TCPSocketAction
-=======
 	// +optional
 	TCPSocket *TCPSocketAction
 
@@ -2341,7 +2276,6 @@ type GRPCAction struct {
 	// If this is not specified, the default behavior is to probe the server's overall health status.
 	// +optional
 	Service *string
->>>>>>> upstream/master
 }
 
 // Lifecycle describes actions that the management system should take in response to container lifecycle
@@ -2350,21 +2284,6 @@ type GRPCAction struct {
 type Lifecycle struct {
 	// PostStart is called immediately after a container is created.  If the handler fails, the container
 	// is terminated and restarted.
-<<<<<<< HEAD
-	// +optional
-	PostStart *Handler
-	// PreStop is called immediately before a container is terminated due to an
-	// API request or management event such as liveness/startup probe failure,
-	// preemption, resource contention, etc. The handler is not called if the
-	// container crashes or exits. The reason for termination is passed to the
-	// handler. The Pod's termination grace period countdown begins before the
-	// PreStop hooked is executed. Regardless of the outcome of the handler, the
-	// container will eventually terminate within the Pod's termination grace
-	// period. Other management of the container blocks until the hook completes
-	// or until the termination grace period is reached.
-	// +optional
-	PreStop *Handler
-=======
 	// More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
 	// +optional
 	PostStart *LifecycleHandler
@@ -2379,7 +2298,6 @@ type Lifecycle struct {
 	// More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
 	// +optional
 	PreStop *LifecycleHandler
->>>>>>> upstream/master
 }
 
 // The below types are used by kube_client and api_server.
@@ -2903,11 +2821,7 @@ type PodSpec struct {
 	// pod to perform user-initiated actions such as debugging. This list cannot be specified when
 	// creating a pod, and it cannot be modified by updating the pod spec. In order to add an
 	// ephemeral container to an existing pod, use the pod's ephemeralcontainers subresource.
-<<<<<<< HEAD
-	// This field is alpha-level and is only honored by servers that enable the EphemeralContainers feature.
-=======
 	// This field is beta-level and available on clusters that haven't disabled the EphemeralContainers feature gate.
->>>>>>> upstream/master
 	// +optional
 	EphemeralContainers []EphemeralContainer
 	// +optional
@@ -3045,8 +2959,6 @@ type PodSpec struct {
 	// All topologySpreadConstraints are ANDed.
 	// +optional
 	TopologySpreadConstraints []TopologySpreadConstraint
-<<<<<<< HEAD
-=======
 	// Specifies the OS of the containers in the pod.
 	// Some pod and container fields are restricted if this is set.
 	//
@@ -3095,7 +3007,6 @@ type PodOS struct {
 	// https://github.com/opencontainers/runtime-spec/blob/master/config.md#platform-specific-configuration
 	// Clients should expect to handle additional values and treat unrecognized values in this field as os: null
 	Name OSName
->>>>>>> upstream/master
 }
 
 // HostAlias holds the mapping between IP and hostnames that will be injected as an entry in the
@@ -3141,19 +3052,13 @@ type PodSecurityContext struct {
 	HostNetwork bool
 	// Use the host's pid namespace.
 	// Optional: Default to false.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +k8s:conversion-gen=false
 	// +optional
 	HostPID bool
 	// Use the host's ipc namespace.
 	// Optional: Default to false.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +k8s:conversion-gen=false
 	// +optional
 	HostIPC bool
@@ -3161,10 +3066,7 @@ type PodSecurityContext struct {
 	// When this is set containers will be able to view and signal processes from other containers
 	// in the same pod, and the first process in each container will not be assigned PID 1.
 	// HostPID and ShareProcessNamespace cannot both be set.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// Optional: Default to false.
 	// +k8s:conversion-gen=false
 	// +optional
@@ -3174,19 +3076,13 @@ type PodSecurityContext struct {
 	// container.  May also be set in SecurityContext.  If set in
 	// both SecurityContext and PodSecurityContext, the value specified in SecurityContext
 	// takes precedence for that container.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	SELinuxOptions *SELinuxOptions
 	// The Windows specific settings applied to all containers.
 	// If unspecified, the options within a container's SecurityContext will be used.
 	// If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is linux.
->>>>>>> upstream/master
 	// +optional
 	WindowsOptions *WindowsSecurityContextOptions
 	// The UID to run the entrypoint of the container process.
@@ -3194,10 +3090,7 @@ type PodSecurityContext struct {
 	// May also be set in SecurityContext.  If set in both SecurityContext and
 	// PodSecurityContext, the value specified in SecurityContext takes precedence
 	// for that container.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	RunAsUser *int64
 	// The GID to run the entrypoint of the container process.
@@ -3205,10 +3098,7 @@ type PodSecurityContext struct {
 	// May also be set in SecurityContext.  If set in both SecurityContext and
 	// PodSecurityContext, the value specified in SecurityContext takes precedence
 	// for that container.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	RunAsGroup *int64
 	// Indicates that the container must run as a non-root user.
@@ -3223,10 +3113,7 @@ type PodSecurityContext struct {
 	// A list of groups applied to the first process run in each container, in addition
 	// to the container's primary GID.  If unspecified, no groups will be added to
 	// any container.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	SupplementalGroups []int64
 	// A special supplemental group that applies to all containers in a pod.
@@ -3238,10 +3125,7 @@ type PodSecurityContext struct {
 	// 3. The permission bits are OR'd with rw-rw----
 	//
 	// If unset, the Kubelet will not modify the ownership and permissions of any volume.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	FSGroup *int64
 	// fsGroupChangePolicy defines behavior of changing ownership and permission of the volume
@@ -3250,25 +3134,16 @@ type PodSecurityContext struct {
 	// It will have no effect on ephemeral volume types such as: secret, configmaps
 	// and emptydir.
 	// Valid values are "OnRootMismatch" and "Always". If not specified, "Always" is used.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	FSGroupChangePolicy *PodFSGroupChangePolicy
 	// Sysctls hold a list of namespaced sysctls used for the pod. Pods with unsupported
 	// sysctls (by the container runtime) might fail to launch.
-<<<<<<< HEAD
-	// +optional
-	Sysctls []Sysctl
-	// The seccomp options to use by the containers in this pod.
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
 	// +optional
 	Sysctls []Sysctl
 	// The seccomp options to use by the containers in this pod.
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	SeccompProfile *SeccompProfile
 }
@@ -3394,10 +3269,7 @@ type EphemeralContainerCommon struct {
 	// already allocated to the pod.
 	// +optional
 	Resources ResourceRequirements
-<<<<<<< HEAD
-=======
 	// Pod volumes to mount into the container's filesystem. Subpath mounts are not allowed for ephemeral containers.
->>>>>>> upstream/master
 	// +optional
 	VolumeMounts []VolumeMount
 	// volumeDevices is the list of block devices to be used by the container.
@@ -3441,17 +3313,6 @@ type EphemeralContainerCommon struct {
 // these two types.
 var _ = Container(EphemeralContainerCommon{})
 
-<<<<<<< HEAD
-// An EphemeralContainer is a temporary container that may be added to an existing pod for
-// user-initiated activities such as debugging. Ephemeral containers have no resource or
-// scheduling guarantees, and they will not be restarted when they exit or when a pod is
-// removed or restarted. If an ephemeral container causes a pod to exceed its resource
-// allocation, the pod may be evicted.
-// Ephemeral containers may not be added by directly updating the pod spec. They must be added
-// via the pod's ephemeralcontainers subresource, and they will appear in the pod spec
-// once added.
-// This is an alpha feature enabled by the EphemeralContainers feature flag.
-=======
 // An EphemeralContainer is a temporary container that you may add to an existing Pod for
 // user-initiated activities such as debugging. Ephemeral containers have no resource or
 // scheduling guarantees, and they will not be restarted when they exit or when a Pod is
@@ -3462,7 +3323,6 @@ var _ = Container(EphemeralContainerCommon{})
 // Pod. Ephemeral containers may not be removed or restarted.
 //
 // This is a beta feature available on clusters that haven't disabled the EphemeralContainers feature gate.
->>>>>>> upstream/master
 type EphemeralContainer struct {
 	// Ephemeral containers have all of the fields of Container, plus additional fields
 	// specific to ephemeral containers. Fields in common with Container are in the
@@ -3472,15 +3332,10 @@ type EphemeralContainer struct {
 
 	// If set, the name of the container from PodSpec that this ephemeral container targets.
 	// The ephemeral container will be run in the namespaces (IPC, PID, etc) of this container.
-<<<<<<< HEAD
-	// If not set then the ephemeral container is run in whatever namespaces are shared
-	// for the pod. Note that the container runtime must support this feature.
-=======
 	// If not set then the ephemeral container uses the namespaces configured in the Pod spec.
 	//
 	// The container runtime must implement support for this feature. If the runtime does not
 	// support namespace targeting then the result of setting this field is undefined.
->>>>>>> upstream/master
 	// +optional
 	TargetContainerName string
 }
@@ -3534,11 +3389,7 @@ type PodStatus struct {
 	ContainerStatuses []ContainerStatus
 
 	// Status for any ephemeral containers that have run in this pod.
-<<<<<<< HEAD
-	// This field is alpha-level and is only honored by servers that enable the EphemeralContainers feature.
-=======
 	// This field is beta-level and available on clusters that haven't disabled the EphemeralContainers feature gate.
->>>>>>> upstream/master
 	// +optional
 	EphemeralContainerStatuses []ContainerStatus
 }
@@ -5329,10 +5180,7 @@ type Secret struct {
 	Data map[string][]byte `datapolicy:"password,security-key,token"`
 
 	// Used to facilitate programmatic handling of secret data.
-<<<<<<< HEAD
-=======
 	// More info: https://kubernetes.io/docs/concepts/configuration/secret/#secret-types
->>>>>>> upstream/master
 	// +optional
 	Type SecretType
 }
@@ -5573,58 +5421,40 @@ type ComponentStatusList struct {
 type SecurityContext struct {
 	// The capabilities to add/drop when running containers.
 	// Defaults to the default set of capabilities granted by the container runtime.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	Capabilities *Capabilities
 	// Run container in privileged mode.
 	// Processes in privileged containers are essentially equivalent to root on the host.
 	// Defaults to false.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	Privileged *bool
 	// The SELinux context to be applied to the container.
 	// If unspecified, the container runtime will allocate a random SELinux context for each
 	// container.  May also be set in PodSecurityContext.  If set in both SecurityContext and
 	// PodSecurityContext, the value specified in SecurityContext takes precedence.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	SELinuxOptions *SELinuxOptions
 	// The Windows specific settings applied to all containers.
 	// If unspecified, the options from the PodSecurityContext will be used.
 	// If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is linux.
->>>>>>> upstream/master
 	// +optional
 	WindowsOptions *WindowsSecurityContextOptions
 	// The UID to run the entrypoint of the container process.
 	// Defaults to user specified in image metadata if unspecified.
 	// May also be set in PodSecurityContext.  If set in both SecurityContext and
 	// PodSecurityContext, the value specified in SecurityContext takes precedence.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	RunAsUser *int64
 	// The GID to run the entrypoint of the container process.
 	// Uses runtime default if unset.
 	// May also be set in PodSecurityContext.  If set in both SecurityContext and
 	// PodSecurityContext, the value specified in SecurityContext takes precedence.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	RunAsGroup *int64
 	// Indicates that the container must run as a non-root user.
@@ -5637,37 +5467,25 @@ type SecurityContext struct {
 	RunAsNonRoot *bool
 	// The read-only root filesystem allows you to restrict the locations that an application can write
 	// files to, ensuring the persistent data can only be written to mounts.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	ReadOnlyRootFilesystem *bool
 	// AllowPrivilegeEscalation controls whether a process can gain more
 	// privileges than its parent process. This bool directly controls if
 	// the no_new_privs flag will be set on the container process.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	AllowPrivilegeEscalation *bool
 	// ProcMount denotes the type of proc mount to use for the containers.
 	// The default is DefaultProcMount which uses the container runtime defaults for
 	// readonly paths and masked paths.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	ProcMount *ProcMountType
 	// The seccomp options to use by this container. If seccomp options are
 	// provided at both the pod & container level, the container options
 	// override the pod options.
-<<<<<<< HEAD
-=======
 	// Note that this field cannot be set when spec.os.name is windows.
->>>>>>> upstream/master
 	// +optional
 	SeccompProfile *SeccompProfile
 }
@@ -5813,11 +5631,7 @@ type TopologySpreadConstraint struct {
 	//   but giving higher precedence to topologies that would help reduce the
 	//   skew.
 	// A constraint is considered "Unsatisfiable" for an incoming pod
-<<<<<<< HEAD
-	// if and only if every possible node assigment for that pod would violate
-=======
 	// if and only if every possible node assignment for that pod would violate
->>>>>>> upstream/master
 	// "MaxSkew" on some topology.
 	// For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same
 	// labelSelector spread as 3/1/1:

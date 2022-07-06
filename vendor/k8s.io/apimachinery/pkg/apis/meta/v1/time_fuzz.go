@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 //go:build !notest
->>>>>>> upstream/master
 // +build !notest
 
 /*

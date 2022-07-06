@@ -6,13 +6,10 @@
 .project
 .settings/**
 
-<<<<<<< HEAD
-=======
 # Idea files
 .idea/**
 .idea/
 
->>>>>>> upstream/master
 # Emacs save files
 *~
 

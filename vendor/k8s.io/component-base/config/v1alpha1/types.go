@@ -17,12 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
-<<<<<<< HEAD
-=======
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/resource"
->>>>>>> upstream/master
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -93,11 +90,6 @@ type LoggingConfiguration struct {
 	// Format Flag specifies the structure of log messages.
 	// default value of format is `text`
 	Format string `json:"format,omitempty"`
-<<<<<<< HEAD
-	// [Experimental] When enabled prevents logging of fields tagged as sensitive (passwords, keys, tokens).
-	// Runtime log sanitization may introduce significant computation overhead and therefore should not be enabled in production.`)
-	Sanitization bool `json:"sanitization,omitempty"`
-=======
 	// Maximum number of seconds between log flushes. Ignored if the
 	// selected logging backend writes log messages without buffering.
 	FlushFrequency time.Duration `json:"flushFrequency"`
@@ -150,5 +142,4 @@ type VModuleItem struct {
 	// Verbosity is the threshold for log messages emitted inside files
 	// that match the pattern.
 	Verbosity uint32 `json:"verbosity"`
->>>>>>> upstream/master
 }

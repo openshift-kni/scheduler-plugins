@@ -37,13 +37,8 @@ const (
 	// Parameter names defined in azure disk CSI driver, refer to
 	// https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/driver-parameters.md
 	azureDiskKind        = "kind"
-<<<<<<< HEAD
-	azureDiskCachingMode = "cachingMode"
-	azureDiskFSType      = "fsType"
-=======
 	azureDiskCachingMode = "cachingmode"
 	azureDiskFSType      = "fstype"
->>>>>>> upstream/master
 )
 
 var (
@@ -208,15 +203,6 @@ func (t *azureDiskCSITranslator) TranslateCSIPVToInTree(pv *v1.PersistentVolume)
 	}
 
 	if csiSource.VolumeAttributes != nil {
-<<<<<<< HEAD
-		if cachingMode, ok := csiSource.VolumeAttributes[azureDiskCachingMode]; ok {
-			mode := v1.AzureDataDiskCachingMode(cachingMode)
-			azureSource.CachingMode = &mode
-		}
-
-		if fsType, ok := csiSource.VolumeAttributes[azureDiskFSType]; ok && fsType != "" {
-			azureSource.FSType = &fsType
-=======
 		for k, v := range csiSource.VolumeAttributes {
 			switch strings.ToLower(k) {
 			case azureDiskCachingMode:
@@ -230,7 +216,6 @@ func (t *azureDiskCSITranslator) TranslateCSIPVToInTree(pv *v1.PersistentVolume)
 					azureSource.FSType = &fsType
 				}
 			}
->>>>>>> upstream/master
 		}
 		azureSource.Kind = &managed
 	}

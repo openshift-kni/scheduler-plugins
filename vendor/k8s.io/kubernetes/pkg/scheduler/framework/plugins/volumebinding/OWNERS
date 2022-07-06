@@ -1,9 +1,5 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 
-<<<<<<< HEAD
-reviewers:
-- sig-storage-reviewers
-=======
 approvers:
 - sig-storage-approvers
 - cofyc
@@ -11,6 +7,5 @@ reviewers:
 - sig-storage-reviewers
 - cofyc
 - lichuqiang
->>>>>>> upstream/master
 labels:
 - sig/storage

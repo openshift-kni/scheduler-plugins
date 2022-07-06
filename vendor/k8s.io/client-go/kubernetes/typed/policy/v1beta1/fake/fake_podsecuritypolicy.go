@@ -102,11 +102,7 @@ func (c *FakePodSecurityPolicies) Update(ctx context.Context, podSecurityPolicy 
 // Delete takes name of the podSecurityPolicy and deletes it. Returns an error if one occurs.
 func (c *FakePodSecurityPolicies) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-<<<<<<< HEAD
-		Invokes(testing.NewRootDeleteAction(podsecuritypoliciesResource, name), &v1beta1.PodSecurityPolicy{})
-=======
 		Invokes(testing.NewRootDeleteActionWithOptions(podsecuritypoliciesResource, name, opts), &v1beta1.PodSecurityPolicy{})
->>>>>>> upstream/master
 	return err
 }
 

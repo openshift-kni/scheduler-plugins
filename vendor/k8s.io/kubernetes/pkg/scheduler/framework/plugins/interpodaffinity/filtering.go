@@ -161,11 +161,7 @@ func (pl *InterPodAffinity) getExistingAntiAffinityCounts(pod *v1.Pod, nsLabels 
 		nodeInfo := nodes[i]
 		node := nodeInfo.Node()
 		if node == nil {
-<<<<<<< HEAD
-			klog.Error("node not found")
-=======
 			klog.ErrorS(nil, "Node not found")
->>>>>>> upstream/master
 			return
 		}
 		topoMap := make(topologyToMatchedTermCount)
@@ -204,11 +200,7 @@ func (pl *InterPodAffinity) getIncomingAffinityAntiAffinityCounts(podInfo *frame
 		nodeInfo := allNodes[i]
 		node := nodeInfo.Node()
 		if node == nil {
-<<<<<<< HEAD
-			klog.Error("node not found")
-=======
 			klog.ErrorS(nil, "Node not found")
->>>>>>> upstream/master
 			return
 		}
 		affinity := make(topologyToMatchedTermCount)

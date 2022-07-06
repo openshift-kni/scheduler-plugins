@@ -19,11 +19,8 @@ limitations under the License.
 package v1
 
 import (
-<<<<<<< HEAD
-=======
 	"net/http"
 
->>>>>>> upstream/master
 	v1 "k8s.io/api/node/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	rest "k8s.io/client-go/rest"
@@ -44,19 +41,13 @@ func (c *NodeV1Client) RuntimeClasses() RuntimeClassInterface {
 }
 
 // NewForConfig creates a new NodeV1Client for the given config.
-<<<<<<< HEAD
-=======
 // NewForConfig is equivalent to NewForConfigAndClient(c, httpClient),
 // where httpClient was generated with rest.HTTPClientFor(c).
->>>>>>> upstream/master
 func NewForConfig(c *rest.Config) (*NodeV1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
 	}
-<<<<<<< HEAD
-	client, err := rest.RESTClientFor(&config)
-=======
 	httpClient, err := rest.HTTPClientFor(&config)
 	if err != nil {
 		return nil, err
@@ -72,7 +63,6 @@ func NewForConfigAndClient(c *rest.Config, h *http.Client) (*NodeV1Client, error
 		return nil, err
 	}
 	client, err := rest.RESTClientForConfigAndClient(&config, h)
->>>>>>> upstream/master
 	if err != nil {
 		return nil, err
 	}

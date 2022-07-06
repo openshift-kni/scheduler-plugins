@@ -34,8 +34,6 @@ func ParseUnixCredentials(m *SocketControlMessage) (*Ucred, error) {
 	ucred := *(*Ucred)(unsafe.Pointer(&m.Data[0]))
 	return &ucred, nil
 }
-<<<<<<< HEAD
-=======
 
 // PktInfo4 encodes Inet4Pktinfo into a socket control message of type IP_PKTINFO.
 func PktInfo4(info *Inet4Pktinfo) []byte {
@@ -89,4 +87,3 @@ func ParseOrigDstAddr(m *SocketControlMessage) (Sockaddr, error) {
 		return nil, EINVAL
 	}
 }
->>>>>>> upstream/master

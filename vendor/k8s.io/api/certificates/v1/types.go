@@ -214,10 +214,7 @@ type CertificateSigningRequestStatus struct {
 }
 
 // RequestConditionType is the type of a CertificateSigningRequestCondition
-<<<<<<< HEAD
-=======
 // +enum
->>>>>>> upstream/master
 type RequestConditionType string
 
 // Well-known condition types for certificate requests.
@@ -282,10 +279,7 @@ type CertificateSigningRequestList struct {
 // KeyUsage specifies valid usage contexts for keys.
 // See: https://tools.ietf.org/html/rfc5280#section-4.2.1.3
 //      https://tools.ietf.org/html/rfc5280#section-4.2.1.12
-<<<<<<< HEAD
-=======
 // +enum
->>>>>>> upstream/master
 type KeyUsage string
 
 // Valid key usages

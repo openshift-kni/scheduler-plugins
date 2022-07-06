@@ -202,11 +202,8 @@ func (c *Config) String() string {
 type ImpersonationConfig struct {
 	// UserName is the username to impersonate on each request.
 	UserName string
-<<<<<<< HEAD
-=======
 	// UID is a unique value that identifies the user.
 	UID string
->>>>>>> upstream/master
 	// Groups are the groups to impersonate on each request.
 	Groups []string
 	// Extra is a free-form field which can be used to link some authentication information
@@ -308,11 +305,8 @@ type ContentConfig struct {
 // object. Note that a RESTClient may require fields that are optional when initializing a Client.
 // A RESTClient created by this method is generic - it expects to operate on an API that follows
 // the Kubernetes conventions, but may not be the Kubernetes API.
-<<<<<<< HEAD
-=======
 // RESTClientFor is equivalent to calling RESTClientForConfigAndClient(config, httpClient),
 // where httpClient was generated with HTTPClientFor(config).
->>>>>>> upstream/master
 func RESTClientFor(config *Config) (*RESTClient, error) {
 	if config.GroupVersion == nil {
 		return nil, fmt.Errorf("GroupVersion is required when initializing a RESTClient")
@@ -321,34 +315,18 @@ func RESTClientFor(config *Config) (*RESTClient, error) {
 		return nil, fmt.Errorf("NegotiatedSerializer is required when initializing a RESTClient")
 	}
 
-<<<<<<< HEAD
-	baseURL, versionedAPIPath, err := defaultServerUrlFor(config)
-=======
 	// Validate config.Host before constructing the transport/client so we can fail fast.
 	// ServerURL will be obtained later in RESTClientForConfigAndClient()
 	_, _, err := defaultServerUrlFor(config)
->>>>>>> upstream/master
 	if err != nil {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	transport, err := TransportFor(config)
-=======
 	httpClient, err := HTTPClientFor(config)
->>>>>>> upstream/master
 	if err != nil {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	var httpClient *http.Client
-	if transport != http.DefaultTransport {
-		httpClient = &http.Client{Transport: transport}
-		if config.Timeout > 0 {
-			httpClient.Timeout = config.Timeout
-		}
-=======
 	return RESTClientForConfigAndClient(config, httpClient)
 }
 
@@ -369,7 +347,6 @@ func RESTClientForConfigAndClient(config *Config, httpClient *http.Client) (*RES
 	baseURL, versionedAPIPath, err := defaultServerUrlFor(config)
 	if err != nil {
 		return nil, err
->>>>>>> upstream/master
 	}
 
 	rateLimiter := config.RateLimiter
@@ -412,34 +389,18 @@ func UnversionedRESTClientFor(config *Config) (*RESTClient, error) {
 		return nil, fmt.Errorf("NegotiatedSerializer is required when initializing a RESTClient")
 	}
 
-<<<<<<< HEAD
-	baseURL, versionedAPIPath, err := defaultServerUrlFor(config)
-=======
 	// Validate config.Host before constructing the transport/client so we can fail fast.
 	// ServerURL will be obtained later in UnversionedRESTClientForConfigAndClient()
 	_, _, err := defaultServerUrlFor(config)
->>>>>>> upstream/master
 	if err != nil {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	transport, err := TransportFor(config)
-=======
 	httpClient, err := HTTPClientFor(config)
->>>>>>> upstream/master
 	if err != nil {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	var httpClient *http.Client
-	if transport != http.DefaultTransport {
-		httpClient = &http.Client{Transport: transport}
-		if config.Timeout > 0 {
-			httpClient.Timeout = config.Timeout
-		}
-=======
 	return UnversionedRESTClientForConfigAndClient(config, httpClient)
 }
 
@@ -453,7 +414,6 @@ func UnversionedRESTClientForConfigAndClient(config *Config, httpClient *http.Cl
 	baseURL, versionedAPIPath, err := defaultServerUrlFor(config)
 	if err != nil {
 		return nil, err
->>>>>>> upstream/master
 	}
 
 	rateLimiter := config.RateLimiter
@@ -677,16 +637,10 @@ func CopyConfig(config *Config) *Config {
 		BearerToken:     config.BearerToken,
 		BearerTokenFile: config.BearerTokenFile,
 		Impersonate: ImpersonationConfig{
-<<<<<<< HEAD
-			Groups:   config.Impersonate.Groups,
-			Extra:    config.Impersonate.Extra,
-			UserName: config.Impersonate.UserName,
-=======
 			UserName: config.Impersonate.UserName,
 			UID:      config.Impersonate.UID,
 			Groups:   config.Impersonate.Groups,
 			Extra:    config.Impersonate.Extra,
->>>>>>> upstream/master
 		},
 		AuthProvider:        config.AuthProvider,
 		AuthConfigPersister: config.AuthConfigPersister,

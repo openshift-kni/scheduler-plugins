@@ -17,35 +17,6 @@ limitations under the License.
 package request
 
 import (
-<<<<<<< HEAD
-	"net/http"
-)
-
-type Width struct {
-	// Seats represents the number of seats associated with this request
-	Seats uint
-}
-
-// DefaultWidthEstimator returns returns '1' as the "width"
-// of the given request.
-//
-// TODO: when we plumb in actual "width" handling for different
-//  type of request(s) this function will iterate through a chain
-//  of widthEstimator instance(s).
-func DefaultWidthEstimator(_ *http.Request) Width {
-	return Width{
-		Seats: 1,
-	}
-}
-
-// WidthEstimatorFunc returns the estimated "width" of a given request.
-// This function will be used by the Priority & Fairness filter to
-// estimate the "width" of incoming requests.
-type WidthEstimatorFunc func(*http.Request) Width
-
-func (e WidthEstimatorFunc) EstimateWidth(r *http.Request) Width {
-	return e(r)
-=======
 	"fmt"
 	"net/http"
 	"time"
@@ -141,5 +112,4 @@ func (e *workEstimator) estimate(r *http.Request, flowSchemaName, priorityLevelN
 	}
 
 	return WorkEstimate{InitialSeats: minimumSeats}
->>>>>>> upstream/master
 }

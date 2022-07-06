@@ -20,10 +20,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"crypto/sha512"
-<<<<<<< HEAD
-=======
 	"encoding/json"
->>>>>>> upstream/master
 	"fmt"
 	"mime"
 	"net/http"
@@ -34,15 +31,9 @@ import (
 	"github.com/emicklei/go-restful"
 	"github.com/golang/protobuf/proto"
 	openapi_v2 "github.com/googleapis/gnostic/openapiv2"
-<<<<<<< HEAD
-	jsoniter "github.com/json-iterator/go"
-	"github.com/munnerz/goautoneg"
-	"gopkg.in/yaml.v2"
-=======
 	"github.com/munnerz/goautoneg"
 	"gopkg.in/yaml.v2"
 	klog "k8s.io/klog/v2"
->>>>>>> upstream/master
 	"k8s.io/kube-openapi/pkg/builder"
 	"k8s.io/kube-openapi/pkg/common"
 	"k8s.io/kube-openapi/pkg/validation/spec"
@@ -65,15 +56,6 @@ type OpenAPIService struct {
 
 	lastModified time.Time
 
-<<<<<<< HEAD
-	specBytes []byte
-	specPb    []byte
-	specPbGz  []byte
-
-	specBytesETag string
-	specPbETag    string
-	specPbGzETag  string
-=======
 	jsonCache  cache
 	protoCache cache
 }
@@ -108,7 +90,6 @@ func (c *cache) New(cacheBuilder func() ([]byte, error)) cache {
 		etag:       c.etag,
 		BuildCache: cacheBuilder,
 	}
->>>>>>> upstream/master
 }
 
 func init() {
@@ -118,12 +99,9 @@ func init() {
 }
 
 func computeETag(data []byte) string {
-<<<<<<< HEAD
-=======
 	if data == nil {
 		return ""
 	}
->>>>>>> upstream/master
 	return fmt.Sprintf("\"%X\"", sha512.Sum512(data))
 }
 
@@ -136,53 +114,6 @@ func NewOpenAPIService(spec *spec.Swagger) (*OpenAPIService, error) {
 	return o, nil
 }
 
-<<<<<<< HEAD
-func (o *OpenAPIService) getSwaggerBytes() ([]byte, string, time.Time) {
-	o.rwMutex.RLock()
-	defer o.rwMutex.RUnlock()
-	return o.specBytes, o.specBytesETag, o.lastModified
-}
-
-func (o *OpenAPIService) getSwaggerPbBytes() ([]byte, string, time.Time) {
-	o.rwMutex.RLock()
-	defer o.rwMutex.RUnlock()
-	return o.specPb, o.specPbETag, o.lastModified
-}
-
-func (o *OpenAPIService) getSwaggerPbGzBytes() ([]byte, string, time.Time) {
-	o.rwMutex.RLock()
-	defer o.rwMutex.RUnlock()
-	return o.specPbGz, o.specPbGzETag, o.lastModified
-}
-
-func (o *OpenAPIService) UpdateSpec(openapiSpec *spec.Swagger) (err error) {
-	specBytes, err := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(openapiSpec)
-	if err != nil {
-		return err
-	}
-	specPb, err := ToProtoBinary(specBytes)
-	if err != nil {
-		return err
-	}
-	specPbGz := toGzip(specPb)
-
-	specBytesETag := computeETag(specBytes)
-	specPbETag := computeETag(specPb)
-	specPbGzETag := computeETag(specPbGz)
-
-	lastModified := time.Now()
-
-	o.rwMutex.Lock()
-	defer o.rwMutex.Unlock()
-
-	o.specBytes = specBytes
-	o.specPb = specPb
-	o.specPbGz = specPbGz
-	o.specBytesETag = specBytesETag
-	o.specPbETag = specPbETag
-	o.specPbGzETag = specPbGzETag
-	o.lastModified = lastModified
-=======
 func (o *OpenAPIService) getSwaggerBytes() ([]byte, string, time.Time, error) {
 	o.rwMutex.RLock()
 	defer o.rwMutex.RUnlock()
@@ -217,7 +148,6 @@ func (o *OpenAPIService) UpdateSpec(openapiSpec *spec.Swagger) (err error) {
 		return ToProtoBinary(json)
 	})
 	o.lastModified = time.Now()
->>>>>>> upstream/master
 
 	return nil
 }
@@ -296,11 +226,7 @@ func (o *OpenAPIService) RegisterOpenAPIVersionedService(servePath string, handl
 	accepted := []struct {
 		Type           string
 		SubType        string
-<<<<<<< HEAD
-		GetDataAndETag func() ([]byte, string, time.Time)
-=======
 		GetDataAndETag func() ([]byte, string, time.Time, error)
->>>>>>> upstream/master
 	}{
 		{"application", "json", o.getSwaggerBytes},
 		{"application", "com.github.proto-openapi.spec.v2@v1.0+protobuf", o.getSwaggerPbBytes},
@@ -324,9 +250,6 @@ func (o *OpenAPIService) RegisterOpenAPIVersionedService(servePath string, handl
 					}
 
 					// serve the first matching media type in the sorted clause list
-<<<<<<< HEAD
-					data, etag, lastModified := accepts.GetDataAndETag()
-=======
 					data, etag, lastModified, err := accepts.GetDataAndETag()
 					if err != nil {
 						klog.Errorf("Error in OpenAPI handler: %s", err)
@@ -336,7 +259,6 @@ func (o *OpenAPIService) RegisterOpenAPIVersionedService(servePath string, handl
 							return
 						}
 					}
->>>>>>> upstream/master
 					w.Header().Set("Etag", etag)
 					// ServeContent will take care of caching using eTag.
 					http.ServeContent(w, r, servePath, lastModified, bytes.NewReader(data))

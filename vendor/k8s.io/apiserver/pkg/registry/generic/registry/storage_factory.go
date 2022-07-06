@@ -36,11 +36,7 @@ import (
 // Creates a cacher based given storageConfig.
 func StorageWithCacher() generic.StorageDecorator {
 	return func(
-<<<<<<< HEAD
-		storageConfig *storagebackend.Config,
-=======
 		storageConfig *storagebackend.ConfigForResource,
->>>>>>> upstream/master
 		resourcePrefix string,
 		keyFunc func(obj runtime.Object) (string, error),
 		newFunc func() runtime.Object,

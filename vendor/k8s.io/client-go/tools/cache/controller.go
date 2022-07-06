@@ -21,15 +21,9 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
-<<<<<<< HEAD
-	"k8s.io/apimachinery/pkg/util/clock"
-	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
-=======
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 )
 
 // This file implements a low-level controller that is used in
@@ -328,11 +322,7 @@ func NewInformer(
 	// This will hold the client state, as we know it.
 	clientState := NewStore(DeletionHandlingMetaNamespaceKeyFunc)
 
-<<<<<<< HEAD
-	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState)
-=======
 	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState, nil)
->>>>>>> upstream/master
 }
 
 // NewIndexerInformer returns an Indexer and a Controller for populating the index
@@ -361,9 +351,6 @@ func NewIndexerInformer(
 	// This will hold the client state, as we know it.
 	clientState := NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers)
 
-<<<<<<< HEAD
-	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState)
-=======
 	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState, nil)
 }
 
@@ -417,7 +404,6 @@ func NewTransformingIndexerInformer(
 	clientState := NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers)
 
 	return clientState, newInformer(lw, objType, resyncPeriod, h, clientState, transformer)
->>>>>>> upstream/master
 }
 
 // newInformer returns a controller for populating the store while also
@@ -440,10 +426,7 @@ func newInformer(
 	resyncPeriod time.Duration,
 	h ResourceEventHandler,
 	clientState Store,
-<<<<<<< HEAD
-=======
 	transformer TransformFunc,
->>>>>>> upstream/master
 ) Controller {
 	// This will hold incoming changes. Note how we pass clientState in as a
 	// KeyLister, that way resync operations will result in the correct set
@@ -463,26 +446,6 @@ func newInformer(
 		Process: func(obj interface{}) error {
 			// from oldest to newest
 			for _, d := range obj.(Deltas) {
-<<<<<<< HEAD
-				switch d.Type {
-				case Sync, Replaced, Added, Updated:
-					if old, exists, err := clientState.Get(d.Object); err == nil && exists {
-						if err := clientState.Update(d.Object); err != nil {
-							return err
-						}
-						h.OnUpdate(old, d.Object)
-					} else {
-						if err := clientState.Add(d.Object); err != nil {
-							return err
-						}
-						h.OnAdd(d.Object)
-					}
-				case Deleted:
-					if err := clientState.Delete(d.Object); err != nil {
-						return err
-					}
-					h.OnDelete(d.Object)
-=======
 				obj := d.Object
 				if transformer != nil {
 					var err error
@@ -510,7 +473,6 @@ func newInformer(
 						return err
 					}
 					h.OnDelete(obj)
->>>>>>> upstream/master
 				}
 			}
 			return nil

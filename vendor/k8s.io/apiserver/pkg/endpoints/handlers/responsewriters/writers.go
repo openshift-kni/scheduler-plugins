@@ -201,12 +201,8 @@ func (w *deferredResponseWriter) Write(p []byte) (n int, err error) {
 			w.trace.Step("Write call finished",
 				utiltrace.Field{"writer", fmt.Sprintf("%T", w.w)},
 				utiltrace.Field{"size", len(p)},
-<<<<<<< HEAD
-				utiltrace.Field{"firstWrite", firstWrite})
-=======
 				utiltrace.Field{"firstWrite", firstWrite},
 				utiltrace.Field{"err", err})
->>>>>>> upstream/master
 		}()
 	}
 	if w.hasWritten {
@@ -272,13 +268,7 @@ func WriteObjectNegotiated(s runtime.NegotiatedSerializer, restrictions negotiat
 		return
 	}
 
-<<<<<<< HEAD
-	if ae := request.AuditEventFrom(req.Context()); ae != nil {
-		audit.LogResponseObject(ae, object, gv, s)
-	}
-=======
 	audit.LogResponseObject(req.Context(), object, gv, s)
->>>>>>> upstream/master
 
 	encoder := s.EncoderForVersion(serializer.Serializer, gv)
 	SerializeObject(serializer.MediaType, encoder, w, req, statusCode, object)

@@ -19,10 +19,7 @@ package runtime
 import (
 	"fmt"
 	"reflect"
-<<<<<<< HEAD
-=======
 	"strings"
->>>>>>> upstream/master
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -128,17 +125,6 @@ func IsMissingVersion(err error) bool {
 // strictDecodingError is a base error type that is returned by a strict Decoder such
 // as UniversalStrictDecoder.
 type strictDecodingError struct {
-<<<<<<< HEAD
-	message string
-	data    string
-}
-
-// NewStrictDecodingError creates a new strictDecodingError object.
-func NewStrictDecodingError(message string, data string) error {
-	return &strictDecodingError{
-		message: message,
-		data:    data,
-=======
 	errors []error
 }
 
@@ -146,14 +132,10 @@ func NewStrictDecodingError(message string, data string) error {
 func NewStrictDecodingError(errors []error) error {
 	return &strictDecodingError{
 		errors: errors,
->>>>>>> upstream/master
 	}
 }
 
 func (e *strictDecodingError) Error() string {
-<<<<<<< HEAD
-	return fmt.Sprintf("strict decoder error for %s: %s", e.data, e.message)
-=======
 	var s strings.Builder
 	s.WriteString("strict decoding error: ")
 	for i, err := range e.errors {
@@ -167,7 +149,6 @@ func (e *strictDecodingError) Error() string {
 
 func (e *strictDecodingError) Errors() []error {
 	return e.errors
->>>>>>> upstream/master
 }
 
 // IsStrictDecodingError returns true if the error indicates that the provided object
@@ -179,8 +160,6 @@ func IsStrictDecodingError(err error) bool {
 	_, ok := err.(*strictDecodingError)
 	return ok
 }
-<<<<<<< HEAD
-=======
 
 // AsStrictDecodingError returns a strict decoding error
 // containing all the strictness violations.
@@ -191,4 +170,3 @@ func AsStrictDecodingError(err error) (*strictDecodingError, bool) {
 	strictErr, ok := err.(*strictDecodingError)
 	return strictErr, ok
 }
->>>>>>> upstream/master

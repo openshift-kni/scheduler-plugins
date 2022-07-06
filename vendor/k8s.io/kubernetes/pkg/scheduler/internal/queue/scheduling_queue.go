@@ -29,11 +29,7 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD
-	"k8s.io/api/core/v1"
-=======
 	v1 "k8s.io/api/core/v1"
->>>>>>> upstream/master
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -52,13 +48,8 @@ import (
 )
 
 const (
-<<<<<<< HEAD
-	// If the pod stays in unschedulableQ longer than the unschedulableQTimeInterval,
-	// the pod will be moved from unschedulableQ to activeQ.
-=======
 	// If a pod stays in unschedulableQ longer than unschedulableQTimeInterval,
 	// the pod will be moved from unschedulableQ to backoffQ or activeQ.
->>>>>>> upstream/master
 	unschedulableQTimeInterval = 60 * time.Second
 
 	queueClosed = "scheduling queue is closed"
@@ -110,11 +101,6 @@ type SchedulingQueue interface {
 	// Close closes the SchedulingQueue so that the goroutine which is
 	// waiting to pop items can exit gracefully.
 	Close()
-<<<<<<< HEAD
-	// NumUnschedulablePods returns the number of unschedulable pods exist in the SchedulingQueue.
-	NumUnschedulablePods() int
-=======
->>>>>>> upstream/master
 	// Run starts the goroutines managing the queue.
 	Run()
 }
@@ -299,11 +285,7 @@ func (p *PriorityQueue) Add(pod *v1.Pod) error {
 	defer p.lock.Unlock()
 	pInfo := p.newQueuedPodInfo(pod)
 	if err := p.activeQ.Add(pInfo); err != nil {
-<<<<<<< HEAD
-		klog.ErrorS(err, "Error adding pod to the scheduling queue", "pod", klog.KObj(pod))
-=======
 		klog.ErrorS(err, "Error adding pod to the active queue", "pod", klog.KObj(pod))
->>>>>>> upstream/master
 		return err
 	}
 	if p.unschedulableQ.get(pod) != nil {
@@ -315,11 +297,7 @@ func (p *PriorityQueue) Add(pod *v1.Pod) error {
 		klog.ErrorS(nil, "Error: pod is already in the podBackoff queue", "pod", klog.KObj(pod))
 	}
 	metrics.SchedulerQueueIncomingPods.WithLabelValues("active", PodAdd).Inc()
-<<<<<<< HEAD
-	p.PodNominator.AddNominatedPod(pInfo.PodInfo, "")
-=======
 	p.PodNominator.AddNominatedPod(pInfo.PodInfo, nil)
->>>>>>> upstream/master
 	p.cond.Broadcast()
 
 	return nil
@@ -373,11 +351,7 @@ func (p *PriorityQueue) activate(pod *v1.Pod) bool {
 	p.unschedulableQ.delete(pod)
 	p.podBackoffQ.Delete(pInfo)
 	metrics.SchedulerQueueIncomingPods.WithLabelValues("active", ForceActivate).Inc()
-<<<<<<< HEAD
-	p.PodNominator.AddNominatedPod(pInfo.PodInfo, "")
-=======
 	p.PodNominator.AddNominatedPod(pInfo.PodInfo, nil)
->>>>>>> upstream/master
 	return true
 }
 
@@ -429,11 +403,7 @@ func (p *PriorityQueue) AddUnschedulableIfNotPresent(pInfo *framework.QueuedPodI
 		metrics.SchedulerQueueIncomingPods.WithLabelValues("unschedulable", ScheduleAttemptFailure).Inc()
 	}
 
-<<<<<<< HEAD
-	p.PodNominator.AddNominatedPod(pInfo.PodInfo, "")
-=======
 	p.PodNominator.AddNominatedPod(pInfo.PodInfo, nil)
->>>>>>> upstream/master
 	return nil
 }
 
@@ -462,13 +432,8 @@ func (p *PriorityQueue) flushBackoffQCompleted() {
 	}
 }
 
-<<<<<<< HEAD
-// flushUnschedulableQLeftover moves pod which stays in unschedulableQ longer than the unschedulableQTimeInterval
-// to activeQ.
-=======
 // flushUnschedulableQLeftover moves pods which stay in unschedulableQ longer than unschedulableQTimeInterval
 // to backoffQ or activeQ.
->>>>>>> upstream/master
 func (p *PriorityQueue) flushUnschedulableQLeftover() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -581,11 +546,7 @@ func (p *PriorityQueue) Update(oldPod, newPod *v1.Pod) error {
 	if err := p.activeQ.Add(pInfo); err != nil {
 		return err
 	}
-<<<<<<< HEAD
-	p.PodNominator.AddNominatedPod(pInfo.PodInfo, "")
-=======
 	p.PodNominator.AddNominatedPod(pInfo.PodInfo, nil)
->>>>>>> upstream/master
 	p.cond.Broadcast()
 	return nil
 }
@@ -622,11 +583,7 @@ func (p *PriorityQueue) AssignedPodUpdated(pod *v1.Pod) {
 
 // MoveAllToActiveOrBackoffQueue moves all pods from unschedulableQ to activeQ or backoffQ.
 // This function adds all pods and then signals the condition variable to ensure that
-<<<<<<< HEAD
-// if Pop() is waiting for an item, it receives it after all the pods are in the
-=======
 // if Pop() is waiting for an item, it receives the signal after all the pods are in the
->>>>>>> upstream/master
 // queue and the head is the highest priority pod.
 func (p *PriorityQueue) MoveAllToActiveOrBackoffQueue(event framework.ClusterEvent, preCheck PreEnqueueCheck) {
 	p.lock.Lock()
@@ -735,15 +692,6 @@ func (npm *nominator) DeleteNominatedPodIfExists(pod *v1.Pod) {
 // This is called during the preemption process after a node is nominated to run
 // the pod. We update the structure before sending a request to update the pod
 // object to avoid races with the following scheduling cycles.
-<<<<<<< HEAD
-func (npm *nominator) AddNominatedPod(pi *framework.PodInfo, nodeName string) {
-	npm.Lock()
-	npm.add(pi, nodeName)
-	npm.Unlock()
-}
-
-// NominatedPodsForNode returns pods that are nominated to run on the given node,
-=======
 func (npm *nominator) AddNominatedPod(pi *framework.PodInfo, nominatingInfo *framework.NominatingInfo) {
 	npm.Lock()
 	npm.add(pi, nominatingInfo)
@@ -751,23 +699,16 @@ func (npm *nominator) AddNominatedPod(pi *framework.PodInfo, nominatingInfo *fra
 }
 
 // NominatedPodsForNode returns a copy of pods that are nominated to run on the given node,
->>>>>>> upstream/master
 // but they are waiting for other pods to be removed from the node.
 func (npm *nominator) NominatedPodsForNode(nodeName string) []*framework.PodInfo {
 	npm.RLock()
 	defer npm.RUnlock()
-<<<<<<< HEAD
-	// TODO: we may need to return a copy of []*Pods to avoid modification
-	// on the caller side.
-	return npm.nominatedPods[nodeName]
-=======
 	// Make a copy of the nominated Pods so the caller can mutate safely.
 	pods := make([]*framework.PodInfo, len(npm.nominatedPods[nodeName]))
 	for i := 0; i < len(pods); i++ {
 		pods[i] = npm.nominatedPods[nodeName][i].DeepCopy()
 	}
 	return pods
->>>>>>> upstream/master
 }
 
 func (p *PriorityQueue) podsCompareBackoffCompleted(podInfo1, podInfo2 interface{}) bool {
@@ -778,16 +719,6 @@ func (p *PriorityQueue) podsCompareBackoffCompleted(podInfo1, podInfo2 interface
 	return bo1.Before(bo2)
 }
 
-<<<<<<< HEAD
-// NumUnschedulablePods returns the number of unschedulable pods exist in the SchedulingQueue.
-func (p *PriorityQueue) NumUnschedulablePods() int {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-	return len(p.unschedulableQ.podInfoMap)
-}
-
-=======
->>>>>>> upstream/master
 // newQueuedPodInfo builds a QueuedPodInfo object.
 func (p *PriorityQueue) newQueuedPodInfo(pod *v1.Pod, plugins ...string) *framework.QueuedPodInfo {
 	now := p.clock.Now()
@@ -811,18 +742,11 @@ func (p *PriorityQueue) getBackoffTime(podInfo *framework.QueuedPodInfo) time.Ti
 func (p *PriorityQueue) calculateBackoffDuration(podInfo *framework.QueuedPodInfo) time.Duration {
 	duration := p.podInitialBackoffDuration
 	for i := 1; i < podInfo.Attempts; i++ {
-<<<<<<< HEAD
-		duration = duration * 2
-		if duration > p.podMaxBackoffDuration {
-			return p.podMaxBackoffDuration
-		}
-=======
 		// Use subtraction instead of addition or multiplication to avoid overflow.
 		if duration > p.podMaxBackoffDuration-duration {
 			return p.podMaxBackoffDuration
 		}
 		duration += duration
->>>>>>> upstream/master
 	}
 	return duration
 }
@@ -907,19 +831,6 @@ type nominator struct {
 	sync.RWMutex
 }
 
-<<<<<<< HEAD
-func (npm *nominator) add(pi *framework.PodInfo, nodeName string) {
-	// always delete the pod if it already exist, to ensure we never store more than
-	// one instance of the pod.
-	npm.delete(pi.Pod)
-
-	nnn := nodeName
-	if len(nnn) == 0 {
-		nnn = NominatedNodeName(pi.Pod)
-		if len(nnn) == 0 {
-			return
-		}
-=======
 func (npm *nominator) add(pi *framework.PodInfo, nominatingInfo *framework.NominatingInfo) {
 	// Always delete the pod if it already exists, to ensure we never store more than
 	// one instance of the pod.
@@ -933,7 +844,6 @@ func (npm *nominator) add(pi *framework.PodInfo, nominatingInfo *framework.Nomin
 			return
 		}
 		nodeName = pi.Pod.Status.NominatedNodeName
->>>>>>> upstream/master
 	}
 
 	if npm.podLister != nil {
@@ -944,23 +854,14 @@ func (npm *nominator) add(pi *framework.PodInfo, nominatingInfo *framework.Nomin
 		}
 	}
 
-<<<<<<< HEAD
-	npm.nominatedPodToNode[pi.Pod.UID] = nnn
-	for _, npi := range npm.nominatedPods[nnn] {
-=======
 	npm.nominatedPodToNode[pi.Pod.UID] = nodeName
 	for _, npi := range npm.nominatedPods[nodeName] {
->>>>>>> upstream/master
 		if npi.Pod.UID == pi.Pod.UID {
 			klog.V(4).InfoS("Pod already exists in the nominator", "pod", klog.KObj(npi.Pod))
 			return
 		}
 	}
-<<<<<<< HEAD
-	npm.nominatedPods[nnn] = append(npm.nominatedPods[nnn], pi)
-=======
 	npm.nominatedPods[nodeName] = append(npm.nominatedPods[nodeName], pi)
->>>>>>> upstream/master
 }
 
 func (npm *nominator) delete(p *v1.Pod) {
@@ -987,11 +888,7 @@ func (npm *nominator) UpdateNominatedPod(oldPod *v1.Pod, newPodInfo *framework.P
 	// In some cases, an Update event with no "NominatedNode" present is received right
 	// after a node("NominatedNode") is reserved for this pod in memory.
 	// In this case, we need to keep reserving the NominatedNode when updating the pod pointer.
-<<<<<<< HEAD
-	nodeName := ""
-=======
 	var nominatingInfo *framework.NominatingInfo
->>>>>>> upstream/master
 	// We won't fall into below `if` block if the Update event represents:
 	// (1) NominatedNode info is added
 	// (2) NominatedNode info is updated
@@ -999,24 +896,16 @@ func (npm *nominator) UpdateNominatedPod(oldPod *v1.Pod, newPodInfo *framework.P
 	if NominatedNodeName(oldPod) == "" && NominatedNodeName(newPodInfo.Pod) == "" {
 		if nnn, ok := npm.nominatedPodToNode[oldPod.UID]; ok {
 			// This is the only case we should continue reserving the NominatedNode
-<<<<<<< HEAD
-			nodeName = nnn
-=======
 			nominatingInfo = &framework.NominatingInfo{
 				NominatingMode:    framework.ModeOverride,
 				NominatedNodeName: nnn,
 			}
->>>>>>> upstream/master
 		}
 	}
 	// We update irrespective of the nominatedNodeName changed or not, to ensure
 	// that pod pointer is updated.
 	npm.delete(oldPod)
-<<<<<<< HEAD
-	npm.add(newPodInfo, nodeName)
-=======
 	npm.add(newPodInfo, nominatingInfo)
->>>>>>> upstream/master
 }
 
 // NewPodNominator creates a nominator as a backing of framework.PodNominator.

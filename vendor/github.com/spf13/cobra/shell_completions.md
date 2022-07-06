@@ -7,8 +7,6 @@ The currently supported shells are:
 - fish
 - PowerShell
 
-<<<<<<< HEAD
-=======
 Cobra will automatically provide your program with a fully functional `completion` command,
 similarly to how it provides the `help` command.
 
@@ -18,7 +16,6 @@ If you do not wish to use the default `completion` command, you can choose to
 provide your own, which will take precedence over the default one. (This also provides
 backwards-compatibility with programs that already have their own `completion` command.)
 
->>>>>>> upstream/master
 If you are using the generator, you can create a completion command by running
 
 ```bash
@@ -82,11 +79,7 @@ PowerShell:
 		case "fish":
 			cmd.Root().GenFishCompletion(os.Stdout, true)
 		case "powershell":
-<<<<<<< HEAD
-			cmd.Root().GenPowerShellCompletion(os.Stdout)
-=======
 			cmd.Root().GenPowerShellCompletionWithDesc(os.Stdout)
->>>>>>> upstream/master
 		}
 	},
 }
@@ -94,8 +87,6 @@ PowerShell:
 
 **Note:** The cobra generator may include messages printed to stdout, for example, if the config file is loaded; this will break the auto-completion script so must be removed.
 
-<<<<<<< HEAD
-=======
 ## Adapting the default completion command
 
 Cobra provides a few options for the default `completion` command.  To configure such options you must set
@@ -116,7 +107,6 @@ To tell Cobra to completely disable descriptions for completions:
 rootCmd.CompletionOptions.DisableDescriptions = true
 ```
 
->>>>>>> upstream/master
 # Customizing completions
 
 The generated completion scripts will automatically handle completing commands and flags.  However, you can make your completions much more powerful by providing information to complete your program's nouns and flag values.
@@ -362,14 +352,10 @@ cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string,
 ```
 ### Descriptions for completions
 
-<<<<<<< HEAD
-`zsh`, `fish` and `powershell` allow for descriptions to annotate completion choices.  For commands and flags, Cobra will provide the descriptions automatically, based on usage information.  For example, using zsh:
-=======
 Cobra provides support for completion descriptions.  Such descriptions are supported for each shell
 (however, for bash, it is only available in the [completion V2 version](#bash-completion-v2)).
 For commands and flags, Cobra will provide the descriptions automatically, based on usage information.
 For example, using zsh:
->>>>>>> upstream/master
 ```
 $ helm s[tab]
 search  -- search for a keyword in charts
@@ -382,11 +368,7 @@ $ helm s[tab]
 search  (search for a keyword in charts)  show  (show information of a chart)  status  (displays the status of the named release)
 ```
 
-<<<<<<< HEAD
-Cobra allows you to add annotations to your own completions.  Simply add the annotation text after each completion, following a `\t` separator.  This technique applies to completions returned by `ValidArgs`, `ValidArgsFunction` and `RegisterFlagCompletionFunc()`.  For example:
-=======
 Cobra allows you to add descriptions to your own completions.  Simply add the description text after each completion, following a `\t` separator.  This technique applies to completions returned by `ValidArgs`, `ValidArgsFunction` and `RegisterFlagCompletionFunc()`.  For example:
->>>>>>> upstream/master
 ```go
 ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return []string{"harbor\tAn image registry", "thanos\tLong-term metrics"}, cobra.ShellCompDirectiveNoFileComp
@@ -421,8 +403,6 @@ completion     firstcommand   secondcommand
 For backward compatibility, Cobra still supports its bash legacy dynamic completion solution.
 Please refer to [Bash Completions](bash_completions.md) for details.
 
-<<<<<<< HEAD
-=======
 ### Bash completion V2
 
 Cobra provides two versions for bash completion.  The original bash completion (which started it all!) can be used by calling
@@ -454,7 +434,6 @@ $ helm s[tab][tab]
 search  show  status
 ```
 **Note**: Cobra's default `completion` command uses bash completion V2.  If for some reason you need to use bash completion V1, you will need to implement your own `completion` command. 
->>>>>>> upstream/master
 ## Zsh completions
 
 Cobra supports native zsh completion generated from the root `cobra.Command`.

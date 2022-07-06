@@ -175,14 +175,11 @@ type Cmsghdr struct {
 	Type  int32
 }
 
-<<<<<<< HEAD
-=======
 type ifreq struct {
 	Ifrn [16]byte
 	Ifru [16]byte
 }
 
->>>>>>> upstream/master
 const (
 	SizeofSockaddrNFCLLCP = 0x58
 	SizeofIovec           = 0x8
@@ -639,8 +636,6 @@ const (
 	PPS_GETCAP    = 0x400470a3
 	PPS_FETCH     = 0xc00470a4
 )
-<<<<<<< HEAD
-=======
 
 const (
 	PIDFD_NONBLOCK = 0x80
@@ -673,4 +668,3 @@ type SysvShmDesc struct {
 	Ctime_high uint16
 	_          uint16
 }
->>>>>>> upstream/master

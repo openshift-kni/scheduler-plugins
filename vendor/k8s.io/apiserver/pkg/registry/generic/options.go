@@ -22,20 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/storage"
 	"k8s.io/apiserver/pkg/storage/storagebackend"
-<<<<<<< HEAD
-	"k8s.io/client-go/tools/cache"
-)
-
-// RESTOptions is set of configuration options to generic registries.
-type RESTOptions struct {
-	StorageConfig *storagebackend.Config
-	Decorator     StorageDecorator
-
-	EnableGarbageCollection bool
-	DeleteCollectionWorkers int
-	ResourcePrefix          string
-	CountMetricPollPeriod   time.Duration
-=======
 	flowcontrolrequest "k8s.io/apiserver/pkg/util/flowcontrol/request"
 	"k8s.io/client-go/tools/cache"
 )
@@ -50,7 +36,6 @@ type RESTOptions struct {
 	ResourcePrefix            string
 	CountMetricPollPeriod     time.Duration
 	StorageObjectCountTracker flowcontrolrequest.StorageObjectCountTracker
->>>>>>> upstream/master
 }
 
 // Implement RESTOptionsGetter so that RESTOptions can directly be used when available (i.e. tests)

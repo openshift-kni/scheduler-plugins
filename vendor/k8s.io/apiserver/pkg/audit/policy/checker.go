@@ -20,10 +20,7 @@ import (
 	"strings"
 
 	"k8s.io/apiserver/pkg/apis/audit"
-<<<<<<< HEAD
-=======
 	auditinternal "k8s.io/apiserver/pkg/audit"
->>>>>>> upstream/master
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 )
 
@@ -32,27 +29,12 @@ const (
 	DefaultAuditLevel = audit.LevelNone
 )
 
-<<<<<<< HEAD
-// Checker exposes methods for checking the policy rules.
-type Checker interface {
-	// Check the audit level for a request with the given authorizer attributes.
-	LevelAndStages(authorizer.Attributes) (audit.Level, []audit.Stage)
-}
-
-// NewChecker creates a new policy checker.
-func NewChecker(policy *audit.Policy) Checker {
-	for i, rule := range policy.Rules {
-		policy.Rules[i].OmitStages = unionStages(policy.OmitStages, rule.OmitStages)
-	}
-	return &policyChecker{*policy}
-=======
 // NewPolicyRuleEvaluator creates a new policy rule evaluator.
 func NewPolicyRuleEvaluator(policy *audit.Policy) auditinternal.PolicyRuleEvaluator {
 	for i, rule := range policy.Rules {
 		policy.Rules[i].OmitStages = unionStages(policy.OmitStages, rule.OmitStages)
 	}
 	return &policyRuleEvaluator{*policy}
->>>>>>> upstream/master
 }
 
 func unionStages(stageLists ...[]audit.Stage) []audit.Stage {
@@ -69,24 +51,6 @@ func unionStages(stageLists ...[]audit.Stage) []audit.Stage {
 	return result
 }
 
-<<<<<<< HEAD
-// FakeChecker creates a checker that returns a constant level for all requests (for testing).
-func FakeChecker(level audit.Level, stage []audit.Stage) Checker {
-	return &fakeChecker{level, stage}
-}
-
-type policyChecker struct {
-	audit.Policy
-}
-
-func (p *policyChecker) LevelAndStages(attrs authorizer.Attributes) (audit.Level, []audit.Stage) {
-	for _, rule := range p.Rules {
-		if ruleMatches(&rule, attrs) {
-			return rule.Level, rule.OmitStages
-		}
-	}
-	return DefaultAuditLevel, p.OmitStages
-=======
 // NewFakePolicyRuleEvaluator creates a fake policy rule evaluator that returns
 // a constant level for all requests (for testing).
 func NewFakePolicyRuleEvaluator(level audit.Level, stage []audit.Stage) auditinternal.PolicyRuleEvaluator {
@@ -129,7 +93,6 @@ func isOmitManagedFields(policyRule *audit.PolicyRule, policyDefault bool) bool 
 	}
 
 	return *policyRule.OmitManagedFields
->>>>>>> upstream/master
 }
 
 // Check whether the rule matches the request attrs.
@@ -267,19 +230,11 @@ func hasString(slice []string, value string) bool {
 	return false
 }
 
-<<<<<<< HEAD
-type fakeChecker struct {
-=======
 type fakePolicyRuleEvaluator struct {
->>>>>>> upstream/master
 	level audit.Level
 	stage []audit.Stage
 }
 
-<<<<<<< HEAD
-func (f *fakeChecker) LevelAndStages(_ authorizer.Attributes) (audit.Level, []audit.Stage) {
-	return f.level, f.stage
-=======
 func (f *fakePolicyRuleEvaluator) EvaluatePolicyRule(_ authorizer.Attributes) auditinternal.RequestAuditConfigWithLevel {
 	return auditinternal.RequestAuditConfigWithLevel{
 		Level: f.level,
@@ -287,5 +242,4 @@ func (f *fakePolicyRuleEvaluator) EvaluatePolicyRule(_ authorizer.Attributes) au
 			OmitStages: f.stage,
 		},
 	}
->>>>>>> upstream/master
 }

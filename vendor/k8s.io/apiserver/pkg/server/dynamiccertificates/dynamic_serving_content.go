@@ -23,11 +23,8 @@ import (
 	"sync/atomic"
 	"time"
 
-<<<<<<< HEAD
-=======
 	"github.com/fsnotify/fsnotify"
 
->>>>>>> upstream/master
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/workqueue"
@@ -43,11 +40,7 @@ type DynamicCertKeyPairContent struct {
 	// keyFile is the name of the key file to read.
 	keyFile string
 
-<<<<<<< HEAD
-	// servingCert is a certKeyContent that contains the last read, non-zero length content of the key and cert
-=======
 	// certKeyPair is a certKeyContent that contains the last read, non-zero length content of the key and cert
->>>>>>> upstream/master
 	certKeyPair atomic.Value
 
 	listeners []Listener
@@ -84,11 +77,7 @@ func (c *DynamicCertKeyPairContent) AddListener(listener Listener) {
 	c.listeners = append(c.listeners, listener)
 }
 
-<<<<<<< HEAD
-// loadServingCert determines the next set of content for the file.
-=======
 // loadCertKeyPair determines the next set of content for the file.
->>>>>>> upstream/master
 func (c *DynamicCertKeyPairContent) loadCertKeyPair() error {
 	cert, err := ioutil.ReadFile(c.certFile)
 	if err != nil {
@@ -145,28 +134,16 @@ func (c *DynamicCertKeyPairContent) Run(workers int, stopCh <-chan struct{}) {
 	// doesn't matter what workers say, only start one.
 	go wait.Until(c.runWorker, time.Second, stopCh)
 
-<<<<<<< HEAD
-	// start timer that rechecks every minute, just in case.  this also serves to prime the controller quickly.
-	go wait.PollImmediateUntil(FileRefreshDuration, func() (bool, error) {
-		c.queue.Add(workItemKey)
-		return false, nil
-	}, stopCh)
-
-	// TODO this can be wired to an fsnotifier as well.
-=======
 	// start the loop that watches the cert and key files until stopCh is closed.
 	go wait.Until(func() {
 		if err := c.watchCertKeyFile(stopCh); err != nil {
 			klog.ErrorS(err, "Failed to watch cert and key file, will retry later")
 		}
 	}, time.Minute, stopCh)
->>>>>>> upstream/master
 
 	<-stopCh
 }
 
-<<<<<<< HEAD
-=======
 func (c *DynamicCertKeyPairContent) watchCertKeyFile(stopCh <-chan struct{}) error {
 	// Trigger a check here to ensure the content will be checked periodically even if the following watch fails.
 	c.queue.Add(workItemKey)
@@ -219,7 +196,6 @@ func (c *DynamicCertKeyPairContent) handleWatchEvent(e fsnotify.Event, w *fsnoti
 	return nil
 }
 
->>>>>>> upstream/master
 func (c *DynamicCertKeyPairContent) runWorker() {
 	for c.processNextWorkItem() {
 	}

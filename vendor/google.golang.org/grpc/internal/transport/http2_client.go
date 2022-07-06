@@ -24,10 +24,7 @@ import (
 	"io"
 	"math"
 	"net"
-<<<<<<< HEAD
-=======
 	"net/http"
->>>>>>> upstream/master
 	"strconv"
 	"strings"
 	"sync"
@@ -245,9 +242,6 @@ func newHTTP2Client(connectCtx, ctx context.Context, addr resolver.Address, opts
 		// and passed to the credential handshaker. This makes it possible for
 		// address specific arbitrary data to reach the credential handshaker.
 		connectCtx = icredentials.NewClientHandshakeInfoContext(connectCtx, credentials.ClientHandshakeInfo{Attributes: addr.Attributes})
-<<<<<<< HEAD
-		conn, authInfo, err = transportCreds.ClientHandshake(connectCtx, addr.ServerName, conn)
-=======
 		rawConn := conn
 		// Pull the deadline from the connectCtx, which will be used for
 		// timeouts in the authentication protocol handshake. Can ignore the
@@ -257,7 +251,6 @@ func newHTTP2Client(connectCtx, ctx context.Context, addr resolver.Address, opts
 		rawConn.SetDeadline(deadline)
 		conn, authInfo, err = transportCreds.ClientHandshake(connectCtx, addr.ServerName, rawConn)
 		rawConn.SetDeadline(time.Time{})
->>>>>>> upstream/master
 		if err != nil {
 			return nil, connectionErrorf(isTemporary(err), err, "transport: authentication handshake failed: %v", err)
 		}
@@ -415,18 +408,10 @@ func newHTTP2Client(connectCtx, ctx context.Context, addr resolver.Address, opts
 				logger.Errorf("transport: loopyWriter.run returning. Err: %v", err)
 			}
 		}
-<<<<<<< HEAD
-		// If it's a connection error, let reader goroutine handle it
-		// since there might be data in the buffers.
-		if _, ok := err.(net.Error); !ok {
-			t.conn.Close()
-		}
-=======
 		// Do not close the transport.  Let reader goroutine handle it since
 		// there might be data in the buffers.
 		t.conn.Close()
 		t.controlBuf.finish()
->>>>>>> upstream/master
 		close(t.writerDone)
 	}()
 	return t, nil
@@ -631,28 +616,6 @@ func (t *http2Client) getCallAuthData(ctx context.Context, audience string, call
 	return callAuthData, nil
 }
 
-<<<<<<< HEAD
-// PerformedIOError wraps an error to indicate IO may have been performed
-// before the error occurred.
-type PerformedIOError struct {
-	Err error
-}
-
-// Error implements error.
-func (p PerformedIOError) Error() string {
-	return p.Err.Error()
-}
-
-// NewStream creates a stream and registers it into the transport as "active"
-// streams.
-func (t *http2Client) NewStream(ctx context.Context, callHdr *CallHdr) (_ *Stream, err error) {
-	ctx = peer.NewContext(ctx, t.getPeer())
-	headerFields, err := t.createHeaderFields(ctx, callHdr)
-	if err != nil {
-		// We may have performed I/O in the per-RPC creds callback, so do not
-		// allow transparent retry.
-		return nil, PerformedIOError{err}
-=======
 // NewStreamError wraps an error and reports additional information.
 type NewStreamError struct {
 	Err error
@@ -686,7 +649,6 @@ func (t *http2Client) NewStream(ctx context.Context, callHdr *CallHdr) (_ *Strea
 	headerFields, err := t.createHeaderFields(ctx, callHdr)
 	if err != nil {
 		return nil, err
->>>>>>> upstream/master
 	}
 	s := t.newStream(ctx, callHdr)
 	cleanup := func(err error) {
@@ -792,11 +754,7 @@ func (t *http2Client) NewStream(ctx context.Context, callHdr *CallHdr) (_ *Strea
 			break
 		}
 		if hdrListSizeErr != nil {
-<<<<<<< HEAD
-			return nil, hdrListSizeErr
-=======
 			return nil, &NewStreamError{Err: hdrListSizeErr, DoNotRetry: true}
->>>>>>> upstream/master
 		}
 		firstTry = false
 		select {
@@ -941,14 +899,6 @@ func (t *http2Client) Close(err error) {
 	// Append info about previous goaways if there were any, since this may be important
 	// for understanding the root cause for this connection to be closed.
 	_, goAwayDebugMessage := t.GetGoAwayReason()
-<<<<<<< HEAD
-	if len(goAwayDebugMessage) > 0 {
-		err = fmt.Errorf("closing transport due to: %v, received prior goaway: %v", err, goAwayDebugMessage)
-	}
-	// Notify all active streams.
-	for _, s := range streams {
-		t.closeStream(s, err, false, http2.ErrCodeNo, status.New(codes.Unavailable, err.Error()), nil, false)
-=======
 
 	var st *status.Status
 	if len(goAwayDebugMessage) > 0 {
@@ -961,7 +911,6 @@ func (t *http2Client) Close(err error) {
 	// Notify all active streams.
 	for _, s := range streams {
 		t.closeStream(s, err, false, http2.ErrCodeNo, st, nil, false)
->>>>>>> upstream/master
 	}
 	if t.statsHandler != nil {
 		connEnd := &stats.ConnEnd{
@@ -1299,15 +1248,11 @@ func (t *http2Client) setGoAwayReason(f *http2.GoAwayFrame) {
 			t.goAwayReason = GoAwayTooManyPings
 		}
 	}
-<<<<<<< HEAD
-	t.goAwayDebugMessage = fmt.Sprintf("code: %s, debug data: %v", f.ErrCode, string(f.DebugData()))
-=======
 	if len(f.DebugData()) == 0 {
 		t.goAwayDebugMessage = fmt.Sprintf("code: %s", f.ErrCode)
 	} else {
 		t.goAwayDebugMessage = fmt.Sprintf("code: %s, debug data: %q", f.ErrCode, string(f.DebugData()))
 	}
->>>>>>> upstream/master
 }
 
 func (t *http2Client) GetGoAwayReason() (GoAwayReason, string) {
@@ -1340,13 +1285,6 @@ func (t *http2Client) operateHeaders(frame *http2.MetaHeadersFrame) {
 		return
 	}
 
-<<<<<<< HEAD
-	state := &decodeState{}
-	// Initialize isGRPC value to be !initialHeader, since if a gRPC Response-Headers has already been received, then it means that the peer is speaking gRPC and we are in gRPC mode.
-	state.data.isGRPC = !initialHeader
-	if h2code, err := state.decodeHeader(frame); err != nil {
-		t.closeStream(s, err, true, h2code, status.Convert(err), nil, endStream)
-=======
 	// frame.Truncated is set to true when framer detects that the current header
 	// list size hits MaxHeaderListSize limit.
 	if frame.Truncated {
@@ -1465,7 +1403,6 @@ func (t *http2Client) operateHeaders(frame *http2.MetaHeadersFrame) {
 	if headerError != "" {
 		se := status.New(codes.Internal, headerError)
 		t.closeStream(s, se.Err(), true, http2.ErrCodeProtocol, se, nil, endStream)
->>>>>>> upstream/master
 		return
 	}
 
@@ -1500,15 +1437,9 @@ func (t *http2Client) operateHeaders(frame *http2.MetaHeadersFrame) {
 			// These values can be set without any synchronization because
 			// stream goroutine will read it only after seeing a closed
 			// headerChan which we'll close after setting this.
-<<<<<<< HEAD
-			s.recvCompress = state.data.encoding
-			if len(state.data.mdata) > 0 {
-				s.header = state.data.mdata
-=======
 			s.recvCompress = recvCompress
 			if len(mdata) > 0 {
 				s.header = mdata
->>>>>>> upstream/master
 			}
 		} else {
 			// HEADERS frame block carries a Trailers-Only.
@@ -1521,11 +1452,6 @@ func (t *http2Client) operateHeaders(frame *http2.MetaHeadersFrame) {
 		return
 	}
 
-<<<<<<< HEAD
-	// if client received END_STREAM from server while stream was still active, send RST_STREAM
-	rst := s.getState() == streamActive
-	t.closeStream(s, io.EOF, rst, http2.ErrCodeNo, state.status(), state.data.mdata, true)
-=======
 	if statusGen == nil {
 		statusGen = status.New(rawStatusCode, grpcMessage)
 	}
@@ -1533,7 +1459,6 @@ func (t *http2Client) operateHeaders(frame *http2.MetaHeadersFrame) {
 	// if client received END_STREAM from server while stream was still active, send RST_STREAM
 	rst := s.getState() == streamActive
 	t.closeStream(s, io.EOF, rst, http2.ErrCodeNo, statusGen, mdata, true)
->>>>>>> upstream/master
 }
 
 // reader runs as a separate goroutine in charge of reading data from network

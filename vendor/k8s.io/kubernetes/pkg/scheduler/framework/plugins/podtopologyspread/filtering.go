@@ -226,11 +226,7 @@ func (pl *PodTopologySpread) calPreFilterState(pod *v1.Pod) (*preFilterState, er
 	for _, n := range allNodes {
 		node := n.Node()
 		if node == nil {
-<<<<<<< HEAD
-			klog.Error("node not found")
-=======
 			klog.ErrorS(nil, "Node not found")
->>>>>>> upstream/master
 			continue
 		}
 		// In accordance to design, if NodeAffinity or NodeSelector is defined,
@@ -300,11 +296,7 @@ func (pl *PodTopologySpread) Filter(ctx context.Context, cycleState *framework.C
 		tpKey := c.TopologyKey
 		tpVal, ok := node.Labels[c.TopologyKey]
 		if !ok {
-<<<<<<< HEAD
-			klog.V(5).Infof("node '%s' doesn't have required label '%s'", node.Name, tpKey)
-=======
 			klog.V(5).InfoS("Node doesn't have required label", "node", klog.KObj(node), "label", tpKey)
->>>>>>> upstream/master
 			return framework.NewStatus(framework.UnschedulableAndUnresolvable, ErrReasonNodeLabelNotMatch)
 		}
 
@@ -317,11 +309,7 @@ func (pl *PodTopologySpread) Filter(ctx context.Context, cycleState *framework.C
 		paths, ok := s.TpKeyToCriticalPaths[tpKey]
 		if !ok {
 			// error which should not happen
-<<<<<<< HEAD
-			klog.Errorf("internal error: get paths from key %q of %#v", tpKey, s.TpKeyToCriticalPaths)
-=======
 			klog.ErrorS(nil, "Internal error occurred while retrieving paths from topology key", "topologyKey", tpKey, "paths", s.TpKeyToCriticalPaths)
->>>>>>> upstream/master
 			continue
 		}
 		// judging criteria:
@@ -333,11 +321,7 @@ func (pl *PodTopologySpread) Filter(ctx context.Context, cycleState *framework.C
 		}
 		skew := matchNum + selfMatchNum - minMatchNum
 		if skew > c.MaxSkew {
-<<<<<<< HEAD
-			klog.V(5).Infof("node '%s' failed spreadConstraint[%s]: MatchNum(%d) + selfMatchNum(%d) - minMatchNum(%d) > maxSkew(%d)", node.Name, tpKey, matchNum, selfMatchNum, minMatchNum, c.MaxSkew)
-=======
 			klog.V(5).InfoS("Node failed spreadConstraint: matchNum + selfMatchNum - minMatchNum > maxSkew", "node", klog.KObj(node), "topologyKey", tpKey, "matchNum", matchNum, "selfMatchNum", selfMatchNum, "minMatchNum", minMatchNum, "maxSkew", c.MaxSkew)
->>>>>>> upstream/master
 			return framework.NewStatus(framework.Unschedulable, ErrReasonConstraintsNotMatch)
 		}
 	}

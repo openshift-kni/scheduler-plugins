@@ -296,11 +296,7 @@ type controlBuffer struct {
 	// closed and nilled when transportResponseFrames drops below the
 	// threshold.  Both fields are protected by mu.
 	transportResponseFrames int
-<<<<<<< HEAD
-	trfChan                 atomic.Value // *chan struct{}
-=======
 	trfChan                 atomic.Value // chan struct{}
->>>>>>> upstream/master
 }
 
 func newControlBuffer(done <-chan struct{}) *controlBuffer {
@@ -314,17 +310,10 @@ func newControlBuffer(done <-chan struct{}) *controlBuffer {
 // throttle blocks if there are too many incomingSettings/cleanupStreams in the
 // controlbuf.
 func (c *controlBuffer) throttle() {
-<<<<<<< HEAD
-	ch, _ := c.trfChan.Load().(*chan struct{})
-	if ch != nil {
-		select {
-		case <-*ch:
-=======
 	ch, _ := c.trfChan.Load().(chan struct{})
 	if ch != nil {
 		select {
 		case <-ch:
->>>>>>> upstream/master
 		case <-c.done:
 		}
 	}
@@ -358,12 +347,7 @@ func (c *controlBuffer) executeAndPut(f func(it interface{}) bool, it cbItem) (b
 		if c.transportResponseFrames == maxQueuedTransportResponseFrames {
 			// We are adding the frame that puts us over the threshold; create
 			// a throttling channel.
-<<<<<<< HEAD
-			ch := make(chan struct{})
-			c.trfChan.Store(&ch)
-=======
 			c.trfChan.Store(make(chan struct{}))
->>>>>>> upstream/master
 		}
 	}
 	c.mu.Unlock()
@@ -404,15 +388,9 @@ func (c *controlBuffer) get(block bool) (interface{}, error) {
 				if c.transportResponseFrames == maxQueuedTransportResponseFrames {
 					// We are removing the frame that put us over the
 					// threshold; close and clear the throttling channel.
-<<<<<<< HEAD
-					ch := c.trfChan.Load().(*chan struct{})
-					close(*ch)
-					c.trfChan.Store((*chan struct{})(nil))
-=======
 					ch := c.trfChan.Load().(chan struct{})
 					close(ch)
 					c.trfChan.Store((chan struct{})(nil))
->>>>>>> upstream/master
 				}
 				c.transportResponseFrames--
 			}
@@ -428,10 +406,6 @@ func (c *controlBuffer) get(block bool) (interface{}, error) {
 		select {
 		case <-c.ch:
 		case <-c.done:
-<<<<<<< HEAD
-			c.finish()
-=======
->>>>>>> upstream/master
 			return nil, ErrConnClosing
 		}
 	}
@@ -456,8 +430,6 @@ func (c *controlBuffer) finish() {
 			hdr.onOrphaned(ErrConnClosing)
 		}
 	}
-<<<<<<< HEAD
-=======
 	// In case throttle() is currently in flight, it needs to be unblocked.
 	// Otherwise, the transport may not close, since the transport is closed by
 	// the reader encountering the connection error.
@@ -466,7 +438,6 @@ func (c *controlBuffer) finish() {
 		close(ch)
 	}
 	c.trfChan.Store((chan struct{})(nil))
->>>>>>> upstream/master
 	c.mu.Unlock()
 }
 

@@ -95,11 +95,7 @@ _%[1]s()
     local shellCompDirectiveFilterFileExt=%[6]d
     local shellCompDirectiveFilterDirs=%[7]d
 
-<<<<<<< HEAD
-    local lastParam lastChar flagPrefix requestComp out directive compCount comp lastComp
-=======
     local lastParam lastChar flagPrefix requestComp out directive comp lastComp noSpace
->>>>>>> upstream/master
     local -a completions
 
     __%[1]s_debug "\n========= starting completion logic =========="
@@ -167,10 +163,6 @@ _%[1]s()
         return
     fi
 
-<<<<<<< HEAD
-    compCount=0
-=======
->>>>>>> upstream/master
     while IFS='\n' read -r comp; do
         if [ -n "$comp" ]; then
             # If requested, completions are returned with a description.
@@ -182,24 +174,17 @@ _%[1]s()
             local tab=$(printf '\t')
             comp=${comp//$tab/:}
 
-<<<<<<< HEAD
-            ((compCount++))
-=======
->>>>>>> upstream/master
             __%[1]s_debug "Adding completion: ${comp}"
             completions+=${comp}
             lastComp=$comp
         fi
     done < <(printf "%%s\n" "${out[@]}")
 
-<<<<<<< HEAD
-=======
     if [ $((directive & shellCompDirectiveNoSpace)) -ne 0 ]; then
         __%[1]s_debug "Activating nospace."
         noSpace="-S ''"
     fi
 
->>>>>>> upstream/master
     if [ $((directive & shellCompDirectiveFilterFileExt)) -ne 0 ]; then
         # File extension filtering
         local filteringCmd
@@ -226,27 +211,6 @@ _%[1]s()
             __%[1]s_debug "Listing directories in ."
         fi
 
-<<<<<<< HEAD
-        _arguments '*:dirname:_files -/'" ${flagPrefix}"
-        if [ -n "$subdir" ]; then
-            popd >/dev/null 2>&1
-        fi
-    elif [ $((directive & shellCompDirectiveNoSpace)) -ne 0 ] && [ ${compCount} -eq 1 ]; then
-        __%[1]s_debug "Activating nospace."
-        # We can use compadd here as there is no description when
-        # there is only one completion.
-        compadd -S '' "${lastComp}"
-    elif [ ${compCount} -eq 0 ]; then
-        if [ $((directive & shellCompDirectiveNoFileComp)) -ne 0 ]; then
-            __%[1]s_debug "deactivating file completion"
-        else
-            # Perform file completion
-            __%[1]s_debug "activating file completion"
-            _arguments '*:filename:_files'" ${flagPrefix}"
-        fi
-    else
-        _describe "completions" completions $(echo $flagPrefix)
-=======
         local result
         _arguments '*:dirname:_files -/'" ${flagPrefix}"
         result=$?
@@ -281,7 +245,6 @@ _%[1]s()
                 _arguments '*:filename:_files'" ${flagPrefix}"
             fi
         fi
->>>>>>> upstream/master
     fi
 }
 

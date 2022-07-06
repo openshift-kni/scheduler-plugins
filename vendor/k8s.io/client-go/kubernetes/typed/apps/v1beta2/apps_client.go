@@ -19,11 +19,8 @@ limitations under the License.
 package v1beta2
 
 import (
-<<<<<<< HEAD
-=======
 	"net/http"
 
->>>>>>> upstream/master
 	v1beta2 "k8s.io/api/apps/v1beta2"
 	"k8s.io/client-go/kubernetes/scheme"
 	rest "k8s.io/client-go/rest"
@@ -64,19 +61,13 @@ func (c *AppsV1beta2Client) StatefulSets(namespace string) StatefulSetInterface 
 }
 
 // NewForConfig creates a new AppsV1beta2Client for the given config.
-<<<<<<< HEAD
-=======
 // NewForConfig is equivalent to NewForConfigAndClient(c, httpClient),
 // where httpClient was generated with rest.HTTPClientFor(c).
->>>>>>> upstream/master
 func NewForConfig(c *rest.Config) (*AppsV1beta2Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
 	}
-<<<<<<< HEAD
-	client, err := rest.RESTClientFor(&config)
-=======
 	httpClient, err := rest.HTTPClientFor(&config)
 	if err != nil {
 		return nil, err
@@ -92,7 +83,6 @@ func NewForConfigAndClient(c *rest.Config, h *http.Client) (*AppsV1beta2Client, 
 		return nil, err
 	}
 	client, err := rest.RESTClientForConfigAndClient(&config, h)
->>>>>>> upstream/master
 	if err != nil {
 		return nil, err
 	}

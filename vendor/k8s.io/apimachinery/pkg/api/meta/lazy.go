@@ -32,11 +32,7 @@ type lazyObject struct {
 	mapper RESTMapper
 }
 
-<<<<<<< HEAD
-// NewLazyObjectLoader handles unrecoverable errors when creating a RESTMapper / ObjectTyper by
-=======
 // NewLazyRESTMapperLoader handles unrecoverable errors when creating a RESTMapper / ObjectTyper by
->>>>>>> upstream/master
 // returning those initialization errors when the interface methods are invoked. This defers the
 // initialization and any server calls until a client actually needs to perform the action.
 func NewLazyRESTMapperLoader(fn func() (RESTMapper, error)) RESTMapper {
@@ -56,11 +52,7 @@ func (o *lazyObject) init() error {
 	return o.err
 }
 
-<<<<<<< HEAD
-var _ RESTMapper = &lazyObject{}
-=======
 var _ ResettableRESTMapper = &lazyObject{}
->>>>>>> upstream/master
 
 func (o *lazyObject) KindFor(resource schema.GroupVersionResource) (schema.GroupVersionKind, error) {
 	if err := o.init(); err != nil {
@@ -110,8 +102,6 @@ func (o *lazyObject) ResourceSingularizer(resource string) (singular string, err
 	}
 	return o.mapper.ResourceSingularizer(resource)
 }
-<<<<<<< HEAD
-=======
 
 func (o *lazyObject) Reset() {
 	o.lock.Lock()
@@ -120,4 +110,3 @@ func (o *lazyObject) Reset() {
 		MaybeResetRESTMapper(o.mapper)
 	}
 }
->>>>>>> upstream/master

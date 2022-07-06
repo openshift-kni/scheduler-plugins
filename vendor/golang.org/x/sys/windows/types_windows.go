@@ -66,11 +66,6 @@ var signals = [...]string{
 }
 
 const (
-<<<<<<< HEAD
-	FILE_LIST_DIRECTORY   = 0x00000001
-	FILE_APPEND_DATA      = 0x00000004
-	FILE_WRITE_ATTRIBUTES = 0x00000100
-=======
 	FILE_READ_DATA        = 0x00000001
 	FILE_READ_ATTRIBUTES  = 0x00000080
 	FILE_READ_EA          = 0x00000008
@@ -86,7 +81,6 @@ const (
 
 	FILE_LIST_DIRECTORY = 0x00000001
 	FILE_TRAVERSE       = 0x00000020
->>>>>>> upstream/master
 
 	FILE_SHARE_READ   = 0x00000001
 	FILE_SHARE_WRITE  = 0x00000002
@@ -261,8 +255,6 @@ const (
 )
 
 const (
-<<<<<<< HEAD
-=======
 	// flags for EnumProcessModulesEx
 	LIST_MODULES_32BIT   = 0x01
 	LIST_MODULES_64BIT   = 0x02
@@ -271,7 +263,6 @@ const (
 )
 
 const (
->>>>>>> upstream/master
 	// filters for ReadDirectoryChangesW and FindFirstChangeNotificationW
 	FILE_NOTIFY_CHANGE_FILE_NAME   = 0x001
 	FILE_NOTIFY_CHANGE_DIR_NAME    = 0x002
@@ -709,11 +700,7 @@ const (
 	WTD_CHOICE_CERT    = 5
 
 	WTD_STATEACTION_IGNORE           = 0x00000000
-<<<<<<< HEAD
-	WTD_STATEACTION_VERIFY           = 0x00000010
-=======
 	WTD_STATEACTION_VERIFY           = 0x00000001
->>>>>>> upstream/master
 	WTD_STATEACTION_CLOSE            = 0x00000002
 	WTD_STATEACTION_AUTO_CACHE       = 0x00000003
 	WTD_STATEACTION_AUTO_CACHE_FLUSH = 0x00000004
@@ -1814,9 +1801,6 @@ type reparseDataBuffer struct {
 }
 
 const (
-<<<<<<< HEAD
-	FSCTL_GET_REPARSE_POINT          = 0x900A8
-=======
 	FSCTL_CREATE_OR_GET_OBJECT_ID             = 0x0900C0
 	FSCTL_DELETE_OBJECT_ID                    = 0x0900A0
 	FSCTL_DELETE_REPARSE_POINT                = 0x0900AC
@@ -1864,7 +1848,6 @@ const (
 	FSCTL_SIS_COPYFILE                        = 0x090100
 	FSCTL_WRITE_USN_CLOSE_RECORD              = 0x0900EF
 
->>>>>>> upstream/master
 	MAXIMUM_REPARSE_DATA_BUFFER_SIZE = 16 * 1024
 	IO_REPARSE_TAG_MOUNT_POINT       = 0xA0000003
 	IO_REPARSE_TAG_SYMLINK           = 0xA000000C
@@ -2383,15 +2366,12 @@ type LIST_ENTRY struct {
 	Blink *LIST_ENTRY
 }
 
-<<<<<<< HEAD
-=======
 type RUNTIME_FUNCTION struct {
 	BeginAddress uint32
 	EndAddress   uint32
 	UnwindData   uint32
 }
 
->>>>>>> upstream/master
 type LDR_DATA_TABLE_ENTRY struct {
 	reserved1          [2]uintptr
 	InMemoryOrderLinks LIST_ENTRY
@@ -2582,8 +2562,6 @@ const (
 	FILE_PIPE_SERVER_END = 0x00000001
 )
 
-<<<<<<< HEAD
-=======
 const (
 	// FileInformationClass for NtSetInformationFile
 	FileBasicInformation                         = 4
@@ -2638,7 +2616,6 @@ const (
 	FILE_LINK_FORCE_RESIZE_SR                      = 0x00000180
 )
 
->>>>>>> upstream/master
 // ProcessInformationClasses for NtQueryInformationProcess and NtSetInformationProcess.
 const (
 	ProcessBasicInformation = iota
@@ -2755,8 +2732,6 @@ type PROCESS_BASIC_INFORMATION struct {
 	InheritedFromUniqueProcessId uintptr
 }
 
-<<<<<<< HEAD
-=======
 // SystemInformationClasses for NtQuerySystemInformation and NtSetSystemInformation
 const (
 	SystemBasicInformation = iota
@@ -2954,7 +2929,6 @@ type RTL_PROCESS_MODULES struct {
 	Modules         [1]RTL_PROCESS_MODULE_INFORMATION
 }
 
->>>>>>> upstream/master
 // Constants for LocalAlloc flags.
 const (
 	LMEM_FIXED          = 0x0
@@ -3049,8 +3023,6 @@ var (
 	RT_MANIFEST     ResourceID = 24
 )
 
-<<<<<<< HEAD
-=======
 type VS_FIXEDFILEINFO struct {
 	Signature        uint32
 	StrucVersion     uint32
@@ -3067,7 +3039,6 @@ type VS_FIXEDFILEINFO struct {
 	FileDateLS       uint32
 }
 
->>>>>>> upstream/master
 type COAUTHIDENTITY struct {
 	User           *uint16
 	UserLength     uint32
@@ -3141,12 +3112,9 @@ const (
 
 // Flag for QueryFullProcessImageName.
 const PROCESS_NAME_NATIVE = 1
-<<<<<<< HEAD
-=======
 
 type ModuleInfo struct {
 	BaseOfDll   uintptr
 	SizeOfImage uint32
 	EntryPoint  uintptr
 }
->>>>>>> upstream/master

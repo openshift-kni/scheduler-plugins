@@ -120,11 +120,7 @@ func (c *FakeHorizontalPodAutoscalers) UpdateStatus(ctx context.Context, horizon
 // Delete takes name of the horizontalPodAutoscaler and deletes it. Returns an error if one occurs.
 func (c *FakeHorizontalPodAutoscalers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-<<<<<<< HEAD
-		Invokes(testing.NewDeleteAction(horizontalpodautoscalersResource, c.ns, name), &v2beta2.HorizontalPodAutoscaler{})
-=======
 		Invokes(testing.NewDeleteActionWithOptions(horizontalpodautoscalersResource, c.ns, name, opts), &v2beta2.HorizontalPodAutoscaler{})
->>>>>>> upstream/master
 
 	return err
 }

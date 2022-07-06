@@ -120,11 +120,7 @@ func (c *FakeCronJobs) UpdateStatus(ctx context.Context, cronJob *v1beta1.CronJo
 // Delete takes name of the cronJob and deletes it. Returns an error if one occurs.
 func (c *FakeCronJobs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-<<<<<<< HEAD
-		Invokes(testing.NewDeleteAction(cronjobsResource, c.ns, name), &v1beta1.CronJob{})
-=======
 		Invokes(testing.NewDeleteActionWithOptions(cronjobsResource, c.ns, name, opts), &v1beta1.CronJob{})
->>>>>>> upstream/master
 
 	return err
 }

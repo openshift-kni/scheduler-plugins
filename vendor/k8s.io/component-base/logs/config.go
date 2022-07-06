@@ -19,21 +19,14 @@ package logs
 import (
 	"flag"
 	"fmt"
-<<<<<<< HEAD
-=======
 	"sort"
->>>>>>> upstream/master
 	"strings"
 
 	"github.com/spf13/pflag"
 
-<<<<<<< HEAD
-	"k8s.io/component-base/config"
-=======
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/config"
 	"k8s.io/component-base/logs/registry"
->>>>>>> upstream/master
 	"k8s.io/klog/v2"
 )
 
@@ -43,14 +36,6 @@ const (
 	JSONLogFormat    = "json"
 )
 
-<<<<<<< HEAD
-// LogRegistry is new init LogFormatRegistry struct
-var LogRegistry = NewLogFormatRegistry()
-
-func init() {
-	// Text format is default klog format
-	LogRegistry.Register(DefaultLogFormat, nil)
-=======
 // loggingFlags captures the state of the logging flags, in particular their default value
 // before flag parsing. It is used by UnsupportedLoggingFlags.
 var loggingFlags pflag.FlagSet
@@ -62,59 +47,11 @@ func init() {
 	var fs flag.FlagSet
 	klog.InitFlags(&fs)
 	loggingFlags.AddGoFlagSet(&fs)
->>>>>>> upstream/master
 }
 
 // List of logs (k8s.io/klog + k8s.io/component-base/logs) flags supported by all logging formats
 var supportedLogsFlags = map[string]struct{}{
 	"v": {},
-<<<<<<< HEAD
-	// TODO: support vmodule after 1.19 Alpha
-}
-
-// BindLoggingFlags binds the Options struct fields to a flagset
-func BindLoggingFlags(c *config.LoggingConfiguration, fs *pflag.FlagSet) {
-	normalizeFunc := func(name string) string {
-		f := fs.GetNormalizeFunc()
-		return string(f(fs, name))
-	}
-	unsupportedFlags := fmt.Sprintf("--%s", strings.Join(UnsupportedLoggingFlags(normalizeFunc), ", --"))
-	formats := fmt.Sprintf(`"%s"`, strings.Join(LogRegistry.List(), `", "`))
-	fs.StringVar(&c.Format, "logging-format", c.Format, fmt.Sprintf("Sets the log format. Permitted formats: %s.\nNon-default formats don't honor these flags: %s.\nNon-default choices are currently alpha and subject to change without warning.", formats, unsupportedFlags))
-	// No new log formats should be added after generation is of flag options
-	LogRegistry.Freeze()
-	fs.BoolVar(&c.Sanitization, "experimental-logging-sanitization", c.Sanitization, `[Experimental] When enabled prevents logging of fields tagged as sensitive (passwords, keys, tokens).
-Runtime log sanitization may introduce significant computation overhead and therefore should not be enabled in production.`)
-}
-
-// UnsupportedLoggingFlags lists unsupported logging flags
-func UnsupportedLoggingFlags(normalizeFunc func(name string) string) []string {
-	allFlags := []string{}
-
-	// k8s.io/klog flags
-	fs := &flag.FlagSet{}
-	klog.InitFlags(fs)
-	fs.VisitAll(func(flag *flag.Flag) {
-		if _, found := supportedLogsFlags[flag.Name]; !found {
-			name := flag.Name
-			if normalizeFunc != nil {
-				name = normalizeFunc(name)
-			}
-			allFlags = append(allFlags, name)
-		}
-	})
-
-	// k8s.io/component-base/logs flags
-	pfs := &pflag.FlagSet{}
-	AddFlags(pfs)
-	pfs.VisitAll(func(flag *pflag.Flag) {
-		if _, found := supportedLogsFlags[flag.Name]; !found {
-			allFlags = append(allFlags, flag.Name)
-		}
-	})
-	return allFlags
-}
-=======
 }
 
 // BindLoggingFlags binds the Options struct fields to a flagset.
@@ -179,4 +116,3 @@ func unsupportedLoggingFlagNames(normalizeFunc func(f *pflag.FlagSet, name strin
 	sort.Strings(names)
 	return names
 }
->>>>>>> upstream/master

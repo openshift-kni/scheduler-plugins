@@ -32,12 +32,8 @@ type WriteScheduler interface {
 
 	// Pop dequeues the next frame to write. Returns false if no frames can
 	// be written. Frames with a given wr.StreamID() are Pop'd in the same
-<<<<<<< HEAD
-	// order they are Push'd. No frames should be discarded except by CloseStream.
-=======
 	// order they are Push'd, except RST_STREAM frames. No frames should be
 	// discarded except by CloseStream.
->>>>>>> upstream/master
 	Pop() (wr FrameWriteRequest, ok bool)
 }
 
@@ -57,10 +53,7 @@ type FrameWriteRequest struct {
 
 	// stream is the stream on which this frame will be written.
 	// nil for non-stream frames like PING and SETTINGS.
-<<<<<<< HEAD
-=======
 	// nil for RST_STREAM streams, which use the StreamError.StreamID field instead.
->>>>>>> upstream/master
 	stream *stream
 
 	// done, if non-nil, must be a buffered channel with space for

@@ -32,15 +32,12 @@ import (
 
 // WithWaitGroup adds all non long-running requests to wait group, which is used for graceful shutdown.
 func WithWaitGroup(handler http.Handler, longRunning apirequest.LongRunningRequestCheck, wg *utilwaitgroup.SafeWaitGroup) http.Handler {
-<<<<<<< HEAD
-=======
 	// NOTE: both WithWaitGroup and WithRetryAfter must use the same exact isRequestExemptFunc 'isRequestExemptFromRetryAfter,
 	// otherwise SafeWaitGroup might wait indefinitely and will prevent the server from shutting down gracefully.
 	return withWaitGroup(handler, longRunning, wg, isRequestExemptFromRetryAfter)
 }
 
 func withWaitGroup(handler http.Handler, longRunning apirequest.LongRunningRequestCheck, wg *utilwaitgroup.SafeWaitGroup, isRequestExemptFn isRequestExemptFunc) http.Handler {
->>>>>>> upstream/master
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		requestInfo, ok := apirequest.RequestInfoFrom(ctx)
@@ -50,23 +47,6 @@ func withWaitGroup(handler http.Handler, longRunning apirequest.LongRunningReque
 			return
 		}
 
-<<<<<<< HEAD
-		if !longRunning(req, requestInfo) {
-			if err := wg.Add(1); err != nil {
-				// When apiserver is shutting down, signal clients to retry
-				// There is a good chance the client hit a different server, so a tight retry is good for client responsiveness.
-				w.Header().Add("Retry-After", "1")
-				w.Header().Set("Content-Type", runtime.ContentTypeJSON)
-				w.Header().Set("X-Content-Type-Options", "nosniff")
-				statusErr := apierrors.NewServiceUnavailable("apiserver is shutting down").Status()
-				w.WriteHeader(int(statusErr.Code))
-				fmt.Fprintln(w, runtime.EncodeOrDie(scheme.Codecs.LegacyCodec(v1.SchemeGroupVersion), &statusErr))
-				return
-			}
-			defer wg.Done()
-		}
-
-=======
 		if longRunning(req, requestInfo) {
 			handler.ServeHTTP(w, req)
 			return
@@ -94,7 +74,6 @@ func withWaitGroup(handler http.Handler, longRunning apirequest.LongRunningReque
 		}
 
 		defer wg.Done()
->>>>>>> upstream/master
 		handler.ServeHTTP(w, req)
 	})
 }

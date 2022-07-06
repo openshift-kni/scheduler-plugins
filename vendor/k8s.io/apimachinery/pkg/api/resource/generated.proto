@@ -86,8 +86,6 @@ message Quantity {
   optional string string = 1;
 }
 
-<<<<<<< HEAD
-=======
 // QuantityValue makes it possible to use a Quantity as value for a command
 // line parameter.
 //
@@ -100,4 +98,3 @@ message QuantityValue {
   optional string string = 1;
 }
 
->>>>>>> upstream/master

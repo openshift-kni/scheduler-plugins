@@ -31,10 +31,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-<<<<<<< HEAD
-	"k8s.io/apimachinery/pkg/util/clock"
-=======
->>>>>>> upstream/master
 	"k8s.io/apimachinery/pkg/util/sets"
 	utilwaitgroup "k8s.io/apimachinery/pkg/util/waitgroup"
 	"k8s.io/apimachinery/pkg/version"
@@ -53,14 +49,6 @@ import (
 	utilopenapi "k8s.io/apiserver/pkg/util/openapi"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
-<<<<<<< HEAD
-	openapibuilder "k8s.io/kube-openapi/pkg/builder"
-	openapicommon "k8s.io/kube-openapi/pkg/common"
-	"k8s.io/kube-openapi/pkg/handler"
-	openapiutil "k8s.io/kube-openapi/pkg/util"
-	openapiproto "k8s.io/kube-openapi/pkg/util/proto"
-	"k8s.io/kube-openapi/pkg/validation/spec"
-=======
 	openapibuilder2 "k8s.io/kube-openapi/pkg/builder"
 	openapicommon "k8s.io/kube-openapi/pkg/common"
 	"k8s.io/kube-openapi/pkg/handler"
@@ -69,7 +57,6 @@ import (
 	openapiproto "k8s.io/kube-openapi/pkg/util/proto"
 	"k8s.io/kube-openapi/pkg/validation/spec"
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 )
 
 // Info about an API group.
@@ -158,13 +145,10 @@ type GenericAPIServer struct {
 	// It is set during PrepareRun if `openAPIConfig` is non-nil unless `skipOpenAPIInstallation` is true.
 	OpenAPIVersionedService *handler.OpenAPIService
 
-<<<<<<< HEAD
-=======
 	// OpenAPIV3VersionedService controls the /openapi/v3 endpoint and can be used to update the served spec.
 	// It is set during PrepareRun if `openAPIConfig` is non-nil unless `skipOpenAPIInstallation` is true.
 	OpenAPIV3VersionedService *handler3.OpenAPIService
 
->>>>>>> upstream/master
 	// StaticOpenAPISpec is the spec derived from the restful container endpoints.
 	// It is set during PrepareRun.
 	StaticOpenAPISpec *spec.Swagger
@@ -234,8 +218,6 @@ type GenericAPIServer struct {
 
 	// lifecycleSignals provides access to the various signals that happen during the life cycle of the apiserver.
 	lifecycleSignals lifecycleSignals
-<<<<<<< HEAD
-=======
 
 	// muxAndDiscoveryCompleteSignals holds signals that indicate all known HTTP paths have been registered.
 	// it exists primarily to avoid returning a 404 response when a resource actually exists but we haven't installed the path to a handler.
@@ -251,7 +233,6 @@ type GenericAPIServer struct {
 	// If enabled, after ShutdownDelayDuration elapses, any incoming request is
 	// rejected with a 429 status code and a 'Retry-After' response.
 	ShutdownSendRetryAfter bool
->>>>>>> upstream/master
 }
 
 // DelegationTarget is an interface which allows for composition of API servers with top level handling that works
@@ -277,12 +258,9 @@ type DelegationTarget interface {
 
 	// PrepareRun does post API installation setup steps. It calls recursively the same function of the delegates.
 	PrepareRun() preparedGenericAPIServer
-<<<<<<< HEAD
-=======
 
 	// MuxAndDiscoveryCompleteSignals exposes registered signals that indicate if all known HTTP paths have been installed.
 	MuxAndDiscoveryCompleteSignals() map[string]<-chan struct{}
->>>>>>> upstream/master
 }
 
 func (s *GenericAPIServer) UnprotectedHandler() http.Handler {
@@ -306,9 +284,6 @@ func (s *GenericAPIServer) NextDelegate() DelegationTarget {
 	return s.delegationTarget
 }
 
-<<<<<<< HEAD
-type emptyDelegate struct {
-=======
 // RegisterMuxAndDiscoveryCompleteSignal registers the given signal that will be used to determine if all known
 // HTTP paths have been registered. It is okay to call this method after instantiating the generic server but before running.
 func (s *GenericAPIServer) RegisterMuxAndDiscoveryCompleteSignal(signalName string, signal <-chan struct{}) error {
@@ -327,17 +302,12 @@ type emptyDelegate struct {
 	// handler is called at the end of the delegation chain
 	// when a request has been made against an unregistered HTTP path the individual servers will simply pass it through until it reaches the handler.
 	handler http.Handler
->>>>>>> upstream/master
 }
 
 func NewEmptyDelegate() DelegationTarget {
 	return emptyDelegate{}
 }
 
-<<<<<<< HEAD
-func (s emptyDelegate) UnprotectedHandler() http.Handler {
-	return nil
-=======
 // NewEmptyDelegateWithCustomHandler allows for registering a custom handler usually for special handling of 404 requests
 func NewEmptyDelegateWithCustomHandler(handler http.Handler) DelegationTarget {
 	return emptyDelegate{handler}
@@ -345,7 +315,6 @@ func NewEmptyDelegateWithCustomHandler(handler http.Handler) DelegationTarget {
 
 func (s emptyDelegate) UnprotectedHandler() http.Handler {
 	return s.handler
->>>>>>> upstream/master
 }
 func (s emptyDelegate) PostStartHooks() map[string]postStartHookEntry {
 	return map[string]postStartHookEntry{}
@@ -365,12 +334,9 @@ func (s emptyDelegate) NextDelegate() DelegationTarget {
 func (s emptyDelegate) PrepareRun() preparedGenericAPIServer {
 	return preparedGenericAPIServer{nil}
 }
-<<<<<<< HEAD
-=======
 func (s emptyDelegate) MuxAndDiscoveryCompleteSignals() map[string]<-chan struct{} {
 	return map[string]<-chan struct{}{}
 }
->>>>>>> upstream/master
 
 // preparedGenericAPIServer is a private wrapper that enforces a call of PrepareRun() before Run can be invoked.
 type preparedGenericAPIServer struct {
@@ -384,16 +350,12 @@ func (s *GenericAPIServer) PrepareRun() preparedGenericAPIServer {
 	if s.openAPIConfig != nil && !s.skipOpenAPIInstallation {
 		s.OpenAPIVersionedService, s.StaticOpenAPISpec = routes.OpenAPI{
 			Config: s.openAPIConfig,
-<<<<<<< HEAD
-		}.Install(s.Handler.GoRestfulContainer, s.Handler.NonGoRestfulMux)
-=======
 		}.InstallV2(s.Handler.GoRestfulContainer, s.Handler.NonGoRestfulMux)
 		if utilfeature.DefaultFeatureGate.Enabled(features.OpenAPIV3) {
 			s.OpenAPIV3VersionedService = routes.OpenAPI{
 				Config: s.openAPIConfig,
 			}.InstallV3(s.Handler.GoRestfulContainer, s.Handler.NonGoRestfulMux)
 		}
->>>>>>> upstream/master
 	}
 
 	s.installHealthz()
@@ -427,8 +389,6 @@ func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
 	delayedStopCh := s.lifecycleSignals.AfterShutdownDelayDuration
 	shutdownInitiatedCh := s.lifecycleSignals.ShutdownInitiated
 
-<<<<<<< HEAD
-=======
 	// spawn a new goroutine for closing the MuxAndDiscoveryComplete signal
 	// registration happens during construction of the generic api server
 	// the last server in the chain aggregates signals from the previous instances
@@ -446,7 +406,6 @@ func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
 		klog.V(1).Infof("%s has all endpoints registered and discovery information is complete", s.lifecycleSignals.MuxAndDiscoveryComplete.Name())
 	}()
 
->>>>>>> upstream/master
 	go func() {
 		defer delayedStopCh.Signal()
 		defer klog.V(1).InfoS("[graceful-termination] shutdown event", "name", delayedStopCh.Name())
@@ -463,9 +422,6 @@ func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
 	}()
 
 	// close socket after delayed stopCh
-<<<<<<< HEAD
-	stoppedCh, listenerStoppedCh, err := s.NonBlockingRun(delayedStopCh.Signaled())
-=======
 	drainedCh := s.lifecycleSignals.InFlightRequestsDrained
 	stopHttpServerCh := delayedStopCh.Signaled()
 	shutdownTimeout := s.ShutdownTimeout
@@ -482,7 +438,6 @@ func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
 	}
 
 	stoppedCh, listenerStoppedCh, err := s.NonBlockingRun(stopHttpServerCh, shutdownTimeout)
->>>>>>> upstream/master
 	if err != nil {
 		return err
 	}
@@ -493,10 +448,6 @@ func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
 		klog.V(1).InfoS("[graceful-termination] shutdown event", "name", httpServerStoppedListeningCh.Name())
 	}()
 
-<<<<<<< HEAD
-	drainedCh := s.lifecycleSignals.InFlightRequestsDrained
-=======
->>>>>>> upstream/master
 	go func() {
 		defer drainedCh.Signal()
 		defer klog.V(1).InfoS("[graceful-termination] shutdown event", "name", drainedCh.Name())
@@ -530,11 +481,7 @@ func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
 // NonBlockingRun spawns the secure http server. An error is
 // returned if the secure port cannot be listened on.
 // The returned channel is closed when the (asynchronous) termination is finished.
-<<<<<<< HEAD
-func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) (<-chan struct{}, <-chan struct{}, error) {
-=======
 func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}, shutdownTimeout time.Duration) (<-chan struct{}, <-chan struct{}, error) {
->>>>>>> upstream/master
 	// Use an stop channel to allow graceful shutdown without dropping audit events
 	// after http server shutdown.
 	auditStopCh := make(chan struct{})
@@ -553,12 +500,7 @@ func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}, shutdow
 	var listenerStoppedCh <-chan struct{}
 	if s.SecureServingInfo != nil && s.Handler != nil {
 		var err error
-<<<<<<< HEAD
-		klog.V(1).Infof("[graceful-termination] ShutdownTimeout=%s", s.ShutdownTimeout)
-		stoppedCh, listenerStoppedCh, err = s.SecureServingInfo.ServeWithListenerStopped(s.Handler, s.ShutdownTimeout, internalStopCh)
-=======
 		stoppedCh, listenerStoppedCh, err = s.SecureServingInfo.ServeWithListenerStopped(s.Handler, shutdownTimeout, internalStopCh)
->>>>>>> upstream/master
 		if err != nil {
 			close(internalStopCh)
 			close(auditStopCh)
@@ -774,11 +716,7 @@ func (s *GenericAPIServer) getOpenAPIModels(apiPrefix string, apiGroupInfos ...*
 	}
 
 	// Build the openapi definitions for those resources and convert it to proto models
-<<<<<<< HEAD
-	openAPISpec, err := openapibuilder.BuildOpenAPIDefinitionsForResources(s.openAPIConfig, resourceNames...)
-=======
 	openAPISpec, err := openapibuilder2.BuildOpenAPIDefinitionsForResources(s.openAPIConfig, resourceNames...)
->>>>>>> upstream/master
 	if err != nil {
 		return nil, err
 	}

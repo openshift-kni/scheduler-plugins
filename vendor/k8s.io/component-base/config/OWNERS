@@ -7,17 +7,11 @@ approvers:
 - api-approvers
 reviewers:
 - api-reviewers
-<<<<<<< HEAD
-=======
 emeritus_reviewers:
->>>>>>> upstream/master
 - luxas
 - mtaufen
 - sttts
 labels:
 - kind/api-change
-<<<<<<< HEAD
-=======
 - sig/api-machinery
 - sig/scheduling
->>>>>>> upstream/master

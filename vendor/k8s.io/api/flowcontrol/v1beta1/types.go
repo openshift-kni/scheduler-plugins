@@ -105,10 +105,7 @@ const (
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:prerelease-lifecycle-gen:introduced=1.20
-<<<<<<< HEAD
-=======
 // +k8s:prerelease-lifecycle-gen:replacement=flowcontrol.apiserver.k8s.io,v1beta2,FlowSchema
->>>>>>> upstream/master
 
 // FlowSchema defines the schema of a group of flows. Note that a flow is made up of a set of inbound API requests with
 // similar attributes and is identified by a pair of strings: the name of the FlowSchema and a "flow distinguisher".
@@ -130,10 +127,7 @@ type FlowSchema struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:prerelease-lifecycle-gen:introduced=1.20
-<<<<<<< HEAD
-=======
 // +k8s:prerelease-lifecycle-gen:replacement=flowcontrol.apiserver.k8s.io,v1beta2,FlowSchemaList
->>>>>>> upstream/master
 
 // FlowSchemaList is a list of FlowSchema objects.
 type FlowSchemaList struct {
@@ -287,15 +281,10 @@ type ServiceAccountSubject struct {
 // ResourcePolicyRule matches a resource request if and only if: (a)
 // at least one member of verbs matches the request, (b) at least one
 // member of apiGroups matches the request, (c) at least one member of
-<<<<<<< HEAD
-// resources matches the request, and (d) least one member of
-// namespaces matches the request.
-=======
 // resources matches the request, and (d) either (d1) the request does
 // not specify a namespace (i.e., `Namespace==""`) and clusterScope is
 // true or (d2) the request specifies a namespace and least one member
 // of namespaces matches the request's namespace.
->>>>>>> upstream/master
 type ResourcePolicyRule struct {
 	// `verbs` is a list of matching verbs and may not be empty.
 	// "*" matches all verbs and, if present, must be the only entry.
@@ -393,10 +382,7 @@ type FlowSchemaConditionType string
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:prerelease-lifecycle-gen:introduced=1.20
-<<<<<<< HEAD
-=======
 // +k8s:prerelease-lifecycle-gen:replacement=flowcontrol.apiserver.k8s.io,v1beta2,PriorityLevelConfiguration
->>>>>>> upstream/master
 
 // PriorityLevelConfiguration represents the configuration of a priority level.
 type PriorityLevelConfiguration struct {
@@ -417,10 +403,7 @@ type PriorityLevelConfiguration struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:prerelease-lifecycle-gen:introduced=1.20
-<<<<<<< HEAD
-=======
 // +k8s:prerelease-lifecycle-gen:replacement=flowcontrol.apiserver.k8s.io,v1beta2,PriorityLevelConfigurationList
->>>>>>> upstream/master
 
 // PriorityLevelConfigurationList is a list of PriorityLevelConfiguration objects.
 type PriorityLevelConfigurationList struct {

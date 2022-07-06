@@ -452,14 +452,11 @@ type CanFilter struct {
 	Mask uint32
 }
 
-<<<<<<< HEAD
-=======
 type TCPRepairOpt struct {
 	Code uint32
 	Val  uint32
 }
 
->>>>>>> upstream/master
 const (
 	SizeofSockaddrInet4     = 0x10
 	SizeofSockaddrInet6     = 0x1c
@@ -492,10 +489,7 @@ const (
 	SizeofUcred             = 0xc
 	SizeofTCPInfo           = 0x68
 	SizeofCanFilter         = 0x8
-<<<<<<< HEAD
-=======
 	SizeofTCPRepairOpt      = 0x8
->>>>>>> upstream/master
 )
 
 const (
@@ -694,8 +688,6 @@ type NdMsg struct {
 }
 
 const (
-<<<<<<< HEAD
-=======
 	ICMP_FILTER = 0x1
 
 	ICMPV6_FILTER             = 0x1
@@ -706,7 +698,6 @@ const (
 )
 
 const (
->>>>>>> upstream/master
 	SizeofSockFilter = 0x8
 )
 
@@ -1026,11 +1017,7 @@ const (
 	PERF_COUNT_SW_EMULATION_FAULTS        = 0x8
 	PERF_COUNT_SW_DUMMY                   = 0x9
 	PERF_COUNT_SW_BPF_OUTPUT              = 0xa
-<<<<<<< HEAD
-	PERF_COUNT_SW_MAX                     = 0xb
-=======
 	PERF_COUNT_SW_MAX                     = 0xc
->>>>>>> upstream/master
 	PERF_SAMPLE_IP                        = 0x1
 	PERF_SAMPLE_TID                       = 0x2
 	PERF_SAMPLE_TIME                      = 0x4
@@ -1802,11 +1789,8 @@ const (
 	NFPROTO_NUMPROTO = 0xd
 )
 
-<<<<<<< HEAD
-=======
 const SO_ORIGINAL_DST = 0x50
 
->>>>>>> upstream/master
 type Nfgenmsg struct {
 	Nfgen_family uint8
 	Version      uint8
@@ -2372,13 +2356,8 @@ const (
 	SOF_TIMESTAMPING_OPT_PKTINFO  = 0x2000
 	SOF_TIMESTAMPING_OPT_TX_SWHW  = 0x4000
 
-<<<<<<< HEAD
-	SOF_TIMESTAMPING_LAST = 0x4000
-	SOF_TIMESTAMPING_MASK = 0x7fff
-=======
 	SOF_TIMESTAMPING_LAST = 0x8000
 	SOF_TIMESTAMPING_MASK = 0xffff
->>>>>>> upstream/master
 
 	SCM_TSTAMP_SND   = 0x0
 	SCM_TSTAMP_SCHED = 0x1
@@ -2954,11 +2933,7 @@ const (
 	DEVLINK_CMD_TRAP_POLICER_NEW                       = 0x47
 	DEVLINK_CMD_TRAP_POLICER_DEL                       = 0x48
 	DEVLINK_CMD_HEALTH_REPORTER_TEST                   = 0x49
-<<<<<<< HEAD
-	DEVLINK_CMD_MAX                                    = 0x49
-=======
 	DEVLINK_CMD_MAX                                    = 0x4d
->>>>>>> upstream/master
 	DEVLINK_PORT_TYPE_NOTSET                           = 0x0
 	DEVLINK_PORT_TYPE_AUTO                             = 0x1
 	DEVLINK_PORT_TYPE_ETH                              = 0x2
@@ -3181,11 +3156,7 @@ const (
 	DEVLINK_ATTR_RELOAD_ACTION_INFO                    = 0xa2
 	DEVLINK_ATTR_RELOAD_ACTION_STATS                   = 0xa3
 	DEVLINK_ATTR_PORT_PCI_SF_NUMBER                    = 0xa4
-<<<<<<< HEAD
-	DEVLINK_ATTR_MAX                                   = 0xa4
-=======
 	DEVLINK_ATTR_MAX                                   = 0xa9
->>>>>>> upstream/master
 	DEVLINK_DPIPE_FIELD_MAPPING_TYPE_NONE              = 0x0
 	DEVLINK_DPIPE_FIELD_MAPPING_TYPE_IFINDEX           = 0x1
 	DEVLINK_DPIPE_MATCH_TYPE_FIELD_EXACT               = 0x0
@@ -3481,11 +3452,7 @@ const (
 	ETHTOOL_MSG_CABLE_TEST_ACT                = 0x1a
 	ETHTOOL_MSG_CABLE_TEST_TDR_ACT            = 0x1b
 	ETHTOOL_MSG_TUNNEL_INFO_GET               = 0x1c
-<<<<<<< HEAD
-	ETHTOOL_MSG_USER_MAX                      = 0x1c
-=======
 	ETHTOOL_MSG_USER_MAX                      = 0x21
->>>>>>> upstream/master
 	ETHTOOL_MSG_KERNEL_NONE                   = 0x0
 	ETHTOOL_MSG_STRSET_GET_REPLY              = 0x1
 	ETHTOOL_MSG_LINKINFO_GET_REPLY            = 0x2
@@ -3516,11 +3483,7 @@ const (
 	ETHTOOL_MSG_CABLE_TEST_NTF                = 0x1b
 	ETHTOOL_MSG_CABLE_TEST_TDR_NTF            = 0x1c
 	ETHTOOL_MSG_TUNNEL_INFO_GET_REPLY         = 0x1d
-<<<<<<< HEAD
-	ETHTOOL_MSG_KERNEL_MAX                    = 0x1d
-=======
 	ETHTOOL_MSG_KERNEL_MAX                    = 0x22
->>>>>>> upstream/master
 	ETHTOOL_A_HEADER_UNSPEC                   = 0x0
 	ETHTOOL_A_HEADER_DEV_INDEX                = 0x1
 	ETHTOOL_A_HEADER_DEV_NAME                 = 0x2
@@ -3960,8 +3923,6 @@ const (
 	NFC_SDP_ATTR_URI                  = 0x1
 	NFC_SDP_ATTR_SAP                  = 0x2
 )
-<<<<<<< HEAD
-=======
 
 type LandlockRulesetAttr struct {
 	Access_fs uint64
@@ -3995,4 +3956,3 @@ const (
 	SHM_RDONLY = 0x1000
 	SHM_RND    = 0x2000
 )
->>>>>>> upstream/master

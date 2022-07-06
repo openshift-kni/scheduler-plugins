@@ -522,8 +522,6 @@ type DeleteOptions struct {
 	DryRun []string `json:"dryRun,omitempty" protobuf:"bytes,5,rep,name=dryRun"`
 }
 
-<<<<<<< HEAD
-=======
 const (
 	// FieldValidationIgnore ignores unknown/duplicate fields
 	FieldValidationIgnore = "Ignore"
@@ -533,7 +531,6 @@ const (
 	FieldValidationStrict = "Strict"
 )
 
->>>>>>> upstream/master
 // +k8s:conversion-gen:explicit-from=net/url.Values
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -556,8 +553,6 @@ type CreateOptions struct {
 	// as defined by https://golang.org/pkg/unicode/#IsPrint.
 	// +optional
 	FieldManager string `json:"fieldManager,omitempty" protobuf:"bytes,3,name=fieldManager"`
-<<<<<<< HEAD
-=======
 
 	// fieldValidation determines how the server should respond to
 	// unknown/duplicate fields in the object in the request.
@@ -571,7 +566,6 @@ type CreateOptions struct {
 	// - Strict: fails the request on unknown/duplicate fields.
 	// +optional
 	FieldValidation string `json:"fieldValidation,omitempty" protobuf:"bytes,4,name=fieldValidation"`
->>>>>>> upstream/master
 }
 
 // +k8s:conversion-gen:explicit-from=net/url.Values
@@ -605,8 +599,6 @@ type PatchOptions struct {
 	// types (JsonPatch, MergePatch, StrategicMergePatch).
 	// +optional
 	FieldManager string `json:"fieldManager,omitempty" protobuf:"bytes,3,name=fieldManager"`
-<<<<<<< HEAD
-=======
 
 	// fieldValidation determines how the server should respond to
 	// unknown/duplicate fields in the object in the request.
@@ -620,7 +612,6 @@ type PatchOptions struct {
 	// - Strict: fails the request on unknown/duplicate fields.
 	// +optional
 	FieldValidation string `json:"fieldValidation,omitempty" protobuf:"bytes,4,name=fieldValidation"`
->>>>>>> upstream/master
 }
 
 // ApplyOptions may be provided when applying an API object.
@@ -676,8 +667,6 @@ type UpdateOptions struct {
 	// as defined by https://golang.org/pkg/unicode/#IsPrint.
 	// +optional
 	FieldManager string `json:"fieldManager,omitempty" protobuf:"bytes,2,name=fieldManager"`
-<<<<<<< HEAD
-=======
 
 	// fieldValidation determines how the server should respond to
 	// unknown/duplicate fields in the object in the request.
@@ -691,7 +680,6 @@ type UpdateOptions struct {
 	// - Strict: fails the request on unknown/duplicate fields.
 	// +optional
 	FieldValidation string `json:"fieldValidation,omitempty" protobuf:"bytes,3,name=fieldValidation"`
->>>>>>> upstream/master
 }
 
 // Preconditions must be fulfilled before an operation (update, delete, etc.) is carried out.

@@ -20,21 +20,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-<<<<<<< HEAD
-=======
 	"net/http"
->>>>>>> upstream/master
 	"net/url"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
-<<<<<<< HEAD
-	//lint:ignore SA1019 Keep using module since it's still being maintained and the api of google.golang.org/protobuf/proto differs
-=======
 	//nolint:staticcheck // SA1019 Keep using module since it's still being maintained and the api of google.golang.org/protobuf/proto differs
->>>>>>> upstream/master
 	"github.com/golang/protobuf/proto"
 	openapi_v2 "github.com/googleapis/gnostic/openapiv2"
 
@@ -490,19 +483,13 @@ func setDiscoveryDefaults(config *restclient.Config) error {
 
 // NewDiscoveryClientForConfig creates a new DiscoveryClient for the given config. This client
 // can be used to discover supported resources in the API server.
-<<<<<<< HEAD
-=======
 // NewDiscoveryClientForConfig is equivalent to NewDiscoveryClientForConfigAndClient(c, httpClient),
 // where httpClient was generated with rest.HTTPClientFor(c).
->>>>>>> upstream/master
 func NewDiscoveryClientForConfig(c *restclient.Config) (*DiscoveryClient, error) {
 	config := *c
 	if err := setDiscoveryDefaults(&config); err != nil {
 		return nil, err
 	}
-<<<<<<< HEAD
-	client, err := restclient.UnversionedRESTClientFor(&config)
-=======
 	httpClient, err := restclient.HTTPClientFor(&config)
 	if err != nil {
 		return nil, err
@@ -519,7 +506,6 @@ func NewDiscoveryClientForConfigAndClient(c *restclient.Config, httpClient *http
 		return nil, err
 	}
 	client, err := restclient.UnversionedRESTClientForConfigAndClient(&config, httpClient)
->>>>>>> upstream/master
 	return &DiscoveryClient{restClient: client, LegacyPrefix: "/api"}, err
 }
 

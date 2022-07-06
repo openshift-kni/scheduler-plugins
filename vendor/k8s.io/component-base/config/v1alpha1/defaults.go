@@ -19,10 +19,7 @@ package v1alpha1
 import (
 	"time"
 
-<<<<<<< HEAD
-=======
 	"k8s.io/apimachinery/pkg/api/resource"
->>>>>>> upstream/master
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilpointer "k8s.io/utils/pointer"
 )
@@ -114,8 +111,6 @@ func RecommendedLoggingConfiguration(obj *LoggingConfiguration) {
 	if obj.Format == "" {
 		obj.Format = "text"
 	}
-<<<<<<< HEAD
-=======
 	var empty resource.QuantityValue
 	if obj.Options.JSON.InfoBufferSize == empty {
 		obj.Options.JSON.InfoBufferSize = resource.QuantityValue{
@@ -130,5 +125,4 @@ func RecommendedLoggingConfiguration(obj *LoggingConfiguration) {
 	if obj.FlushFrequency == 0 {
 		obj.FlushFrequency = 5 * time.Second
 	}
->>>>>>> upstream/master
 }

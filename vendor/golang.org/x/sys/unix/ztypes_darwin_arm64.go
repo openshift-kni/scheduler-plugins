@@ -209,8 +209,6 @@ type RawSockaddrCtl struct {
 	Sc_reserved [5]uint32
 }
 
-<<<<<<< HEAD
-=======
 type RawSockaddrVM struct {
 	Len       uint8
 	Family    uint8
@@ -297,7 +295,6 @@ type XVSockPgen struct {
 	Sogen uint64
 }
 
->>>>>>> upstream/master
 type _Socklen uint32
 
 type Xucred struct {
@@ -376,14 +373,11 @@ const (
 	SizeofSockaddrUnix     = 0x6a
 	SizeofSockaddrDatalink = 0x14
 	SizeofSockaddrCtl      = 0x20
-<<<<<<< HEAD
-=======
 	SizeofSockaddrVM       = 0xc
 	SizeofXvsockpcb        = 0xa8
 	SizeofXSocket          = 0x64
 	SizeofXSockbuf         = 0x18
 	SizeofXVSockPgen       = 0x20
->>>>>>> upstream/master
 	SizeofXucred           = 0x4c
 	SizeofLinger           = 0x8
 	SizeofIovec            = 0x10
@@ -736,8 +730,6 @@ type Ucred struct {
 	Ngroups int16
 	Groups  [16]uint32
 }
-<<<<<<< HEAD
-=======
 
 type SysvIpcPerm struct {
 	Uid  uint32
@@ -774,4 +766,3 @@ const (
 	SHM_RDONLY = 0x1000
 	SHM_RND    = 0x2000
 )
->>>>>>> upstream/master

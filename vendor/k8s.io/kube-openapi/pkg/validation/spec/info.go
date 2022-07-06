@@ -68,8 +68,6 @@ func (e Extensions) GetStringSlice(key string) ([]string, bool) {
 	return nil, false
 }
 
-<<<<<<< HEAD
-=======
 // GetObject gets the object value from the extensions.
 // out must be a json serializable type; the json go struct
 // tags of out are used to populate it.
@@ -89,7 +87,6 @@ func (e Extensions) GetObject(key string, out interface{}) error {
 	return nil
 }
 
->>>>>>> upstream/master
 // VendorExtensible composition block.
 type VendorExtensible struct {
 	Extensions Extensions

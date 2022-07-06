@@ -9,11 +9,8 @@ import (
 	"go/ast"
 	"reflect"
 	"sort"
-<<<<<<< HEAD
-=======
 
 	"golang.org/x/tools/internal/typeparams"
->>>>>>> upstream/master
 )
 
 // An ApplyFunc is invoked by Apply for each node n, even if n is nil,
@@ -442,9 +439,6 @@ func (a *application) apply(parent ast.Node, name string, iter *iterator, n ast.
 		}
 
 	default:
-<<<<<<< HEAD
-		panic(fmt.Sprintf("Apply: unexpected node type %T", n))
-=======
 		if ix := typeparams.GetIndexExprData(n); ix != nil {
 			a.apply(n, "X", nil, ix.X)
 			// *ast.IndexExpr was handled above, so n must be an *ast.MultiIndexExpr.
@@ -452,7 +446,6 @@ func (a *application) apply(parent ast.Node, name string, iter *iterator, n ast.
 		} else {
 			panic(fmt.Sprintf("Apply: unexpected node type %T", n))
 		}
->>>>>>> upstream/master
 	}
 
 	if a.post != nil && !a.post(&a.cursor) {

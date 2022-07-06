@@ -61,21 +61,13 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 // requestWatermark is used to track maximal numbers of requests in a particular phase of handling
 type requestWatermark struct {
 	phase                                string
-<<<<<<< HEAD
-	readOnlyObserver, mutatingObserver   fcmetrics.TimedObserver
-=======
 	readOnlyObserver, mutatingObserver   fcmetrics.RatioedChangeObserver
->>>>>>> upstream/master
 	lock                                 sync.Mutex
 	readOnlyWatermark, mutatingWatermark int
 }
 
 func (w *requestWatermark) recordMutating(mutatingVal int) {
-<<<<<<< HEAD
-	w.mutatingObserver.Set(float64(mutatingVal))
-=======
 	w.mutatingObserver.Observe(float64(mutatingVal))
->>>>>>> upstream/master
 
 	w.lock.Lock()
 	defer w.lock.Unlock()
@@ -86,11 +78,7 @@ func (w *requestWatermark) recordMutating(mutatingVal int) {
 }
 
 func (w *requestWatermark) recordReadOnly(readOnlyVal int) {
-<<<<<<< HEAD
-	w.readOnlyObserver.Set(float64(readOnlyVal))
-=======
 	w.readOnlyObserver.Observe(float64(readOnlyVal))
->>>>>>> upstream/master
 
 	w.lock.Lock()
 	defer w.lock.Unlock()
@@ -144,19 +132,11 @@ func WithMaxInFlightLimit(
 	var mutatingChan chan bool
 	if nonMutatingLimit != 0 {
 		nonMutatingChan = make(chan bool, nonMutatingLimit)
-<<<<<<< HEAD
-		watermark.readOnlyObserver.SetX1(float64(nonMutatingLimit))
-	}
-	if mutatingLimit != 0 {
-		mutatingChan = make(chan bool, mutatingLimit)
-		watermark.mutatingObserver.SetX1(float64(mutatingLimit))
-=======
 		watermark.readOnlyObserver.SetDenominator(float64(nonMutatingLimit))
 	}
 	if mutatingLimit != 0 {
 		mutatingChan = make(chan bool, mutatingLimit)
 		watermark.mutatingObserver.SetDenominator(float64(mutatingLimit))
->>>>>>> upstream/master
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

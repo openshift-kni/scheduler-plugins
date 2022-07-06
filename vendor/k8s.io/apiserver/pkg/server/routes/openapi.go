@@ -21,17 +21,11 @@ import (
 	"k8s.io/klog/v2"
 
 	"k8s.io/apiserver/pkg/server/mux"
-<<<<<<< HEAD
-	"k8s.io/kube-openapi/pkg/builder"
-	"k8s.io/kube-openapi/pkg/common"
-	"k8s.io/kube-openapi/pkg/handler"
-=======
 	builder2 "k8s.io/kube-openapi/pkg/builder"
 	"k8s.io/kube-openapi/pkg/builder3"
 	"k8s.io/kube-openapi/pkg/common"
 	"k8s.io/kube-openapi/pkg/handler"
 	"k8s.io/kube-openapi/pkg/handler3"
->>>>>>> upstream/master
 	"k8s.io/kube-openapi/pkg/validation/spec"
 )
 
@@ -41,13 +35,8 @@ type OpenAPI struct {
 }
 
 // Install adds the SwaggerUI webservice to the given mux.
-<<<<<<< HEAD
-func (oa OpenAPI) Install(c *restful.Container, mux *mux.PathRecorderMux) (*handler.OpenAPIService, *spec.Swagger) {
-	spec, err := builder.BuildOpenAPISpec(c.RegisteredWebServices(), oa.Config)
-=======
 func (oa OpenAPI) InstallV2(c *restful.Container, mux *mux.PathRecorderMux) (*handler.OpenAPIService, *spec.Swagger) {
 	spec, err := builder2.BuildOpenAPISpec(c.RegisteredWebServices(), oa.Config)
->>>>>>> upstream/master
 	if err != nil {
 		klog.Fatalf("Failed to build open api spec for root: %v", err)
 	}
@@ -64,8 +53,6 @@ func (oa OpenAPI) InstallV2(c *restful.Container, mux *mux.PathRecorderMux) (*ha
 
 	return openAPIVersionedService, spec
 }
-<<<<<<< HEAD
-=======
 
 // InstallV3 adds the static group/versions defined in the RegisteredWebServices to the OpenAPI v3 spec
 func (oa OpenAPI) InstallV3(c *restful.Container, mux *mux.PathRecorderMux) *handler3.OpenAPIService {
@@ -97,4 +84,3 @@ func (oa OpenAPI) InstallV3(c *restful.Container, mux *mux.PathRecorderMux) *han
 	}
 	return openAPIVersionedService
 }
->>>>>>> upstream/master

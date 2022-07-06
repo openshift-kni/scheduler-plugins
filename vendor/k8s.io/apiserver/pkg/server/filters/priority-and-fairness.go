@@ -22,13 +22,6 @@ import (
 	"net/http"
 	"runtime"
 	"sync/atomic"
-<<<<<<< HEAD
-
-	flowcontrol "k8s.io/api/flowcontrol/v1beta1"
-	apitypes "k8s.io/apimachinery/pkg/types"
-	epmetrics "k8s.io/apiserver/pkg/endpoints/metrics"
-	apirequest "k8s.io/apiserver/pkg/endpoints/request"
-=======
 	"time"
 
 	flowcontrol "k8s.io/api/flowcontrol/v1beta2"
@@ -36,7 +29,6 @@ import (
 	epmetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	apirequest "k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/apiserver/pkg/server/httplog"
->>>>>>> upstream/master
 	utilflowcontrol "k8s.io/apiserver/pkg/util/flowcontrol"
 	fcmetrics "k8s.io/apiserver/pkg/util/flowcontrol/metrics"
 	flowcontrolrequest "k8s.io/apiserver/pkg/util/flowcontrol/request"
@@ -65,8 +57,6 @@ var atomicMutatingWaiting, atomicReadOnlyWaiting int32
 // newInitializationSignal is defined for testing purposes.
 var newInitializationSignal = utilflowcontrol.NewInitializationSignal
 
-<<<<<<< HEAD
-=======
 func truncateLogField(s string) string {
 	const maxFieldLogLength = 64
 
@@ -76,18 +66,13 @@ func truncateLogField(s string) string {
 	return s
 }
 
->>>>>>> upstream/master
 // WithPriorityAndFairness limits the number of in-flight
 // requests in a fine-grained way.
 func WithPriorityAndFairness(
 	handler http.Handler,
 	longRunningRequestCheck apirequest.LongRunningRequestCheck,
 	fcIfc utilflowcontrol.Interface,
-<<<<<<< HEAD
-	widthEstimator flowcontrolrequest.WidthEstimatorFunc,
-=======
 	workEstimator flowcontrolrequest.WorkEstimatorFunc,
->>>>>>> upstream/master
 ) http.Handler {
 	if fcIfc == nil {
 		klog.Warningf("priority and fairness support not found, skipping")
@@ -116,18 +101,12 @@ func WithPriorityAndFairness(
 		}
 
 		var classification *PriorityAndFairnessClassification
-<<<<<<< HEAD
-		note := func(fs *flowcontrol.FlowSchema, pl *flowcontrol.PriorityLevelConfiguration) {
-=======
 		noteFn := func(fs *flowcontrol.FlowSchema, pl *flowcontrol.PriorityLevelConfiguration, flowDistinguisher string) {
->>>>>>> upstream/master
 			classification = &PriorityAndFairnessClassification{
 				FlowSchemaName:    fs.Name,
 				FlowSchemaUID:     fs.UID,
 				PriorityLevelName: pl.Name,
 				PriorityLevelUID:  pl.UID}
-<<<<<<< HEAD
-=======
 
 			httplog.AddKeyValue(ctx, "apf_pl", truncateLogField(pl.Name))
 			httplog.AddKeyValue(ctx, "apf_fs", truncateLogField(fs.Name))
@@ -145,7 +124,6 @@ func WithPriorityAndFairness(
 			}
 
 			return workEstimator(r, classification.FlowSchemaName, classification.PriorityLevelName)
->>>>>>> upstream/master
 		}
 
 		var served bool
@@ -172,18 +150,10 @@ func WithPriorityAndFairness(
 			}
 		}
 
-<<<<<<< HEAD
-		// find the estimated "width" of the request
-		// TODO: Maybe just make it costEstimator and let it return additionalLatency too for the watch?
-		// TODO: Estimate cost should also take fcIfc.GetWatchCount(requestInfo) as a parameter.
-		width := widthEstimator.EstimateWidth(r)
-		digest := utilflowcontrol.RequestDigest{RequestInfo: requestInfo, User: user, Width: width}
-=======
 		digest := utilflowcontrol.RequestDigest{
 			RequestInfo: requestInfo,
 			User:        user,
 		}
->>>>>>> upstream/master
 
 		if isWatchRequest {
 			// This channel blocks calling handler.ServeHTTP() until closed, and is closed inside execute().
@@ -216,23 +186,16 @@ func WithPriorityAndFairness(
 			}()
 
 			execute := func() {
-<<<<<<< HEAD
-=======
 				startedAt := time.Now()
 				defer func() {
 					httplog.AddKeyValue(ctx, "apf_init_latency", time.Since(startedAt))
 				}()
->>>>>>> upstream/master
 				noteExecutingDelta(1)
 				defer noteExecutingDelta(-1)
 				served = true
 				setResponseHeaders(classification, w)
 
-<<<<<<< HEAD
-				forgetWatch = fcIfc.RegisterWatch(requestInfo)
-=======
 				forgetWatch = fcIfc.RegisterWatch(r)
->>>>>>> upstream/master
 
 				// Notify the main thread that we're ready to start the watch.
 				close(shouldStartWatchCh)
@@ -284,11 +247,7 @@ func WithPriorityAndFairness(
 				// Note that Handle will return irrespective of whether the request
 				// executes or is rejected. In the latter case, the function will return
 				// without calling the passed `execute` function.
-<<<<<<< HEAD
-				fcIfc.Handle(handleCtx, digest, note, queueNote, execute)
-=======
 				fcIfc.Handle(handleCtx, digest, noteFn, estimateWork, queueNote, execute)
->>>>>>> upstream/master
 			}()
 
 			select {
@@ -319,11 +278,7 @@ func WithPriorityAndFairness(
 				handler.ServeHTTP(w, r)
 			}
 
-<<<<<<< HEAD
-			fcIfc.Handle(ctx, digest, note, queueNote, execute)
-=======
 			fcIfc.Handle(ctx, digest, noteFn, estimateWork, queueNote, execute)
->>>>>>> upstream/master
 		}
 
 		if !served {

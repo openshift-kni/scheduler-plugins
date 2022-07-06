@@ -72,10 +72,7 @@ func deepMap(dst, src reflect.Value, visited map[uintptr]*visit, depth int, conf
 	case reflect.Struct:
 		srcMap := src.Interface().(map[string]interface{})
 		for key := range srcMap {
-<<<<<<< HEAD
-=======
 			config.overwriteWithEmptyValue = true
->>>>>>> upstream/master
 			srcValue := srcMap[key]
 			fieldName := changeInitialCase(key, unicode.ToUpper)
 			dstElement := dst.FieldByName(fieldName)
@@ -144,12 +141,9 @@ func MapWithOverwrite(dst, src interface{}, opts ...func(*Config)) error {
 }
 
 func _map(dst, src interface{}, opts ...func(*Config)) error {
-<<<<<<< HEAD
-=======
 	if dst != nil && reflect.ValueOf(dst).Kind() != reflect.Ptr {
 		return ErrNonPointerAgument
 	}
->>>>>>> upstream/master
 	var (
 		vDst, vSrc reflect.Value
 		err        error

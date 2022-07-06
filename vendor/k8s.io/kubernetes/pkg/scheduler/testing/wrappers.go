@@ -19,19 +19,12 @@ package testing
 import (
 	"fmt"
 
-<<<<<<< HEAD
-	"k8s.io/api/core/v1"
-=======
 	v1 "k8s.io/api/core/v1"
->>>>>>> upstream/master
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-<<<<<<< HEAD
-=======
 	imageutils "k8s.io/kubernetes/test/utils/image"
->>>>>>> upstream/master
 	"k8s.io/utils/pointer"
 )
 
@@ -292,8 +285,6 @@ func (p *PodWrapper) HostPort(port int32) *PodWrapper {
 	return p
 }
 
-<<<<<<< HEAD
-=======
 // PVC creates a Volume with a PVC and injects into the inner pod.
 func (p *PodWrapper) PVC(name string) *PodWrapper {
 	p.Spec.Volumes = append(p.Spec.Volumes, v1.Volume{
@@ -305,7 +296,6 @@ func (p *PodWrapper) PVC(name string) *PodWrapper {
 	return p
 }
 
->>>>>>> upstream/master
 // PodAffinityKind represents different kinds of PodAffinity.
 type PodAffinityKind int
 
@@ -437,11 +427,8 @@ func (p *PodWrapper) Req(resMap map[v1.ResourceName]string) *PodWrapper {
 		res[k] = resource.MustParse(v)
 	}
 	p.Spec.Containers = append(p.Spec.Containers, v1.Container{
-<<<<<<< HEAD
-=======
 		Name:  fmt.Sprintf("con%d", len(p.Spec.Containers)),
 		Image: imageutils.GetPauseImageName(),
->>>>>>> upstream/master
 		Resources: v1.ResourceRequirements{
 			Requests: res,
 		},

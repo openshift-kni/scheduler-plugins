@@ -20,10 +20,7 @@ import (
 	"time"
 
 	"k8s.io/apiserver/pkg/endpoints/request"
-<<<<<<< HEAD
-=======
 	flowcontrolrequest "k8s.io/apiserver/pkg/util/flowcontrol/request"
->>>>>>> upstream/master
 )
 
 // QueueSetDump is an instant dump of queue-set.
@@ -36,37 +33,26 @@ type QueueSetDump struct {
 
 // QueueDump is an instant dump of one queue in a queue-set.
 type QueueDump struct {
-<<<<<<< HEAD
-	Requests          []RequestDump
-	VirtualStart      float64
-=======
 	QueueSum          QueueSum
 	Requests          []RequestDump
 	NextDispatchR     string
->>>>>>> upstream/master
 	ExecutingRequests int
 	SeatsInUse        int
 }
 
-<<<<<<< HEAD
-=======
 type QueueSum struct {
 	InitialSeatsSum int
 	MaxSeatsSum     int
 	TotalWorkSum    string
 }
 
->>>>>>> upstream/master
 // RequestDump is an instant dump of one requests pending in the queue.
 type RequestDump struct {
 	MatchedFlowSchema string
 	FlowDistinguisher string
 	ArriveTime        time.Time
 	StartTime         time.Time
-<<<<<<< HEAD
-=======
 	WorkEstimate      flowcontrolrequest.WorkEstimate
->>>>>>> upstream/master
 	// request details
 	UserName    string
 	RequestInfo request.RequestInfo

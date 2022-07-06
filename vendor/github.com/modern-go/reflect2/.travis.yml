@@ -1,11 +1,7 @@
 language: go
 
 go:
-<<<<<<< HEAD
-  - 1.8.x
-=======
   - 1.9.x
->>>>>>> upstream/master
   - 1.x
 
 before_install:

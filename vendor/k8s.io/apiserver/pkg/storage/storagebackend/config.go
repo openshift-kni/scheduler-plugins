@@ -21,17 +21,11 @@ import (
 
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/apimachinery/pkg/runtime"
-<<<<<<< HEAD
-	"k8s.io/apiserver/pkg/server/egressselector"
-	"k8s.io/apiserver/pkg/storage/etcd3"
-	"k8s.io/apiserver/pkg/storage/value"
-=======
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/server/egressselector"
 	"k8s.io/apiserver/pkg/storage/etcd3"
 	"k8s.io/apiserver/pkg/storage/value"
 	flowcontrolrequest "k8s.io/apiserver/pkg/util/flowcontrol/request"
->>>>>>> upstream/master
 )
 
 const (
@@ -92,8 +86,6 @@ type Config struct {
 	HealthcheckTimeout time.Duration
 
 	LeaseManagerConfig etcd3.LeaseManagerConfig
-<<<<<<< HEAD
-=======
 
 	// StorageObjectCountTracker is used to keep track of the total
 	// number of objects in the storage per resource.
@@ -115,7 +107,6 @@ func (config *Config) ForResource(resource schema.GroupResource) *ConfigForResou
 		Config:        *config,
 		GroupResource: resource,
 	}
->>>>>>> upstream/master
 }
 
 func NewDefaultConfig(prefix string, codec runtime.Codec) *Config {

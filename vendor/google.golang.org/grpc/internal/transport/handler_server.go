@@ -141,14 +141,8 @@ type serverHandlerTransport struct {
 	stats stats.Handler
 }
 
-<<<<<<< HEAD
-func (ht *serverHandlerTransport) Close() error {
-	ht.closeOnce.Do(ht.closeCloseChanOnce)
-	return nil
-=======
 func (ht *serverHandlerTransport) Close() {
 	ht.closeOnce.Do(ht.closeCloseChanOnce)
->>>>>>> upstream/master
 }
 
 func (ht *serverHandlerTransport) closeCloseChanOnce() { close(ht.closedCh) }

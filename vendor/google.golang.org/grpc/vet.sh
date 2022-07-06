@@ -32,28 +32,6 @@ PATH="${HOME}/go/bin:${GOROOT}/bin:${PATH}"
 go version
 
 if [[ "$1" = "-install" ]]; then
-<<<<<<< HEAD
-  # Check for module support
-  if go help mod >& /dev/null; then
-    # Install the pinned versions as defined in module tools.
-    pushd ./test/tools
-    go install \
-      golang.org/x/lint/golint \
-      golang.org/x/tools/cmd/goimports \
-      honnef.co/go/tools/cmd/staticcheck \
-      github.com/client9/misspell/cmd/misspell
-    popd
-  else
-    # Ye olde `go get` incantation.
-    # Note: this gets the latest version of all tools (vs. the pinned versions
-    # with Go modules).
-    go get -u \
-      golang.org/x/lint/golint \
-      golang.org/x/tools/cmd/goimports \
-      honnef.co/go/tools/cmd/staticcheck \
-      github.com/client9/misspell/cmd/misspell
-  fi
-=======
   # Install the pinned versions as defined in module tools.
   pushd ./test/tools
   go install \
@@ -62,7 +40,6 @@ if [[ "$1" = "-install" ]]; then
     honnef.co/go/tools/cmd/staticcheck \
     github.com/client9/misspell/cmd/misspell
   popd
->>>>>>> upstream/master
   if [[ -z "${VET_SKIP_PROTO}" ]]; then
     if [[ "${TRAVIS}" = "true" ]]; then
       PROTOBUF_VERSION=3.14.0

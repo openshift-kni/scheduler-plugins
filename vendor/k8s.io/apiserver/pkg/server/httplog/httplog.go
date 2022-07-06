@@ -24,30 +24,21 @@ import (
 	"net/http"
 	"runtime"
 	"strings"
-<<<<<<< HEAD
-=======
 	"sync"
->>>>>>> upstream/master
 	"time"
 
 	"k8s.io/apiserver/pkg/endpoints/metrics"
 	"k8s.io/apiserver/pkg/endpoints/request"
-<<<<<<< HEAD
-=======
 	"k8s.io/apiserver/pkg/endpoints/responsewriter"
->>>>>>> upstream/master
 	"k8s.io/klog/v2"
 )
 
 // StacktracePred returns true if a stacktrace should be logged for this status.
 type StacktracePred func(httpStatus int) (logStacktrace bool)
 
-<<<<<<< HEAD
-=======
 // ShouldLogRequestPred returns true if logging should be enabled for this request
 type ShouldLogRequestPred func() bool
 
->>>>>>> upstream/master
 type logger interface {
 	Addf(format string, data ...interface{})
 }
@@ -68,15 +59,6 @@ type respLogger struct {
 	statusRecorded bool
 	status         int
 	statusStack    string
-<<<<<<< HEAD
-	addedInfo      strings.Builder
-	startTime      time.Time
-
-	captureErrorOutput bool
-
-	req *http.Request
-	w   http.ResponseWriter
-=======
 	// mutex is used when accessing addedInfo and addedKeyValuePairs.
 	// They can be modified by other goroutine when logging happens (in case of request timeout)
 	mutex              sync.Mutex
@@ -89,19 +71,10 @@ type respLogger struct {
 	req       *http.Request
 	userAgent string
 	w         http.ResponseWriter
->>>>>>> upstream/master
 
 	logStacktracePred StacktracePred
 }
 
-<<<<<<< HEAD
-// Simple logger that logs immediately when Addf is called
-type passthroughLogger struct{}
-
-//lint:ignore SA1019 Interface implementation check to make sure we don't drop CloseNotifier again
-var _ http.CloseNotifier = &respLogger{}
-
-=======
 var _ http.ResponseWriter = &respLogger{}
 var _ responsewriter.UserProvidedDecorator = &respLogger{}
 
@@ -112,7 +85,6 @@ func (rl *respLogger) Unwrap() http.ResponseWriter {
 // Simple logger that logs immediately when Addf is called
 type passthroughLogger struct{}
 
->>>>>>> upstream/master
 // Addf logs info immediately.
 func (passthroughLogger) Addf(format string, data ...interface{}) {
 	klog.V(2).Info(fmt.Sprintf(format, data...))
@@ -125,9 +97,6 @@ func DefaultStacktracePred(status int) bool {
 
 // WithLogging wraps the handler with logging.
 func WithLogging(handler http.Handler, pred StacktracePred) http.Handler {
-<<<<<<< HEAD
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-=======
 	return withLogging(handler, pred, func() bool {
 		return klog.V(3).Enabled()
 	})
@@ -140,7 +109,6 @@ func withLogging(handler http.Handler, stackTracePred StacktracePred, shouldLogR
 			return
 		}
 
->>>>>>> upstream/master
 		ctx := req.Context()
 		if old := respLoggerFromRequest(req); old != nil {
 			panic("multiple WithLogging calls!")
@@ -151,15 +119,6 @@ func withLogging(handler http.Handler, stackTracePred StacktracePred, shouldLogR
 			startTime = receivedTimestamp
 		}
 
-<<<<<<< HEAD
-		rl := newLoggedWithStartTime(req, w, startTime).StacktraceWhen(pred)
-		req = req.WithContext(context.WithValue(ctx, respLoggerContextKey, rl))
-
-		if klog.V(3).Enabled() {
-			defer rl.Log()
-		}
-		handler.ServeHTTP(rl, req)
-=======
 		rl := newLoggedWithStartTime(req, w, startTime)
 		rl.StacktraceWhen(stackTracePred)
 		req = req.WithContext(context.WithValue(ctx, respLoggerContextKey, rl))
@@ -167,7 +126,6 @@ func withLogging(handler http.Handler, stackTracePred StacktracePred, shouldLogR
 
 		w = responsewriter.WrapForHTTP1Or2(rl)
 		handler.ServeHTTP(w, req)
->>>>>>> upstream/master
 	})
 }
 
@@ -185,14 +143,6 @@ func respLoggerFromRequest(req *http.Request) *respLogger {
 }
 
 func newLoggedWithStartTime(req *http.Request, w http.ResponseWriter, startTime time.Time) *respLogger {
-<<<<<<< HEAD
-	return &respLogger{
-		startTime:         startTime,
-		req:               req,
-		w:                 w,
-		logStacktracePred: DefaultStacktracePred,
-	}
-=======
 	logger := &respLogger{
 		startTime:         startTime,
 		req:               req,
@@ -201,7 +151,6 @@ func newLoggedWithStartTime(req *http.Request, w http.ResponseWriter, startTime 
 		logStacktracePred: DefaultStacktracePred,
 	}
 	return logger
->>>>>>> upstream/master
 }
 
 // newLogged turns a normal response writer into a logged response writer.
@@ -249,11 +198,8 @@ func StatusIsNot(statuses ...int) StacktracePred {
 
 // Addf adds additional data to be logged with this request.
 func (rl *respLogger) Addf(format string, data ...interface{}) {
-<<<<<<< HEAD
-=======
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
->>>>>>> upstream/master
 	rl.addedInfo.WriteString("\n")
 	rl.addedInfo.WriteString(fmt.Sprintf(format, data...))
 }
@@ -264,8 +210,6 @@ func AddInfof(ctx context.Context, format string, data ...interface{}) {
 	}
 }
 
-<<<<<<< HEAD
-=======
 func (rl *respLogger) AddKeyValue(key string, value interface{}) {
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
@@ -282,7 +226,6 @@ func AddKeyValue(ctx context.Context, key string, value interface{}) {
 	}
 }
 
->>>>>>> upstream/master
 // Log is intended to be called once at the end of your request handler, via defer
 func (rl *respLogger) Log() {
 	latency := time.Since(rl.startTime)
@@ -302,12 +245,6 @@ func (rl *respLogger) Log() {
 		"verb", verb,
 		"URI", rl.req.RequestURI,
 		"latency", latency,
-<<<<<<< HEAD
-		"userAgent", rl.req.UserAgent(),
-		"audit-ID", auditID,
-		"srcIP", rl.req.RemoteAddr,
-	}
-=======
 		// We can't get UserAgent from rl.req.UserAgent() here as it accesses headers map,
 		// which can be modified in another goroutine when apiserver request times out.
 		// For example authentication filter modifies request's headers,
@@ -321,7 +258,6 @@ func (rl *respLogger) Log() {
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
 	keysAndValues = append(keysAndValues, rl.addedKeyValuePairs...)
->>>>>>> upstream/master
 
 	if rl.hijacked {
 		keysAndValues = append(keysAndValues, "hijacked", true)
@@ -355,44 +291,18 @@ func (rl *respLogger) Write(b []byte) (int, error) {
 	return rl.w.Write(b)
 }
 
-<<<<<<< HEAD
-// Flush implements http.Flusher even if the underlying http.Writer doesn't implement it.
-// Flush is used for streaming purposes and allows to flush buffered data to the client.
-func (rl *respLogger) Flush() {
-	if flusher, ok := rl.w.(http.Flusher); ok {
-		flusher.Flush()
-	} else if klog.V(2).Enabled() {
-		klog.InfoDepth(1, fmt.Sprintf("Unable to convert %+v into http.Flusher", rl.w))
-	}
-}
-
-=======
->>>>>>> upstream/master
 // WriteHeader implements http.ResponseWriter.
 func (rl *respLogger) WriteHeader(status int) {
 	rl.recordStatus(status)
 	rl.w.WriteHeader(status)
 }
 
-<<<<<<< HEAD
-// Hijack implements http.Hijacker.
-func (rl *respLogger) Hijack() (net.Conn, *bufio.ReadWriter, error) {
-	rl.hijacked = true
-	return rl.w.(http.Hijacker).Hijack()
-}
-
-// CloseNotify implements http.CloseNotifier
-func (rl *respLogger) CloseNotify() <-chan bool {
-	//lint:ignore SA1019 There are places in the code base requiring the CloseNotifier interface to be implemented.
-	return rl.w.(http.CloseNotifier).CloseNotify()
-=======
 func (rl *respLogger) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	rl.hijacked = true
 
 	// the outer ResponseWriter object returned by WrapForHTTP1Or2 implements
 	// http.Hijacker if the inner object (rl.w) implements http.Hijacker.
 	return rl.w.(http.Hijacker).Hijack()
->>>>>>> upstream/master
 }
 
 func (rl *respLogger) recordStatus(status int) {

@@ -59,8 +59,6 @@ func Unmarshal(data []byte, v interface{}) error {
 	}
 }
 
-<<<<<<< HEAD
-=======
 // UnmarshalStrict unmarshals the given data
 // strictly (erroring when there are duplicate fields).
 func UnmarshalStrict(data []byte, v interface{}) error {
@@ -89,7 +87,6 @@ func UnmarshalStrict(data []byte, v interface{}) error {
 	}
 }
 
->>>>>>> upstream/master
 // ToJSON converts a single YAML document into a JSON document
 // or returns an error. If the document appears to be JSON the
 // YAML decoding path is not used (so that error messages are

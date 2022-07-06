@@ -266,11 +266,7 @@ func (s *SugaredLogger) sweetenFields(args []interface{}) []Field {
 
 		// Make sure this element isn't a dangling key.
 		if i == len(args)-1 {
-<<<<<<< HEAD
-			s.base.DPanic(_oddNumberErrMsg, Any("ignored", args[i]))
-=======
 			s.base.Error(_oddNumberErrMsg, Any("ignored", args[i]))
->>>>>>> upstream/master
 			break
 		}
 
@@ -291,11 +287,7 @@ func (s *SugaredLogger) sweetenFields(args []interface{}) []Field {
 
 	// If we encountered any invalid key-value pairs, log an error.
 	if len(invalid) > 0 {
-<<<<<<< HEAD
-		s.base.DPanic(_nonStringKeyErrMsg, Array("invalid", invalid))
-=======
 		s.base.Error(_nonStringKeyErrMsg, Array("invalid", invalid))
->>>>>>> upstream/master
 	}
 	return fields
 }

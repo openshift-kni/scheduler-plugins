@@ -20,11 +20,7 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD
-	"k8s.io/apimachinery/pkg/util/clock"
-=======
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 )
 
 type Interface interface {
@@ -33,10 +29,7 @@ type Interface interface {
 	Get() (item interface{}, shutdown bool)
 	Done(item interface{})
 	ShutDown()
-<<<<<<< HEAD
-=======
 	ShutDownWithDrain()
->>>>>>> upstream/master
 	ShuttingDown() bool
 }
 
@@ -54,11 +47,7 @@ func NewNamed(name string) *Type {
 	)
 }
 
-<<<<<<< HEAD
-func newQueue(c clock.Clock, metrics queueMetrics, updatePeriod time.Duration) *Type {
-=======
 func newQueue(c clock.WithTicker, metrics queueMetrics, updatePeriod time.Duration) *Type {
->>>>>>> upstream/master
 	t := &Type{
 		clock:                      c,
 		dirty:                      set{},
@@ -98,19 +87,12 @@ type Type struct {
 	cond *sync.Cond
 
 	shuttingDown bool
-<<<<<<< HEAD
-=======
 	drain        bool
->>>>>>> upstream/master
 
 	metrics queueMetrics
 
 	unfinishedWorkUpdatePeriod time.Duration
-<<<<<<< HEAD
-	clock                      clock.Clock
-=======
 	clock                      clock.WithTicker
->>>>>>> upstream/master
 }
 
 type empty struct{}
@@ -130,13 +112,10 @@ func (s set) delete(item t) {
 	delete(s, item)
 }
 
-<<<<<<< HEAD
-=======
 func (s set) len() int {
 	return len(s)
 }
 
->>>>>>> upstream/master
 // Add marks item as needing processing.
 func (q *Type) Add(item interface{}) {
 	q.cond.L.Lock()
@@ -182,14 +161,10 @@ func (q *Type) Get() (item interface{}, shutdown bool) {
 		return nil, true
 	}
 
-<<<<<<< HEAD
-	item, q.queue = q.queue[0], q.queue[1:]
-=======
 	item = q.queue[0]
 	// The underlying array still exists and reference this object, so the object will not be garbage collected.
 	q.queue[0] = nil
 	q.queue = q.queue[1:]
->>>>>>> upstream/master
 
 	q.metrics.get(item)
 
@@ -212,15 +187,6 @@ func (q *Type) Done(item interface{}) {
 	if q.dirty.has(item) {
 		q.queue = append(q.queue, item)
 		q.cond.Signal()
-<<<<<<< HEAD
-	}
-}
-
-// ShutDown will cause q to ignore all new items added to it. As soon as the
-// worker goroutines have drained the existing items in the queue, they will be
-// instructed to exit.
-func (q *Type) ShutDown() {
-=======
 	} else if q.processing.len() == 0 {
 		q.cond.Signal()
 	}
@@ -286,7 +252,6 @@ func (q *Type) shouldDrain() bool {
 }
 
 func (q *Type) shutdown() {
->>>>>>> upstream/master
 	q.cond.L.Lock()
 	defer q.cond.L.Unlock()
 	q.shuttingDown = true

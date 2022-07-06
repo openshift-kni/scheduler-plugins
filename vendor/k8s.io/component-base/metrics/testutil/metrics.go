@@ -176,15 +176,6 @@ type Histogram struct {
 	*dto.Histogram
 }
 
-<<<<<<< HEAD
-// GetHistogramFromGatherer collects a metric from a gatherer implementing k8s.io/component-base/metrics.Gatherer interface.
-// Used only for testing purposes where we need to gather metrics directly from a running binary (without metrics endpoint).
-func GetHistogramFromGatherer(gatherer metrics.Gatherer, metricName string) (Histogram, error) {
-	var metricFamily *dto.MetricFamily
-	m, err := gatherer.Gather()
-	if err != nil {
-		return Histogram{}, err
-=======
 // HistogramVec wraps a slice of Histogram.
 // Note that each Histogram must have the same number of buckets.
 type HistogramVec []*Histogram
@@ -266,7 +257,6 @@ func GetHistogramVecFromGatherer(gatherer metrics.Gatherer, metricName string, l
 	m, err := gatherer.Gather()
 	if err != nil {
 		return nil, err
->>>>>>> upstream/master
 	}
 	for _, mFamily := range m {
 		if mFamily.GetName() == metricName {
@@ -276,25 +266,6 @@ func GetHistogramVecFromGatherer(gatherer metrics.Gatherer, metricName string, l
 	}
 
 	if metricFamily == nil {
-<<<<<<< HEAD
-		return Histogram{}, fmt.Errorf("metric %q not found", metricName)
-	}
-
-	if metricFamily.GetMetric() == nil {
-		return Histogram{}, fmt.Errorf("metric %q is empty", metricName)
-	}
-
-	if len(metricFamily.GetMetric()) == 0 {
-		return Histogram{}, fmt.Errorf("metric %q is empty", metricName)
-	}
-
-	return Histogram{
-		// Histograms are stored under the first index (based on observation).
-		// Given there's only one histogram registered per each metric name, accessing
-		// the first index is sufficient.
-		metricFamily.GetMetric()[0].GetHistogram(),
-	}, nil
-=======
 		return nil, fmt.Errorf("metric %q not found", metricName)
 	}
 
@@ -311,7 +282,6 @@ func GetHistogramVecFromGatherer(gatherer metrics.Gatherer, metricName string, l
 		}
 	}
 	return vec, nil
->>>>>>> upstream/master
 }
 
 func uint64Ptr(u uint64) *uint64 {
@@ -369,11 +339,7 @@ func (hist *Histogram) Quantile(q float64) float64 {
 
 	if len(buckets) == 0 || buckets[len(buckets)-1].upperBound != math.Inf(+1) {
 		// The list of buckets in dto.Histogram doesn't include the final +Inf bucket, so we
-<<<<<<< HEAD
-		// add it here for the reset of the samples.
-=======
 		// add it here for the rest of the samples.
->>>>>>> upstream/master
 		buckets = append(buckets, bucket{
 			count:      float64(hist.GetSampleCount()),
 			upperBound: math.Inf(+1),

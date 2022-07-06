@@ -19,11 +19,7 @@ package apihelpers
 import (
 	"sort"
 
-<<<<<<< HEAD
-	flowcontrol "k8s.io/api/flowcontrol/v1beta1"
-=======
 	flowcontrol "k8s.io/api/flowcontrol/v1beta2"
->>>>>>> upstream/master
 )
 
 // SetFlowSchemaCondition sets conditions.

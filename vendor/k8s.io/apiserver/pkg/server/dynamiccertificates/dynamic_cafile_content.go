@@ -24,10 +24,7 @@ import (
 	"sync/atomic"
 	"time"
 
-<<<<<<< HEAD
-=======
 	"github.com/fsnotify/fsnotify"
->>>>>>> upstream/master
 	"k8s.io/client-go/util/cert"
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -48,11 +45,7 @@ type ControllerRunner interface {
 	Run(workers int, stopCh <-chan struct{})
 }
 
-<<<<<<< HEAD
-// DynamicFileCAContent provies a CAContentProvider that can dynamically react to new file content
-=======
 // DynamicFileCAContent provides a CAContentProvider that can dynamically react to new file content
->>>>>>> upstream/master
 // It also fulfills the authenticator interface to provide verifyoptions
 type DynamicFileCAContent struct {
 	name string
@@ -155,11 +148,7 @@ func (c *DynamicFileCAContent) RunOnce() error {
 	return c.loadCABundle()
 }
 
-<<<<<<< HEAD
-// Run starts the kube-apiserver and blocks until stopCh is closed.
-=======
 // Run starts the controller and blocks until stopCh is closed.
->>>>>>> upstream/master
 func (c *DynamicFileCAContent) Run(workers int, stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()
@@ -170,28 +159,16 @@ func (c *DynamicFileCAContent) Run(workers int, stopCh <-chan struct{}) {
 	// doesn't matter what workers say, only start one.
 	go wait.Until(c.runWorker, time.Second, stopCh)
 
-<<<<<<< HEAD
-	// start timer that rechecks every minute, just in case.  this also serves to prime the controller quickly.
-	go wait.PollImmediateUntil(FileRefreshDuration, func() (bool, error) {
-		c.queue.Add(workItemKey)
-		return false, nil
-	}, stopCh)
-
-	// TODO this can be wired to an fsnotifier as well.
-=======
 	// start the loop that watches the CA file until stopCh is closed.
 	go wait.Until(func() {
 		if err := c.watchCAFile(stopCh); err != nil {
 			klog.ErrorS(err, "Failed to watch CA file, will retry later")
 		}
 	}, time.Minute, stopCh)
->>>>>>> upstream/master
 
 	<-stopCh
 }
 
-<<<<<<< HEAD
-=======
 func (c *DynamicFileCAContent) watchCAFile(stopCh <-chan struct{}) error {
 	// Trigger a check here to ensure the content will be checked periodically even if the following watch fails.
 	c.queue.Add(workItemKey)
@@ -238,7 +215,6 @@ func (c *DynamicFileCAContent) handleWatchEvent(e fsnotify.Event, w *fsnotify.Wa
 	return nil
 }
 
->>>>>>> upstream/master
 func (c *DynamicFileCAContent) runWorker() {
 	for c.processNextWorkItem() {
 	}

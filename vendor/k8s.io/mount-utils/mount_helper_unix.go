@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 //go:build !windows
->>>>>>> upstream/master
 // +build !windows
 
 /*
@@ -23,22 +20,15 @@ limitations under the License.
 package mount
 
 import (
-<<<<<<< HEAD
-	"fmt"
-=======
 	"errors"
 	"fmt"
 	"io/fs"
->>>>>>> upstream/master
 	"os"
 	"strconv"
 	"strings"
 	"syscall"
 
-<<<<<<< HEAD
-=======
 	"k8s.io/klog/v2"
->>>>>>> upstream/master
 	utilio "k8s.io/utils/io"
 )
 
@@ -64,11 +54,8 @@ func IsCorruptedMnt(err error) bool {
 		underlyingError = pe.Err
 	case *os.SyscallError:
 		underlyingError = pe.Err
-<<<<<<< HEAD
-=======
 	case syscall.Errno:
 		underlyingError = err
->>>>>>> upstream/master
 	}
 
 	return underlyingError == syscall.ENOTCONN || underlyingError == syscall.ESTALE || underlyingError == syscall.EIO || underlyingError == syscall.EACCES || underlyingError == syscall.EHOSTDOWN
@@ -175,8 +162,6 @@ func isMountPointMatch(mp MountPoint, dir string) bool {
 	deletedDir := fmt.Sprintf("%s\\040(deleted)", dir)
 	return ((mp.Path == dir) || (mp.Path == deletedDir))
 }
-<<<<<<< HEAD
-=======
 
 // PathExists returns true if the specified path exists.
 // TODO: clean this up to use pkg/util/file/FileExists
@@ -200,4 +185,3 @@ func PathExists(path string) (bool, error) {
 	}
 	return false, err
 }
->>>>>>> upstream/master

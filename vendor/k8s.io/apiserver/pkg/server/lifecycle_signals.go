@@ -16,13 +16,10 @@ limitations under the License.
 
 package server
 
-<<<<<<< HEAD
-=======
 import (
 	"sync"
 )
 
->>>>>>> upstream/master
 /*
 We make an attempt here to identify the events that take place during
 lifecycle of the apiserver.
@@ -35,13 +32,9 @@ Events:
 - InFlightRequestsDrained: all in flight request(s) have been drained
 - HasBeenReady is signaled when the readyz endpoint succeeds for the first time
 
-<<<<<<< HEAD
-The following is a sequence of shutdown events that we expect to see during termination:
-=======
 The following is a sequence of shutdown events that we expect to see with
   'ShutdownSendRetryAfter' = false:
 
->>>>>>> upstream/master
 T0: ShutdownInitiated: KILL signal received
 	- /readyz starts returning red
     - run pre shutdown hooks
@@ -67,8 +60,6 @@ T0 + 70s + up-to 60s: InFlightRequestsDrained: existing in flight requests have 
       any request in flight has a hard timeout of 60s.
 	- it's time to call 'Shutdown' on the audit events since all
 	  in flight request(s) have drained.
-<<<<<<< HEAD
-=======
 
 
 The following is a sequence of shutdown events that we expect to see with
@@ -94,7 +85,6 @@ T0 + 70s + up to 60s: InFlightRequestsDrained: existing in flight requests have 
 	- server.Shutdown is called, the HTTP Server stops listening immediately
     - the HTTP Server waits gracefully for existing requests to complete
       up to '2s' (it's hard coded right now)
->>>>>>> upstream/master
 */
 
 // lifecycleSignal encapsulates a named apiserver event
@@ -140,14 +130,11 @@ type lifecycleSignals struct {
 
 	// HasBeenReady is signaled when the readyz endpoint succeeds for the first time.
 	HasBeenReady lifecycleSignal
-<<<<<<< HEAD
-=======
 
 	// MuxAndDiscoveryComplete is signaled when all known HTTP paths have been installed.
 	// It exists primarily to avoid returning a 404 response when a resource actually exists but we haven't installed the path to a handler.
 	// The actual logic is implemented by an APIServer using the generic server library.
 	MuxAndDiscoveryComplete lifecycleSignal
->>>>>>> upstream/master
 }
 
 // newLifecycleSignals returns an instance of lifecycleSignals interface to be used
@@ -159,46 +146,28 @@ func newLifecycleSignals() lifecycleSignals {
 		InFlightRequestsDrained:    newNamedChannelWrapper("InFlightRequestsDrained"),
 		HTTPServerStoppedListening: newNamedChannelWrapper("HTTPServerStoppedListening"),
 		HasBeenReady:               newNamedChannelWrapper("HasBeenReady"),
-<<<<<<< HEAD
-=======
 		MuxAndDiscoveryComplete:    newNamedChannelWrapper("MuxAndDiscoveryComplete"),
->>>>>>> upstream/master
 	}
 }
 
 func newNamedChannelWrapper(name string) lifecycleSignal {
 	return &namedChannelWrapper{
 		name: name,
-<<<<<<< HEAD
-=======
 		once: sync.Once{},
->>>>>>> upstream/master
 		ch:   make(chan struct{}),
 	}
 }
 
 type namedChannelWrapper struct {
 	name string
-<<<<<<< HEAD
-=======
 	once sync.Once
->>>>>>> upstream/master
 	ch   chan struct{}
 }
 
 func (e *namedChannelWrapper) Signal() {
-<<<<<<< HEAD
-	select {
-	case <-e.ch:
-		// already closed, don't close again.
-	default:
-		close(e.ch)
-	}
-=======
 	e.once.Do(func() {
 		close(e.ch)
 	})
->>>>>>> upstream/master
 }
 
 func (e *namedChannelWrapper) Signaled() <-chan struct{} {

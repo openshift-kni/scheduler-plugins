@@ -130,11 +130,7 @@ func (u URL) MarshalJSON() ([]byte, error) {
 	if u.URL != nil {
 		return json.Marshal(u.URL.String())
 	}
-<<<<<<< HEAD
-	return nil, nil
-=======
 	return []byte("null"), nil
->>>>>>> upstream/master
 }
 
 // OAuth2 is the oauth2 client configuration.

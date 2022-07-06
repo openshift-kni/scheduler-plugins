@@ -711,16 +711,12 @@ func (cc *ClientConn) switchBalancer(name string) {
 		return
 	}
 	if cc.balancerWrapper != nil {
-<<<<<<< HEAD
-		cc.balancerWrapper.close()
-=======
 		// Don't hold cc.mu while closing the balancers. The balancers may call
 		// methods that require cc.mu (e.g. cc.NewSubConn()). Holding the mutex
 		// would cause a deadlock in that case.
 		cc.mu.Unlock()
 		cc.balancerWrapper.close()
 		cc.mu.Lock()
->>>>>>> upstream/master
 	}
 
 	builder := balancer.Get(name)
@@ -1055,21 +1051,12 @@ func (cc *ClientConn) Close() error {
 
 	cc.blockingpicker.close()
 
-<<<<<<< HEAD
-	if rWrapper != nil {
-		rWrapper.close()
-	}
-	if bWrapper != nil {
-		bWrapper.close()
-	}
-=======
 	if bWrapper != nil {
 		bWrapper.close()
 	}
 	if rWrapper != nil {
 		rWrapper.close()
 	}
->>>>>>> upstream/master
 
 	for ac := range conns {
 		ac.tearDown(ErrClientConnClosing)
@@ -1442,28 +1429,6 @@ func (ac *addrConn) resetConnectBackoff() {
 	ac.mu.Unlock()
 }
 
-<<<<<<< HEAD
-// getReadyTransport returns the transport if ac's state is READY.
-// Otherwise it returns nil, false.
-// If ac's state is IDLE, it will trigger ac to connect.
-func (ac *addrConn) getReadyTransport() (transport.ClientTransport, bool) {
-	ac.mu.Lock()
-	if ac.state == connectivity.Ready && ac.transport != nil {
-		t := ac.transport
-		ac.mu.Unlock()
-		return t, true
-	}
-	var idle bool
-	if ac.state == connectivity.Idle {
-		idle = true
-	}
-	ac.mu.Unlock()
-	// Trigger idle ac to connect.
-	if idle {
-		ac.connect()
-	}
-	return nil, false
-=======
 // getReadyTransport returns the transport if ac's state is READY or nil if not.
 func (ac *addrConn) getReadyTransport() transport.ClientTransport {
 	ac.mu.Lock()
@@ -1472,7 +1437,6 @@ func (ac *addrConn) getReadyTransport() transport.ClientTransport {
 		return ac.transport
 	}
 	return nil
->>>>>>> upstream/master
 }
 
 // tearDown starts to tear down the addrConn.

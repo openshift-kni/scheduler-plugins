@@ -24,9 +24,6 @@ type Features struct {
 	EnablePodDisruptionBudget          bool
 	EnablePodOverhead                  bool
 	EnableReadWriteOncePod             bool
-<<<<<<< HEAD
-=======
 	EnableVolumeCapacityPriority       bool
 	EnableCSIStorageCapacity           bool
->>>>>>> upstream/master
 }

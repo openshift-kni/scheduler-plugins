@@ -39,10 +39,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apiserver/pkg/admission"
-<<<<<<< HEAD
-=======
 	"k8s.io/apiserver/pkg/audit"
->>>>>>> upstream/master
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 	"k8s.io/apiserver/pkg/endpoints/handlers/fieldmanager"
 	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
@@ -67,13 +64,10 @@ const (
 	// NOTE: For CREATE and UPDATE requests the API server dedups both before and after mutating admission.
 	// For PATCH request the API server only dedups after mutating admission.
 	DuplicateOwnerReferencesAfterMutatingAdmissionWarningFormat = ".metadata.ownerReferences contains duplicate entries after mutating admission happens; API server dedups owner references in 1.20+, and may reject such requests as early as 1.24; please fix your requests; duplicate UID(s) observed: %v"
-<<<<<<< HEAD
-=======
 	// shortPrefix is one possible beginning of yaml unmarshal strict errors.
 	shortPrefix = "yaml: unmarshal errors:\n"
 	// longPrefix is the other possible beginning of yaml unmarshal strict errors.
 	longPrefix = "error converting YAML to JSON: yaml: unmarshal errors:\n"
->>>>>>> upstream/master
 )
 
 // RequestScope encapsulates common fields across all RESTful handler methods.
@@ -198,11 +192,7 @@ func ConnectResource(connecter rest.Connecter, scope *RequestScope, admit admiss
 		}
 		ctx := req.Context()
 		ctx = request.WithNamespace(ctx, namespace)
-<<<<<<< HEAD
-		ae := request.AuditEventFrom(ctx)
-=======
 		ae := audit.AuditEventFrom(ctx)
->>>>>>> upstream/master
 		admit = admission.WithAudit(admit, ae)
 
 		opts, subpath, subpathKey := connecter.NewConnectOptions()
@@ -471,8 +461,6 @@ func isDryRun(url *url.URL) bool {
 	return len(url.Query()["dryRun"]) != 0
 }
 
-<<<<<<< HEAD
-=======
 // fieldValidation checks that the field validation feature is enabled
 // and returns a valid directive of either
 // - Ignore (default when feature is disabled)
@@ -520,7 +508,6 @@ func addStrictDecodingWarnings(requestContext context.Context, errs []error) {
 	}
 }
 
->>>>>>> upstream/master
 type etcdError interface {
 	Code() grpccodes.Code
 	Error() string

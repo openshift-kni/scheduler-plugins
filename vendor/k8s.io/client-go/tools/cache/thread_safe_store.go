@@ -90,11 +90,7 @@ func (c *threadSafeMap) Delete(key string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	if obj, exists := c.items[key]; exists {
-<<<<<<< HEAD
-		c.deleteFromIndices(obj, key)
-=======
 		c.updateIndices(obj, nil, key)
->>>>>>> upstream/master
 		delete(c.items, key)
 	}
 }
@@ -255,20 +251,6 @@ func (c *threadSafeMap) AddIndexers(newIndexers Indexers) error {
 	return nil
 }
 
-<<<<<<< HEAD
-// updateIndices modifies the objects location in the managed indexes, if this is an update, you must provide an oldObj
-// updateIndices must be called from a function that already has a lock on the cache
-func (c *threadSafeMap) updateIndices(oldObj interface{}, newObj interface{}, key string) {
-	// if we got an old object, we need to remove it before we add it again
-	if oldObj != nil {
-		c.deleteFromIndices(oldObj, key)
-	}
-	for name, indexFunc := range c.indexers {
-		indexValues, err := indexFunc(newObj)
-		if err != nil {
-			panic(fmt.Errorf("unable to calculate an index entry for key %q on index %q: %v", key, name, err))
-		}
-=======
 // updateIndices modifies the objects location in the managed indexes:
 // - for create you must provide only the newObj
 // - for update you must provide both the oldObj and the newObj
@@ -296,22 +278,12 @@ func (c *threadSafeMap) updateIndices(oldObj interface{}, newObj interface{}, ke
 			panic(fmt.Errorf("unable to calculate an index entry for key %q on index %q: %v", key, name, err))
 		}
 
->>>>>>> upstream/master
 		index := c.indices[name]
 		if index == nil {
 			index = Index{}
 			c.indices[name] = index
 		}
 
-<<<<<<< HEAD
-		for _, indexValue := range indexValues {
-			set := index[indexValue]
-			if set == nil {
-				set = sets.String{}
-				index[indexValue] = set
-			}
-			set.Insert(key)
-=======
 		for _, value := range oldIndexValues {
 			// We optimize for the most common case where index returns a single value.
 			if len(indexValues) == 1 && value == indexValues[0] {
@@ -325,39 +297,10 @@ func (c *threadSafeMap) updateIndices(oldObj interface{}, newObj interface{}, ke
 				continue
 			}
 			c.addKeyToIndex(key, value, index)
->>>>>>> upstream/master
 		}
 	}
 }
 
-<<<<<<< HEAD
-// deleteFromIndices removes the object from each of the managed indexes
-// it is intended to be called from a function that already has a lock on the cache
-func (c *threadSafeMap) deleteFromIndices(obj interface{}, key string) {
-	for name, indexFunc := range c.indexers {
-		indexValues, err := indexFunc(obj)
-		if err != nil {
-			panic(fmt.Errorf("unable to calculate an index entry for key %q on index %q: %v", key, name, err))
-		}
-
-		index := c.indices[name]
-		if index == nil {
-			continue
-		}
-		for _, indexValue := range indexValues {
-			set := index[indexValue]
-			if set != nil {
-				set.Delete(key)
-
-				// If we don't delete the set when zero, indices with high cardinality
-				// short lived resources can cause memory to increase over time from
-				// unused empty sets. See `kubernetes/kubernetes/issues/84959`.
-				if len(set) == 0 {
-					delete(index, indexValue)
-				}
-			}
-		}
-=======
 func (c *threadSafeMap) addKeyToIndex(key, indexValue string, index Index) {
 	set := index[indexValue]
 	if set == nil {
@@ -378,7 +321,6 @@ func (c *threadSafeMap) deleteKeyFromIndex(key, indexValue string, index Index) 
 	// unused empty sets. See `kubernetes/kubernetes/issues/84959`.
 	if len(set) == 0 {
 		delete(index, indexValue)
->>>>>>> upstream/master
 	}
 }
 

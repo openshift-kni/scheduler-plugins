@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 //go:build windows
->>>>>>> upstream/master
 // +build windows
 
 /*
@@ -220,11 +217,7 @@ func removeSMBMapping(remotepath string) (string, error) {
 
 // Unmount unmounts the target.
 func (mounter *Mounter) Unmount(target string) error {
-<<<<<<< HEAD
-	klog.V(4).Infof("azureMount: Unmount target (%q)", target)
-=======
 	klog.V(4).Infof("Unmount target (%q)", target)
->>>>>>> upstream/master
 	target = NormalizeWindowsPath(target)
 	if output, err := exec.Command("cmd", "/c", "rmdir", target).CombinedOutput(); err != nil {
 		klog.Errorf("rmdir failed: %v, output: %q", err, string(output))

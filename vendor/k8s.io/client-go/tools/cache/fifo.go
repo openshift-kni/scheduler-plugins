@@ -127,11 +127,7 @@ type FIFO struct {
 
 	// Indication the queue is closed.
 	// Used to indicate a queue is closed so a control loop can exit when a queue is empty.
-<<<<<<< HEAD
-	// Currently, not used to gate any of CRED operations.
-=======
 	// Currently, not used to gate any of CRUD operations.
->>>>>>> upstream/master
 	closed bool
 }
 

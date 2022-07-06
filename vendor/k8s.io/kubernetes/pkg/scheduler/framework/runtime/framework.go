@@ -35,11 +35,7 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
-<<<<<<< HEAD
-	"k8s.io/kubernetes/pkg/scheduler/internal/parallelize"
-=======
 	"k8s.io/kubernetes/pkg/scheduler/framework/parallelize"
->>>>>>> upstream/master
 	"k8s.io/kubernetes/pkg/scheduler/metrics"
 )
 
@@ -293,25 +289,6 @@ func NewFramework(r Registry, profile *config.KubeSchedulerProfile, opts ...Opti
 		return f, nil
 	}
 
-<<<<<<< HEAD
-	var totalPriority int64
-	for _, e := range profile.Plugins.Score.Enabled {
-		// a weight of zero is not permitted, plugins can be disabled explicitly
-		// when configured.
-		f.scorePluginWeight[e.Name] = int(e.Weight)
-		if f.scorePluginWeight[e.Name] == 0 {
-			f.scorePluginWeight[e.Name] = 1
-		}
-
-		// Checks totalPriority against MaxTotalScore to avoid overflow
-		if int64(f.scorePluginWeight[e.Name])*framework.MaxNodeScore > framework.MaxTotalScore-totalPriority {
-			return nil, fmt.Errorf("total score of Score plugins could overflow")
-		}
-		totalPriority += int64(f.scorePluginWeight[e.Name]) * framework.MaxNodeScore
-	}
-
-=======
->>>>>>> upstream/master
 	// get needed plugins from config
 	pg := f.pluginsNeeded(profile.Plugins)
 
@@ -353,18 +330,13 @@ func NewFramework(r Registry, profile *config.KubeSchedulerProfile, opts ...Opti
 		fillEventToPluginMap(p, options.clusterEventMap)
 	}
 
-<<<<<<< HEAD
-=======
 	// initialize plugins per individual extension points
->>>>>>> upstream/master
 	for _, e := range f.getExtensionPoints(profile.Plugins) {
 		if err := updatePluginList(e.slicePtr, *e.plugins, pluginsMap); err != nil {
 			return nil, err
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	// initialize multiPoint plugins to their expanded extension points
 	if len(profile.Plugins.MultiPoint.Enabled) > 0 {
 		if err := f.expandMultiPointPlugins(profile, pluginsMap); err != nil {
@@ -380,7 +352,6 @@ func NewFramework(r Registry, profile *config.KubeSchedulerProfile, opts ...Opti
 		return nil, err
 	}
 
->>>>>>> upstream/master
 	// Verifying the score weights again since Plugin.Name() could return a different
 	// value from the one used in the configuration.
 	for _, scorePlugin := range f.scorePlugins {
@@ -413,8 +384,6 @@ func NewFramework(r Registry, profile *config.KubeSchedulerProfile, opts ...Opti
 	return f, nil
 }
 
-<<<<<<< HEAD
-=======
 // getScoreWeights makes sure that, between MultiPoint-Score plugin weights and individual Score
 // plugin weights there is not an overflow of MaxTotalScore.
 func getScoreWeights(f *frameworkImpl, pluginsMap map[string]framework.Plugin, plugins []config.Plugin) error {
@@ -515,7 +484,6 @@ func (f *frameworkImpl) expandMultiPointPlugins(profile *config.KubeSchedulerPro
 	return nil
 }
 
->>>>>>> upstream/master
 func fillEventToPluginMap(p framework.Plugin, eventToPlugins map[framework.ClusterEvent]sets.String) {
 	ext, ok := p.(framework.EnqueueExtensions)
 	if !ok {
@@ -743,11 +711,8 @@ func (f *frameworkImpl) RunPostFilterPlugins(ctx context.Context, state *framewo
 	}()
 
 	statuses := make(framework.PluginToStatus)
-<<<<<<< HEAD
-=======
 	// `result` records the last meaningful(non-noop) PostFilterResult.
 	var result *framework.PostFilterResult
->>>>>>> upstream/master
 	for _, pl := range f.postFilterPlugins {
 		r, s := f.runPostFilterPlugin(ctx, pl, state, pod, filteredNodeStatusMap)
 		if s.IsSuccess() {
@@ -755,20 +720,13 @@ func (f *frameworkImpl) RunPostFilterPlugins(ctx context.Context, state *framewo
 		} else if !s.IsUnschedulable() {
 			// Any status other than Success or Unschedulable is Error.
 			return nil, framework.AsStatus(s.AsError())
-<<<<<<< HEAD
-=======
 		} else if r != nil && r.Mode() != framework.ModeNoop {
 			result = r
->>>>>>> upstream/master
 		}
 		statuses[pl.Name()] = s
 	}
 
-<<<<<<< HEAD
-	return nil, statuses.Merge()
-=======
 	return result, statuses.Merge()
->>>>>>> upstream/master
 }
 
 func (f *frameworkImpl) runPostFilterPlugin(ctx context.Context, pl framework.PostFilterPlugin, state *framework.CycleState, pod *v1.Pod, filteredNodeStatusMap framework.NodeToStatusMap) (*framework.PostFilterResult, *framework.Status) {
@@ -1150,12 +1108,7 @@ func (f *frameworkImpl) RunPermitPlugins(ctx context.Context, state *framework.C
 		status, timeout := f.runPermitPlugin(ctx, pl, state, pod, nodeName)
 		if !status.IsSuccess() {
 			if status.IsUnschedulable() {
-<<<<<<< HEAD
-				msg := fmt.Sprintf("rejected pod %q by permit plugin %q: %v", pod.Name, pl.Name(), status.Message())
-				klog.V(4).Infof(msg)
-=======
 				klog.V(4).InfoS("Pod rejected by permit plugin", "pod", klog.KObj(pod), "plugin", pl.Name(), "status", status.Message())
->>>>>>> upstream/master
 				status.SetFailedPlugin(pl.Name())
 				return status
 			}
@@ -1177,11 +1130,7 @@ func (f *frameworkImpl) RunPermitPlugins(ctx context.Context, state *framework.C
 		waitingPod := newWaitingPod(pod, pluginsWaitTime)
 		f.waitingPods.add(waitingPod)
 		msg := fmt.Sprintf("one or more plugins asked to wait and no plugin rejected pod %q", pod.Name)
-<<<<<<< HEAD
-		klog.V(4).Infof(msg)
-=======
 		klog.V(4).InfoS("One or more plugins asked to wait and no plugin rejected pod", "pod", klog.KObj(pod))
->>>>>>> upstream/master
 		return framework.NewStatus(framework.Wait, msg)
 	}
 	return nil
@@ -1204,11 +1153,7 @@ func (f *frameworkImpl) WaitOnPermit(ctx context.Context, pod *v1.Pod) *framewor
 		return nil
 	}
 	defer f.waitingPods.remove(pod.UID)
-<<<<<<< HEAD
-	klog.V(4).Infof("pod %q waiting on permit", pod.Name)
-=======
 	klog.V(4).InfoS("Pod waiting on permit", "pod", klog.KObj(pod))
->>>>>>> upstream/master
 
 	startTime := time.Now()
 	s := <-waitingPod.s
@@ -1216,12 +1161,7 @@ func (f *frameworkImpl) WaitOnPermit(ctx context.Context, pod *v1.Pod) *framewor
 
 	if !s.IsSuccess() {
 		if s.IsUnschedulable() {
-<<<<<<< HEAD
-			msg := fmt.Sprintf("pod %q rejected while waiting on permit: %v", pod.Name, s.Message())
-			klog.V(4).Infof(msg)
-=======
 			klog.V(4).InfoS("Pod rejected while waiting on permit", "pod", klog.KObj(pod), "status", s.Message())
->>>>>>> upstream/master
 			s.SetFailedPlugin(s.FailedPlugin())
 			return s
 		}
@@ -1254,13 +1194,6 @@ func (f *frameworkImpl) GetWaitingPod(uid types.UID) framework.WaitingPod {
 }
 
 // RejectWaitingPod rejects a WaitingPod given its UID.
-<<<<<<< HEAD
-func (f *frameworkImpl) RejectWaitingPod(uid types.UID) {
-	waitingPod := f.waitingPods.get(uid)
-	if waitingPod != nil {
-		waitingPod.Reject("", "removed")
-	}
-=======
 // The returned value indicates if the given pod is waiting or not.
 func (f *frameworkImpl) RejectWaitingPod(uid types.UID) bool {
 	if waitingPod := f.waitingPods.get(uid); waitingPod != nil {
@@ -1268,7 +1201,6 @@ func (f *frameworkImpl) RejectWaitingPod(uid types.UID) bool {
 		return true
 	}
 	return false
->>>>>>> upstream/master
 }
 
 // HasFilterPlugins returns true if at least one filter plugin is defined.
@@ -1346,12 +1278,9 @@ func (f *frameworkImpl) pluginsNeeded(plugins *config.Plugins) map[string]config
 	for _, e := range f.getExtensionPoints(plugins) {
 		find(e.plugins)
 	}
-<<<<<<< HEAD
-=======
 
 	// Parse MultiPoint separately since they are not returned by f.getExtensionPoints()
 	find(&plugins.MultiPoint)
->>>>>>> upstream/master
 	return pgMap
 }
 

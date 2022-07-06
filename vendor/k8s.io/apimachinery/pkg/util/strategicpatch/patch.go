@@ -1328,28 +1328,19 @@ func mergeMap(original, patch map[string]interface{}, schema LookupPatchMeta, me
 
 		_, ok := original[k]
 		if !ok {
-<<<<<<< HEAD
-			// If it's not in the original document, just take the patch value.
-			original[k] = patchV
-=======
 			if !isDeleteList {
 				// If it's not in the original document, just take the patch value.
 				original[k] = patchV
 			}
->>>>>>> upstream/master
 			continue
 		}
 
 		originalType := reflect.TypeOf(original[k])
 		patchType := reflect.TypeOf(patchV)
 		if originalType != patchType {
-<<<<<<< HEAD
-			original[k] = patchV
-=======
 			if !isDeleteList {
 				original[k] = patchV
 			}
->>>>>>> upstream/master
 			continue
 		}
 		// If they're both maps or lists, recurse into the value.

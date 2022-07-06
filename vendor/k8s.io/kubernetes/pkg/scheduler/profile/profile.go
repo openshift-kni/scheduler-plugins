@@ -20,10 +20,6 @@ package profile
 import (
 	"errors"
 	"fmt"
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/master
 	"github.com/google/go-cmp/cmp"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -58,22 +54,13 @@ func NewMap(cfgs []config.KubeSchedulerProfile, r frameworkruntime.Registry, rec
 	v := cfgValidator{m: m}
 
 	for _, cfg := range cfgs {
-<<<<<<< HEAD
-		if err := v.validate(cfg); err != nil {
-			return nil, err
-		}
-=======
->>>>>>> upstream/master
 		p, err := newProfile(cfg, r, recorderFact, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("creating profile for scheduler name %s: %v", cfg.SchedulerName, err)
 		}
-<<<<<<< HEAD
-=======
 		if err := v.validate(cfg, p); err != nil {
 			return nil, err
 		}
->>>>>>> upstream/master
 		m[cfg.SchedulerName] = p
 	}
 	return m, nil
@@ -98,22 +85,6 @@ type cfgValidator struct {
 	queueSortArgs runtime.Object
 }
 
-<<<<<<< HEAD
-func (v *cfgValidator) validate(cfg config.KubeSchedulerProfile) error {
-	if len(cfg.SchedulerName) == 0 {
-		return errors.New("scheduler name is needed")
-	}
-	if cfg.Plugins == nil {
-		return fmt.Errorf("plugins required for profile with scheduler name %q", cfg.SchedulerName)
-	}
-	if v.m[cfg.SchedulerName] != nil {
-		return fmt.Errorf("duplicate profile with scheduler name %q", cfg.SchedulerName)
-	}
-	if len(cfg.Plugins.QueueSort.Enabled) != 1 {
-		return fmt.Errorf("one queue sort plugin required for profile with scheduler name %q", cfg.SchedulerName)
-	}
-	queueSort := cfg.Plugins.QueueSort.Enabled[0].Name
-=======
 func (v *cfgValidator) validate(cfg config.KubeSchedulerProfile, f framework.Framework) error {
 	if len(f.ProfileName()) == 0 {
 		return errors.New("scheduler name is needed")
@@ -126,7 +97,6 @@ func (v *cfgValidator) validate(cfg config.KubeSchedulerProfile, f framework.Fra
 	}
 
 	queueSort := f.ListPlugins().QueueSort.Enabled[0].Name
->>>>>>> upstream/master
 	var queueSortArgs runtime.Object
 	for _, plCfg := range cfg.PluginConfig {
 		if plCfg.Name == queueSort {

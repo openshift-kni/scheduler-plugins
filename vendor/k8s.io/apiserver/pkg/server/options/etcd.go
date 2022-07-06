@@ -206,12 +206,9 @@ func (s *EtcdOptions) ApplyTo(c *server.Config) error {
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	// use the StorageObjectCountTracker interface instance from server.Config
 	s.StorageConfig.StorageObjectCountTracker = c.StorageObjectCountTracker
 
->>>>>>> upstream/master
 	c.RESTOptionsGetter = &SimpleRestOptionsFactory{
 		Options:              *s,
 		TransformerOverrides: transformerOverrides,
@@ -223,13 +220,10 @@ func (s *EtcdOptions) ApplyWithStorageFactoryTo(factory serverstorage.StorageFac
 	if err := s.addEtcdHealthEndpoint(c); err != nil {
 		return err
 	}
-<<<<<<< HEAD
-=======
 
 	// use the StorageObjectCountTracker interface instance from server.Config
 	s.StorageConfig.StorageObjectCountTracker = c.StorageObjectCountTracker
 
->>>>>>> upstream/master
 	c.RESTOptionsGetter = &StorageFactoryRestOptionsFactory{Options: *s, StorageFactory: factory}
 	return nil
 }
@@ -261,14 +255,6 @@ type SimpleRestOptionsFactory struct {
 
 func (f *SimpleRestOptionsFactory) GetRESTOptions(resource schema.GroupResource) (generic.RESTOptions, error) {
 	ret := generic.RESTOptions{
-<<<<<<< HEAD
-		StorageConfig:           &f.Options.StorageConfig,
-		Decorator:               generic.UndecoratedStorage,
-		EnableGarbageCollection: f.Options.EnableGarbageCollection,
-		DeleteCollectionWorkers: f.Options.DeleteCollectionWorkers,
-		ResourcePrefix:          resource.Group + "/" + resource.Resource,
-		CountMetricPollPeriod:   f.Options.StorageConfig.CountMetricPollPeriod,
-=======
 		StorageConfig:             f.Options.StorageConfig.ForResource(resource),
 		Decorator:                 generic.UndecoratedStorage,
 		EnableGarbageCollection:   f.Options.EnableGarbageCollection,
@@ -276,7 +262,6 @@ func (f *SimpleRestOptionsFactory) GetRESTOptions(resource schema.GroupResource)
 		ResourcePrefix:            resource.Group + "/" + resource.Resource,
 		CountMetricPollPeriod:     f.Options.StorageConfig.CountMetricPollPeriod,
 		StorageObjectCountTracker: f.Options.StorageConfig.StorageObjectCountTracker,
->>>>>>> upstream/master
 	}
 	if f.TransformerOverrides != nil {
 		if transformer, ok := f.TransformerOverrides[resource]; ok {
@@ -313,14 +298,6 @@ func (f *StorageFactoryRestOptionsFactory) GetRESTOptions(resource schema.GroupR
 	}
 
 	ret := generic.RESTOptions{
-<<<<<<< HEAD
-		StorageConfig:           storageConfig,
-		Decorator:               generic.UndecoratedStorage,
-		DeleteCollectionWorkers: f.Options.DeleteCollectionWorkers,
-		EnableGarbageCollection: f.Options.EnableGarbageCollection,
-		ResourcePrefix:          f.StorageFactory.ResourcePrefix(resource),
-		CountMetricPollPeriod:   f.Options.StorageConfig.CountMetricPollPeriod,
-=======
 		StorageConfig:             storageConfig,
 		Decorator:                 generic.UndecoratedStorage,
 		DeleteCollectionWorkers:   f.Options.DeleteCollectionWorkers,
@@ -328,7 +305,6 @@ func (f *StorageFactoryRestOptionsFactory) GetRESTOptions(resource schema.GroupR
 		ResourcePrefix:            f.StorageFactory.ResourcePrefix(resource),
 		CountMetricPollPeriod:     f.Options.StorageConfig.CountMetricPollPeriod,
 		StorageObjectCountTracker: f.Options.StorageConfig.StorageObjectCountTracker,
->>>>>>> upstream/master
 	}
 	if f.Options.EnableWatchCache {
 		sizes, err := ParseWatchCacheSizes(f.Options.WatchCacheSizes)

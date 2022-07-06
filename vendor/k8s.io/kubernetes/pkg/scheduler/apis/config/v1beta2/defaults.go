@@ -17,12 +17,6 @@ limitations under the License.
 package v1beta2
 
 import (
-<<<<<<< HEAD
-	"net"
-	"strconv"
-
-=======
->>>>>>> upstream/master
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -126,53 +120,6 @@ func SetDefaults_KubeSchedulerConfiguration(obj *v1beta2.KubeSchedulerConfigurat
 		setDefaults_KubeSchedulerProfile(prof)
 	}
 
-<<<<<<< HEAD
-	// For Healthz and Metrics bind addresses, we want to check:
-	// 1. If the value is nil, default to 0.0.0.0 and default scheduler port
-	// 2. If there is a value set, attempt to split it. If it's just a port (ie, ":1234"), default to 0.0.0.0 with that port
-	// 3. If splitting the value fails, check if the value is even a valid IP. If so, use that with the default port.
-	// Otherwise leave the address as-is, it will be caught during validation.
-	defaultBindAddress := net.JoinHostPort("0.0.0.0", strconv.Itoa(config.DefaultInsecureSchedulerPort))
-	if obj.HealthzBindAddress == nil {
-		obj.HealthzBindAddress = &defaultBindAddress
-	} else {
-		if host, port, err := net.SplitHostPort(*obj.HealthzBindAddress); err == nil {
-			if len(host) == 0 {
-				host = "0.0.0.0"
-			}
-			hostPort := net.JoinHostPort(host, port)
-			obj.HealthzBindAddress = &hostPort
-		} else {
-			// Something went wrong splitting the host/port, could just be a missing port so check if the
-			// existing value is a valid IP address. If so, use that with the default scheduler port
-			if host := net.ParseIP(*obj.HealthzBindAddress); host != nil {
-				hostPort := net.JoinHostPort(*obj.HealthzBindAddress, strconv.Itoa(config.DefaultInsecureSchedulerPort))
-				obj.HealthzBindAddress = &hostPort
-			}
-		}
-	}
-
-	if obj.MetricsBindAddress == nil {
-		obj.MetricsBindAddress = &defaultBindAddress
-	} else {
-		if host, port, err := net.SplitHostPort(*obj.MetricsBindAddress); err == nil {
-			if len(host) == 0 {
-				host = "0.0.0.0"
-			}
-			hostPort := net.JoinHostPort(host, port)
-			obj.MetricsBindAddress = &hostPort
-		} else {
-			// Something went wrong splitting the host/port, could just be a missing port so check if the
-			// existing value is a valid IP address. If so, use that with the default scheduler port
-			if host := net.ParseIP(*obj.MetricsBindAddress); host != nil {
-				hostPort := net.JoinHostPort(*obj.MetricsBindAddress, strconv.Itoa(config.DefaultInsecureSchedulerPort))
-				obj.MetricsBindAddress = &hostPort
-			}
-		}
-	}
-
-=======
->>>>>>> upstream/master
 	if obj.PercentageOfNodesToScore == nil {
 		percentageOfNodesToScore := int32(config.DefaultPercentageOfNodesToScore)
 		obj.PercentageOfNodesToScore = &percentageOfNodesToScore

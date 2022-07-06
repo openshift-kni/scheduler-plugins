@@ -18,10 +18,7 @@ package config
 
 import (
 	apiserver "k8s.io/apiserver/pkg/server"
-<<<<<<< HEAD
-=======
 	"k8s.io/client-go/dynamic/dynamicinformer"
->>>>>>> upstream/master
 	"k8s.io/client-go/informers"
 	clientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -35,24 +32,6 @@ type Config struct {
 	// ComponentConfig is the scheduler server's configuration object.
 	ComponentConfig kubeschedulerconfig.KubeSchedulerConfiguration
 
-<<<<<<< HEAD
-	LegacyPolicySource *kubeschedulerconfig.SchedulerPolicySource
-
-	// LoopbackClientConfig is a config for a privileged loopback connection
-	LoopbackClientConfig *restclient.Config
-
-	InsecureServing        *apiserver.DeprecatedInsecureServingInfo // nil will disable serving on an insecure port
-	InsecureMetricsServing *apiserver.DeprecatedInsecureServingInfo // non-nil if metrics should be served independently
-	Authentication         apiserver.AuthenticationInfo
-	Authorization          apiserver.AuthorizationInfo
-	SecureServing          *apiserver.SecureServingInfo
-
-	Client          clientset.Interface
-	KubeConfig      *restclient.Config
-	InformerFactory informers.SharedInformerFactory
-
-	//lint:ignore SA1019 this deprecated field still needs to be used for now. It will be removed once the migration is done.
-=======
 	// LoopbackClientConfig is a config for a privileged loopback connection
 	LoopbackClientConfig *restclient.Config
 
@@ -66,7 +45,6 @@ type Config struct {
 	DynInformerFactory dynamicinformer.DynamicSharedInformerFactory
 
 	//nolint:staticcheck // SA1019 this deprecated field still needs to be used for now. It will be removed once the migration is done.
->>>>>>> upstream/master
 	EventBroadcaster events.EventBroadcasterAdapter
 
 	// LeaderElection is optional.
@@ -87,16 +65,6 @@ type CompletedConfig struct {
 func (c *Config) Complete() CompletedConfig {
 	cc := completedConfig{c}
 
-<<<<<<< HEAD
-	if c.InsecureServing != nil {
-		c.InsecureServing.Name = "healthz"
-	}
-	if c.InsecureMetricsServing != nil {
-		c.InsecureMetricsServing.Name = "metrics"
-	}
-
-=======
->>>>>>> upstream/master
 	apiserver.AuthorizeClientBearerToken(c.LoopbackClientConfig, &c.Authentication, &c.Authorization)
 
 	return CompletedConfig{&cc}

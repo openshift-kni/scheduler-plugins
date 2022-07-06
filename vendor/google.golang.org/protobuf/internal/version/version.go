@@ -52,13 +52,8 @@ import (
 //	10. Send out the CL for review and submit it.
 const (
 	Major      = 1
-<<<<<<< HEAD
-	Minor      = 26
-	Patch      = 0
-=======
 	Minor      = 27
 	Patch      = 1
->>>>>>> upstream/master
 	PreRelease = ""
 )
 

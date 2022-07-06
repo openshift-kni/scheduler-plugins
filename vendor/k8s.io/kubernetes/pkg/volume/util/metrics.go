@@ -54,27 +54,6 @@ var storageOperationMetric = metrics.NewHistogramVec(
 	[]string{"volume_plugin", "operation_name", "status", "migrated"},
 )
 
-<<<<<<< HEAD
-var storageOperationErrorMetric = metrics.NewCounterVec(
-	&metrics.CounterOpts{
-		Name:           "storage_operation_errors_total",
-		Help:           "Storage operation errors (Deprecated since 1.21.0)",
-		StabilityLevel: metrics.ALPHA,
-	},
-	[]string{"volume_plugin", "operation_name"},
-)
-
-var storageOperationStatusMetric = metrics.NewCounterVec(
-	&metrics.CounterOpts{
-		Name:           "storage_operation_status_count",
-		Help:           "Storage operation return statuses count (Deprecated since 1.21.0)",
-		StabilityLevel: metrics.ALPHA,
-	},
-	[]string{"volume_plugin", "operation_name", "status"},
-)
-
-=======
->>>>>>> upstream/master
 var storageOperationEndToEndLatencyMetric = metrics.NewHistogramVec(
 	&metrics.HistogramOpts{
 		Name:           "volume_operation_total_seconds",
@@ -104,11 +83,6 @@ func registerMetrics() {
 	// legacyregistry is the internal k8s wrapper around the prometheus
 	// global registry, used specifically for metric stability enforcement
 	legacyregistry.MustRegister(storageOperationMetric)
-<<<<<<< HEAD
-	legacyregistry.MustRegister(storageOperationErrorMetric)
-	legacyregistry.MustRegister(storageOperationStatusMetric)
-=======
->>>>>>> upstream/master
 	legacyregistry.MustRegister(storageOperationEndToEndLatencyMetric)
 	legacyregistry.MustRegister(csiOperationsLatencyMetric)
 }
@@ -124,31 +98,19 @@ func OperationCompleteHook(plugin, operationName string) func(types.CompleteFunc
 			// TODO: Establish well-known error codes to be able to distinguish
 			// user configuration errors from system errors.
 			status = statusFailUnknown
-<<<<<<< HEAD
-			storageOperationErrorMetric.WithLabelValues(plugin, operationName).Inc()
-=======
->>>>>>> upstream/master
 		}
 		migrated := false
 		if c.Migrated != nil {
 			migrated = *c.Migrated
 		}
 		storageOperationMetric.WithLabelValues(plugin, operationName, status, strconv.FormatBool(migrated)).Observe(timeTaken)
-<<<<<<< HEAD
-		storageOperationStatusMetric.WithLabelValues(plugin, operationName, status).Inc()
-=======
->>>>>>> upstream/master
 	}
 	return opComplete
 }
 
 // FSGroupCompleteHook returns a hook to call when volume recursive permission is changed
 func FSGroupCompleteHook(plugin volume.VolumePlugin, spec *volume.Spec) func(types.CompleteFuncParam) {
-<<<<<<< HEAD
-	return OperationCompleteHook(GetFullQualifiedPluginNameForVolume(plugin.GetPluginName(), spec), "volume_fsgroup_recursive_apply")
-=======
 	return OperationCompleteHook(GetFullQualifiedPluginNameForVolume(plugin.GetPluginName(), spec), "volume_apply_access_control")
->>>>>>> upstream/master
 }
 
 // GetFullQualifiedPluginNameForVolume returns full qualified plugin name for

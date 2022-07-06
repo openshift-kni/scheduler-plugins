@@ -20,10 +20,7 @@ import (
 	eventsv1 "k8s.io/api/events/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
-<<<<<<< HEAD
-=======
 	"k8s.io/klog/v2"
->>>>>>> upstream/master
 )
 
 // EventRecorder knows how to record events on behalf of an EventSource.
@@ -60,13 +57,10 @@ type EventBroadcaster interface {
 	// TODO: figure out if this can be removed.
 	StartEventWatcher(eventHandler func(event runtime.Object)) func()
 
-<<<<<<< HEAD
-=======
 	// StartStructuredLogging starts sending events received from this EventBroadcaster to the structured
 	// logging function. The return value can be ignored or used to stop recording, if desired.
 	StartStructuredLogging(verbosity klog.Level) func()
 
->>>>>>> upstream/master
 	// Shutdown shuts down the broadcaster
 	Shutdown()
 }

@@ -412,8 +412,6 @@ func (d *partialArray) set(key string, val *lazyNode) error {
 	if err != nil {
 		return err
 	}
-<<<<<<< HEAD
-=======
 
 	if idx < 0 {
 		if !SupportNegativeIndices {
@@ -425,7 +423,6 @@ func (d *partialArray) set(key string, val *lazyNode) error {
 		idx += len(*d)
 	}
 
->>>>>>> upstream/master
 	(*d)[idx] = val
 	return nil
 }
@@ -476,8 +473,6 @@ func (d *partialArray) get(key string) (*lazyNode, error) {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-=======
 	if idx < 0 {
 		if !SupportNegativeIndices {
 			return nil, errors.Wrapf(ErrInvalidIndex, "Unable to access invalid index: %d", idx)
@@ -488,7 +483,6 @@ func (d *partialArray) get(key string) (*lazyNode, error) {
 		idx += len(*d)
 	}
 
->>>>>>> upstream/master
 	if idx >= len(*d) {
 		return nil, errors.Wrapf(ErrInvalidIndex, "Unable to access invalid index: %d", idx)
 	}
@@ -574,8 +568,6 @@ func (p Patch) replace(doc *container, op Operation) error {
 		return errors.Wrapf(err, "replace operation failed to decode path")
 	}
 
-<<<<<<< HEAD
-=======
 	if path == "" {
 		val := op.value()
 
@@ -599,7 +591,6 @@ func (p Patch) replace(doc *container, op Operation) error {
 		return nil
 	}
 
->>>>>>> upstream/master
 	con, key := findObject(doc, path)
 
 	if con == nil {
@@ -666,8 +657,6 @@ func (p Patch) test(doc *container, op Operation) error {
 		return errors.Wrapf(err, "test operation failed to decode path")
 	}
 
-<<<<<<< HEAD
-=======
 	if path == "" {
 		var self lazyNode
 
@@ -687,7 +676,6 @@ func (p Patch) test(doc *container, op Operation) error {
 		return errors.Wrapf(ErrTestFailed, "testing value %s failed", path)
 	}
 
->>>>>>> upstream/master
 	con, key := findObject(doc, path)
 
 	if con == nil {

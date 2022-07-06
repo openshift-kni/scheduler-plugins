@@ -172,8 +172,6 @@ type Policy struct {
 	// be specified per rule in which case the union of both are omitted.
 	// +optional
 	OmitStages []Stage
-<<<<<<< HEAD
-=======
 
 	// OmitManagedFields indicates whether to omit the managed fields of the request
 	// and response bodies from being written to the API audit log.
@@ -183,7 +181,6 @@ type Policy struct {
 	// in a rule will override the global default.
 	// +optional
 	OmitManagedFields bool
->>>>>>> upstream/master
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -244,8 +241,6 @@ type PolicyRule struct {
 	// An empty list means no restrictions will apply.
 	// +optional
 	OmitStages []Stage
-<<<<<<< HEAD
-=======
 
 	// OmitManagedFields indicates whether to omit the managed fields of the request
 	// and response bodies from being written to the API audit log.
@@ -257,7 +252,6 @@ type PolicyRule struct {
 	// Policy.OmitManagedFields will stand.
 	// +optional
 	OmitManagedFields *bool
->>>>>>> upstream/master
 }
 
 // GroupResources represents resource kinds in an API group.

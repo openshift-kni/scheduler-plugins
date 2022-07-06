@@ -96,19 +96,6 @@ func ValidateDeleteOptions(options *metav1.DeleteOptions) field.ErrorList {
 }
 
 func ValidateCreateOptions(options *metav1.CreateOptions) field.ErrorList {
-<<<<<<< HEAD
-	return append(
-		ValidateFieldManager(options.FieldManager, field.NewPath("fieldManager")),
-		ValidateDryRun(field.NewPath("dryRun"), options.DryRun)...,
-	)
-}
-
-func ValidateUpdateOptions(options *metav1.UpdateOptions) field.ErrorList {
-	return append(
-		ValidateFieldManager(options.FieldManager, field.NewPath("fieldManager")),
-		ValidateDryRun(field.NewPath("dryRun"), options.DryRun)...,
-	)
-=======
 	allErrs := field.ErrorList{}
 	allErrs = append(allErrs, ValidateFieldManager(options.FieldManager, field.NewPath("fieldManager"))...)
 	allErrs = append(allErrs, ValidateDryRun(field.NewPath("dryRun"), options.DryRun)...)
@@ -122,7 +109,6 @@ func ValidateUpdateOptions(options *metav1.UpdateOptions) field.ErrorList {
 	allErrs = append(allErrs, ValidateDryRun(field.NewPath("dryRun"), options.DryRun)...)
 	allErrs = append(allErrs, ValidateFieldValidation(field.NewPath("fieldValidation"), options.FieldValidation)...)
 	return allErrs
->>>>>>> upstream/master
 }
 
 func ValidatePatchOptions(options *metav1.PatchOptions, patchType types.PatchType) field.ErrorList {
@@ -139,10 +125,7 @@ func ValidatePatchOptions(options *metav1.PatchOptions, patchType types.PatchTyp
 	}
 	allErrs = append(allErrs, ValidateFieldManager(options.FieldManager, field.NewPath("fieldManager"))...)
 	allErrs = append(allErrs, ValidateDryRun(field.NewPath("dryRun"), options.DryRun)...)
-<<<<<<< HEAD
-=======
 	allErrs = append(allErrs, ValidateFieldValidation(field.NewPath("fieldValidation"), options.FieldValidation)...)
->>>>>>> upstream/master
 	return allErrs
 }
 
@@ -179,8 +162,6 @@ func ValidateDryRun(fldPath *field.Path, dryRun []string) field.ErrorList {
 	return allErrs
 }
 
-<<<<<<< HEAD
-=======
 var allowedFieldValidationValues = sets.NewString("", metav1.FieldValidationIgnore, metav1.FieldValidationWarn, metav1.FieldValidationStrict)
 
 // ValidateFieldValidation validates that a fieldValidation query param only contains allowed values.
@@ -193,7 +174,6 @@ func ValidateFieldValidation(fldPath *field.Path, fieldValidation string) field.
 
 }
 
->>>>>>> upstream/master
 const UninitializedStatusUpdateErrorMsg string = `must not update status when the object is uninitialized`
 
 // ValidateTableOptions returns any invalid flags on TableOptions.

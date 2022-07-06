@@ -217,11 +217,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 	isSubresource := len(subresource) > 0
 
 	// If there is a subresource, namespace scoping is defined by the parent resource
-<<<<<<< HEAD
-	namespaceScoped := true
-=======
 	var namespaceScoped bool
->>>>>>> upstream/master
 	if isSubresource {
 		parentStorage, ok := a.group.Storage[resource]
 		if !ok {
@@ -545,14 +541,11 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	var disabledParams []string
 	if !utilfeature.DefaultFeatureGate.Enabled(features.ServerSideFieldValidation) {
 		disabledParams = []string{"fieldValidation"}
 	}
 
->>>>>>> upstream/master
 	// Create Routes for the actions.
 	// TODO: Add status documentation using Returns()
 	// Errors (see api/errors/errors.go as well as go-restful router):
@@ -783,11 +776,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusCreated, "Created", producedObject).
 				Reads(defaultVersionedObject).
 				Writes(producedObject)
-<<<<<<< HEAD
-			if err := AddObjectParams(ws, route, versionedUpdateOptions); err != nil {
-=======
 			if err := AddObjectParams(ws, route, versionedUpdateOptions, disabledParams...); err != nil {
->>>>>>> upstream/master
 				return nil, nil, err
 			}
 			addParams(route, action.Params)
@@ -818,11 +807,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusCreated, "Created", producedObject).
 				Reads(metav1.Patch{}).
 				Writes(producedObject)
-<<<<<<< HEAD
-			if err := AddObjectParams(ws, route, versionedPatchOptions); err != nil {
-=======
 			if err := AddObjectParams(ws, route, versionedPatchOptions, disabledParams...); err != nil {
->>>>>>> upstream/master
 				return nil, nil, err
 			}
 			addParams(route, action.Params)
@@ -853,11 +838,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusAccepted, "Accepted", producedObject).
 				Reads(defaultVersionedObject).
 				Writes(producedObject)
-<<<<<<< HEAD
-			if err := AddObjectParams(ws, route, versionedCreateOptions); err != nil {
-=======
 			if err := AddObjectParams(ws, route, versionedCreateOptions, disabledParams...); err != nil {
->>>>>>> upstream/master
 				return nil, nil, err
 			}
 			addParams(route, action.Params)

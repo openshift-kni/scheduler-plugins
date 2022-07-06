@@ -17,11 +17,6 @@ limitations under the License.
 package typed
 
 import (
-<<<<<<< HEAD
-	"math"
-
-=======
->>>>>>> upstream/master
 	"sigs.k8s.io/structured-merge-diff/v4/fieldpath"
 	"sigs.k8s.io/structured-merge-diff/v4/schema"
 	"sigs.k8s.io/structured-merge-diff/v4/value"
@@ -173,82 +168,6 @@ func (w *mergingWalker) visitListItems(t *schema.List, lhs, rhs value.List) (err
 	if lhs != nil {
 		lLen = lhs.Length()
 	}
-<<<<<<< HEAD
-	out := make([]interface{}, 0, int(math.Max(float64(rLen), float64(lLen))))
-
-	// TODO: ordering is totally wrong.
-	// TODO: might as well make the map order work the same way.
-
-	// This is a cheap hack to at least make the output order stable.
-	rhsOrder := make([]fieldpath.PathElement, 0, rLen)
-
-	// First, collect all RHS children.
-	observedRHS := fieldpath.MakePathElementValueMap(rLen)
-	if rhs != nil {
-		for i := 0; i < rhs.Length(); i++ {
-			child := rhs.At(i)
-			pe, err := listItemToPathElement(w.allocator, w.schema, t, i, child)
-			if err != nil {
-				errs = append(errs, errorf("rhs: element %v: %v", i, err.Error())...)
-				// If we can't construct the path element, we can't
-				// even report errors deeper in the schema, so bail on
-				// this element.
-				continue
-			}
-			if _, ok := observedRHS.Get(pe); ok {
-				errs = append(errs, errorf("rhs: duplicate entries for key %v", pe.String())...)
-			}
-			observedRHS.Insert(pe, child)
-			rhsOrder = append(rhsOrder, pe)
-		}
-	}
-
-	// Then merge with LHS children.
-	observedLHS := fieldpath.MakePathElementSet(lLen)
-	if lhs != nil {
-		for i := 0; i < lhs.Length(); i++ {
-			child := lhs.At(i)
-			pe, err := listItemToPathElement(w.allocator, w.schema, t, i, child)
-			if err != nil {
-				errs = append(errs, errorf("lhs: element %v: %v", i, err.Error())...)
-				// If we can't construct the path element, we can't
-				// even report errors deeper in the schema, so bail on
-				// this element.
-				continue
-			}
-			if observedLHS.Has(pe) {
-				errs = append(errs, errorf("lhs: duplicate entries for key %v", pe.String())...)
-				continue
-			}
-			observedLHS.Insert(pe)
-			w2 := w.prepareDescent(pe, t.ElementType)
-			w2.lhs = value.Value(child)
-			if rchild, ok := observedRHS.Get(pe); ok {
-				w2.rhs = rchild
-			}
-			errs = append(errs, w2.merge(pe.String)...)
-			if w2.out != nil {
-				out = append(out, *w2.out)
-			}
-			w.finishDescent(w2)
-		}
-	}
-
-	for _, pe := range rhsOrder {
-		if observedLHS.Has(pe) {
-			continue
-		}
-		value, _ := observedRHS.Get(pe)
-		w2 := w.prepareDescent(pe, t.ElementType)
-		w2.rhs = value
-		errs = append(errs, w2.merge(pe.String)...)
-		if w2.out != nil {
-			out = append(out, *w2.out)
-		}
-		w.finishDescent(w2)
-	}
-
-=======
 	outLen := lLen
 	if outLen < rLen {
 		outLen = rLen
@@ -339,7 +258,6 @@ func (w *mergingWalker) visitListItems(t *schema.List, lhs, rhs value.List) (err
 		}
 	}
 
->>>>>>> upstream/master
 	if len(out) > 0 {
 		i := interface{}(out)
 		w.out = &i
@@ -348,8 +266,6 @@ func (w *mergingWalker) visitListItems(t *schema.List, lhs, rhs value.List) (err
 	return errs
 }
 
-<<<<<<< HEAD
-=======
 func (w *mergingWalker) indexListPathElements(t *schema.List, list value.List) ([]fieldpath.PathElement, fieldpath.PathElementValueMap, ValidationErrors) {
 	var errs ValidationErrors
 	length := 0
@@ -390,7 +306,6 @@ func (w *mergingWalker) mergeListItem(t *schema.List, pe fieldpath.PathElement, 
 	return
 }
 
->>>>>>> upstream/master
 func (w *mergingWalker) derefList(prefix string, v value.Value) (value.List, ValidationErrors) {
 	if v == nil {
 		return nil, nil

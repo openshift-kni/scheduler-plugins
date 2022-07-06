@@ -137,10 +137,6 @@ func newETCD3Client(c storagebackend.TransportConfig) (*clientv3.Client, error) 
 	}
 	dialOptions := []grpc.DialOption{
 		grpc.WithBlock(), // block until the underlying connection is up
-<<<<<<< HEAD
-		grpc.WithUnaryInterceptor(grpcprom.UnaryClientInterceptor),
-		grpc.WithStreamInterceptor(grpcprom.StreamClientInterceptor),
-=======
 		// use chained interceptors so that the default (retry and backoff) interceptors are added.
 		// otherwise they will be overwritten by the metric interceptor.
 		//
@@ -148,7 +144,6 @@ func newETCD3Client(c storagebackend.TransportConfig) (*clientv3.Client, error) 
 		// which seems to be what we want as the metrics will be collected on each attempt (retry)
 		grpc.WithChainUnaryInterceptor(grpcprom.UnaryClientInterceptor),
 		grpc.WithChainStreamInterceptor(grpcprom.StreamClientInterceptor),
->>>>>>> upstream/master
 	}
 	if utilfeature.DefaultFeatureGate.Enabled(genericfeatures.APIServerTracing) {
 		tracingOpts := []otelgrpc.Option{
@@ -254,11 +249,7 @@ func startCompactorOnce(c storagebackend.TransportConfig, interval time.Duration
 	}, nil
 }
 
-<<<<<<< HEAD
-func newETCD3Storage(c storagebackend.Config, newFunc func() runtime.Object) (storage.Interface, DestroyFunc, error) {
-=======
 func newETCD3Storage(c storagebackend.ConfigForResource, newFunc func() runtime.Object) (storage.Interface, DestroyFunc, error) {
->>>>>>> upstream/master
 	stopCompactor, err := startCompactorOnce(c.Transport, c.CompactionInterval)
 	if err != nil {
 		return nil, nil, err
@@ -290,11 +281,7 @@ func newETCD3Storage(c storagebackend.ConfigForResource, newFunc func() runtime.
 	if transformer == nil {
 		transformer = value.IdentityTransformer
 	}
-<<<<<<< HEAD
-	return etcd3.New(client, c.Codec, newFunc, c.Prefix, transformer, c.Paging, c.LeaseManagerConfig), destroyFunc, nil
-=======
 	return etcd3.New(client, c.Codec, newFunc, c.Prefix, c.GroupResource, transformer, c.Paging, c.LeaseManagerConfig), destroyFunc, nil
->>>>>>> upstream/master
 }
 
 // startDBSizeMonitorPerEndpoint starts a loop to monitor etcd database size and update the

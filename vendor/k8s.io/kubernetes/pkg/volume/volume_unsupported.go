@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 //go:build !linux
->>>>>>> upstream/master
 // +build !linux
 
 /*

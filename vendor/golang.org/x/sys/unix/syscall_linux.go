@@ -13,10 +13,6 @@ package unix
 
 import (
 	"encoding/binary"
-<<<<<<< HEAD
-	"runtime"
-=======
->>>>>>> upstream/master
 	"syscall"
 	"unsafe"
 )
@@ -41,8 +37,6 @@ func Creat(path string, mode uint32) (fd int, err error) {
 	return Open(path, O_CREAT|O_WRONLY|O_TRUNC, mode)
 }
 
-<<<<<<< HEAD
-=======
 func EpollCreate(size int) (fd int, err error) {
 	if size <= 0 {
 		return -1, EINVAL
@@ -50,7 +44,6 @@ func EpollCreate(size int) (fd int, err error) {
 	return EpollCreate1(0)
 }
 
->>>>>>> upstream/master
 //sys	FanotifyInit(flags uint, event_f_flags uint) (fd int, err error)
 //sys	fanotifyMark(fd int, flags uint, mask uint64, dirFd int, pathname *byte) (err error)
 
@@ -79,13 +72,6 @@ func Fchmodat(dirfd int, path string, mode uint32, flags int) (err error) {
 	return fchmodat(dirfd, path, mode)
 }
 
-<<<<<<< HEAD
-//sys	ioctl(fd int, req uint, arg uintptr) (err error)
-
-// ioctl itself should not be exposed directly, but additional get/set
-// functions for specific types are permissible.
-// These are defined in ioctl.go and ioctl_linux.go.
-=======
 func InotifyInit() (fd int, err error) {
 	return InotifyInit1(0)
 }
@@ -102,7 +88,6 @@ func InotifyInit() (fd int, err error) {
 // when the third argument is an integer.
 //
 // TODO: some existing code incorrectly uses ioctl when it should use ioctlPtr.
->>>>>>> upstream/master
 
 //sys	Linkat(olddirfd int, oldpath string, newdirfd int, newpath string, flags int) (err error)
 
@@ -134,8 +119,6 @@ func Openat2(dirfd int, path string, how *OpenHow) (fd int, err error) {
 	return openat2(dirfd, path, how, SizeofOpenHow)
 }
 
-<<<<<<< HEAD
-=======
 func Pipe(p []int) error {
 	return Pipe2(p, 0)
 }
@@ -153,7 +136,6 @@ func Pipe2(p []int, flags int) error {
 	return err
 }
 
->>>>>>> upstream/master
 //sys	ppoll(fds *PollFd, nfds int, timeout *Timespec, sigmask *Sigset_t) (n int, err error)
 
 func Ppoll(fds []PollFd, timeout *Timespec, sigmask *Sigset_t) (n int, err error) {
@@ -163,8 +145,6 @@ func Ppoll(fds []PollFd, timeout *Timespec, sigmask *Sigset_t) (n int, err error
 	return ppoll(&fds[0], len(fds), timeout, sigmask)
 }
 
-<<<<<<< HEAD
-=======
 func Poll(fds []PollFd, timeout int) (n int, err error) {
 	var ts *Timespec
 	if timeout >= 0 {
@@ -174,7 +154,6 @@ func Poll(fds []PollFd, timeout int) (n int, err error) {
 	return Ppoll(fds, ts, nil)
 }
 
->>>>>>> upstream/master
 //sys	Readlinkat(dirfd int, path string, buf []byte) (n int, err error)
 
 func Readlink(path string, buf []byte) (n int, err error) {
@@ -225,31 +204,7 @@ func Utimes(path string, tv []Timeval) error {
 //sys	utimensat(dirfd int, path string, times *[2]Timespec, flags int) (err error)
 
 func UtimesNano(path string, ts []Timespec) error {
-<<<<<<< HEAD
-	if ts == nil {
-		err := utimensat(AT_FDCWD, path, nil, 0)
-		if err != ENOSYS {
-			return err
-		}
-		return utimes(path, nil)
-	}
-	if len(ts) != 2 {
-		return EINVAL
-	}
-	err := utimensat(AT_FDCWD, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])), 0)
-	if err != ENOSYS {
-		return err
-	}
-	// If the utimensat syscall isn't available (utimensat was added to Linux
-	// in 2.6.22, Released, 8 July 2007) then fall back to utimes
-	var tv [2]Timeval
-	for i := 0; i < 2; i++ {
-		tv[i] = NsecToTimeval(TimespecToNsec(ts[i]))
-	}
-	return utimes(path, (*[2]Timeval)(unsafe.Pointer(&tv[0])))
-=======
 	return UtimesNanoAt(AT_FDCWD, path, ts, 0)
->>>>>>> upstream/master
 }
 
 func UtimesNanoAt(dirfd int, path string, ts []Timespec, flags int) error {
@@ -1290,15 +1245,7 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 func Accept(fd int) (nfd int, sa Sockaddr, err error) {
 	var rsa RawSockaddrAny
 	var len _Socklen = SizeofSockaddrAny
-<<<<<<< HEAD
-	// Try accept4 first for Android, then try accept for kernel older than 2.6.28
 	nfd, err = accept4(fd, &rsa, &len, 0)
-	if err == ENOSYS {
-		nfd, err = accept(fd, &rsa, &len)
-	}
-=======
-	nfd, err = accept4(fd, &rsa, &len, 0)
->>>>>>> upstream/master
 	if err != nil {
 		return
 	}
@@ -1420,8 +1367,6 @@ func SetsockoptTpacketReq3(fd, level, opt int, tp *TpacketReq3) error {
 	return setsockopt(fd, level, opt, unsafe.Pointer(tp), unsafe.Sizeof(*tp))
 }
 
-<<<<<<< HEAD
-=======
 func SetsockoptTCPRepairOpt(fd, level, opt int, o []TCPRepairOpt) (err error) {
 	if len(o) == 0 {
 		return EINVAL
@@ -1429,7 +1374,6 @@ func SetsockoptTCPRepairOpt(fd, level, opt int, o []TCPRepairOpt) (err error) {
 	return setsockopt(fd, level, opt, unsafe.Pointer(&o[0]), uintptr(SizeofTCPRepairOpt*len(o)))
 }
 
->>>>>>> upstream/master
 // Keyctl Commands (http://man7.org/linux/man-pages/man2/keyctl.2.html)
 
 // KeyctlInt calls keyctl commands in which each argument is an int.
@@ -1884,15 +1828,7 @@ func Sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 //sys	Dup(oldfd int) (fd int, err error)
 
 func Dup2(oldfd, newfd int) error {
-<<<<<<< HEAD
-	// Android O and newer blocks dup2; riscv and arm64 don't implement dup2.
-	if runtime.GOOS == "android" || runtime.GOARCH == "riscv64" || runtime.GOARCH == "arm64" {
-		return Dup3(oldfd, newfd, 0)
-	}
-	return dup2(oldfd, newfd)
-=======
 	return Dup3(oldfd, newfd, 0)
->>>>>>> upstream/master
 }
 
 //sys	Dup3(oldfd int, newfd int, flags int) (err error)
@@ -1945,11 +1881,7 @@ func Getpgrp() (pid int) {
 //sys	Nanosleep(time *Timespec, leftover *Timespec) (err error)
 //sys	PerfEventOpen(attr *PerfEventAttr, pid int, cpu int, groupFd int, flags int) (fd int, err error)
 //sys	PivotRoot(newroot string, putold string) (err error) = SYS_PIVOT_ROOT
-<<<<<<< HEAD
-//sysnb	prlimit(pid int, resource int, newlimit *Rlimit, old *Rlimit) (err error) = SYS_PRLIMIT64
-=======
 //sysnb	Prlimit(pid int, resource int, newlimit *Rlimit, old *Rlimit) (err error) = SYS_PRLIMIT64
->>>>>>> upstream/master
 //sys	Prctl(option int, arg2 uintptr, arg3 uintptr, arg4 uintptr, arg5 uintptr) (err error)
 //sys	Pselect(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *Sigset_t) (n int, err error) = SYS_PSELECT6
 //sys	read(fd int, p []byte) (n int, err error)
@@ -2384,8 +2316,6 @@ type RemoteIovec struct {
 //sys	ProcessVMReadv(pid int, localIov []Iovec, remoteIov []RemoteIovec, flags uint) (n int, err error) = SYS_PROCESS_VM_READV
 //sys	ProcessVMWritev(pid int, localIov []Iovec, remoteIov []RemoteIovec, flags uint) (n int, err error) = SYS_PROCESS_VM_WRITEV
 
-<<<<<<< HEAD
-=======
 //sys	PidfdOpen(pid int, flags int) (fd int, err error) = SYS_PIDFD_OPEN
 //sys	PidfdGetfd(pidfd int, targetfd int, flags int) (fd int, err error) = SYS_PIDFD_GETFD
 
@@ -2394,7 +2324,6 @@ type RemoteIovec struct {
 //sys	shmdt(addr uintptr) (err error)
 //sys	shmget(key int, size int, flag int) (id int, err error)
 
->>>>>>> upstream/master
 /*
  * Unimplemented
  */
@@ -2476,13 +2405,6 @@ type RemoteIovec struct {
 // SetRobustList
 // SetThreadArea
 // SetTidAddress
-<<<<<<< HEAD
-// Shmat
-// Shmctl
-// Shmdt
-// Shmget
-=======
->>>>>>> upstream/master
 // Sigaltstack
 // Swapoff
 // Swapon

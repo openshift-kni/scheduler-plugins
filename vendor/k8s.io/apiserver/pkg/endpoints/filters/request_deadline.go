@@ -27,16 +27,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-<<<<<<< HEAD
-	utilclock "k8s.io/apimachinery/pkg/util/clock"
-	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	auditinternal "k8s.io/apiserver/pkg/apis/audit"
-	"k8s.io/apiserver/pkg/audit"
-	"k8s.io/apiserver/pkg/audit/policy"
-	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
-	"k8s.io/apiserver/pkg/endpoints/request"
-	"k8s.io/klog/v2"
-=======
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	auditinternal "k8s.io/apiserver/pkg/apis/audit"
 	"k8s.io/apiserver/pkg/audit"
@@ -44,7 +34,6 @@ import (
 	"k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/clock"
->>>>>>> upstream/master
 )
 
 const (
@@ -57,15 +46,6 @@ const (
 // auditWrapper provides an http.Handler that audits a failed request.
 // longRunning returns true if he given request is a long running request.
 // requestTimeoutMaximum specifies the default request timeout value.
-<<<<<<< HEAD
-func WithRequestDeadline(handler http.Handler, sink audit.Sink, policy policy.Checker, longRunning request.LongRunningRequestCheck,
-	negotiatedSerializer runtime.NegotiatedSerializer, requestTimeoutMaximum time.Duration) http.Handler {
-	return withRequestDeadline(handler, sink, policy, longRunning, negotiatedSerializer, requestTimeoutMaximum, utilclock.RealClock{})
-}
-
-func withRequestDeadline(handler http.Handler, sink audit.Sink, policy policy.Checker, longRunning request.LongRunningRequestCheck,
-	negotiatedSerializer runtime.NegotiatedSerializer, requestTimeoutMaximum time.Duration, clock utilclock.PassiveClock) http.Handler {
-=======
 func WithRequestDeadline(handler http.Handler, sink audit.Sink, policy audit.PolicyRuleEvaluator, longRunning request.LongRunningRequestCheck,
 	negotiatedSerializer runtime.NegotiatedSerializer, requestTimeoutMaximum time.Duration) http.Handler {
 	return withRequestDeadline(handler, sink, policy, longRunning, negotiatedSerializer, requestTimeoutMaximum, clock.RealClock{})
@@ -73,7 +53,6 @@ func WithRequestDeadline(handler http.Handler, sink audit.Sink, policy audit.Pol
 
 func withRequestDeadline(handler http.Handler, sink audit.Sink, policy audit.PolicyRuleEvaluator, longRunning request.LongRunningRequestCheck,
 	negotiatedSerializer runtime.NegotiatedSerializer, requestTimeoutMaximum time.Duration, clock clock.PassiveClock) http.Handler {
->>>>>>> upstream/master
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 
@@ -124,51 +103,33 @@ func withRequestDeadline(handler http.Handler, sink audit.Sink, policy audit.Pol
 
 // withFailedRequestAudit decorates a failed http.Handler and is used to audit a failed request.
 // statusErr is used to populate the Message property of ResponseStatus.
-<<<<<<< HEAD
-func withFailedRequestAudit(failedHandler http.Handler, statusErr *apierrors.StatusError, sink audit.Sink, policy policy.Checker) http.Handler {
-=======
 func withFailedRequestAudit(failedHandler http.Handler, statusErr *apierrors.StatusError, sink audit.Sink, policy audit.PolicyRuleEvaluator) http.Handler {
->>>>>>> upstream/master
 	if sink == nil || policy == nil {
 		return failedHandler
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-<<<<<<< HEAD
-		req, ev, omitStages, err := createAuditEventAndAttachToContext(req, policy)
-=======
 		a, err := evaluatePolicyAndCreateAuditEvent(req, policy)
->>>>>>> upstream/master
 		if err != nil {
 			utilruntime.HandleError(fmt.Errorf("failed to create audit event: %v", err))
 			responsewriters.InternalError(w, req, errors.New("failed to create audit event"))
 			return
 		}
-<<<<<<< HEAD
-=======
 
 		ev := a.Event
->>>>>>> upstream/master
 		if ev == nil {
 			failedHandler.ServeHTTP(w, req)
 			return
 		}
 
-<<<<<<< HEAD
-=======
 		req = req.WithContext(audit.WithAuditContext(req.Context(), a))
 
->>>>>>> upstream/master
 		ev.ResponseStatus = &metav1.Status{}
 		ev.Stage = auditinternal.StageResponseStarted
 		if statusErr != nil {
 			ev.ResponseStatus.Message = statusErr.Error()
 		}
 
-<<<<<<< HEAD
-		rw := decorateResponseWriter(req.Context(), w, ev, sink, omitStages)
-=======
 		rw := decorateResponseWriter(req.Context(), w, ev, sink, a.RequestAuditConfig.OmitStages)
->>>>>>> upstream/master
 		failedHandler.ServeHTTP(rw, req)
 	})
 }

@@ -132,8 +132,6 @@ type RESTMapper interface {
 
 	ResourceSingularizer(resource string) (singular string, err error)
 }
-<<<<<<< HEAD
-=======
 
 // ResettableRESTMapper is a RESTMapper which is capable of resetting itself
 // from discovery.
@@ -143,4 +141,3 @@ type ResettableRESTMapper interface {
 	RESTMapper
 	Reset()
 }
->>>>>>> upstream/master

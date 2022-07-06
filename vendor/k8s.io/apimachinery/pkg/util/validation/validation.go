@@ -25,10 +25,7 @@ import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
-<<<<<<< HEAD
-=======
 	netutils "k8s.io/utils/net"
->>>>>>> upstream/master
 )
 
 const qnameCharFmt string = "[A-Za-z0-9]"
@@ -350,11 +347,7 @@ func IsValidPortName(port string) []string {
 
 // IsValidIP tests that the argument is a valid IP address.
 func IsValidIP(value string) []string {
-<<<<<<< HEAD
-	if net.ParseIP(value) == nil {
-=======
 	if netutils.ParseIPSloppy(value) == nil {
->>>>>>> upstream/master
 		return []string{"must be a valid IP address, (e.g. 10.9.8.7 or 2001:db8::ffff)"}
 	}
 	return nil
@@ -363,11 +356,7 @@ func IsValidIP(value string) []string {
 // IsValidIPv4Address tests that the argument is a valid IPv4 address.
 func IsValidIPv4Address(fldPath *field.Path, value string) field.ErrorList {
 	var allErrors field.ErrorList
-<<<<<<< HEAD
-	ip := net.ParseIP(value)
-=======
 	ip := netutils.ParseIPSloppy(value)
->>>>>>> upstream/master
 	if ip == nil || ip.To4() == nil {
 		allErrors = append(allErrors, field.Invalid(fldPath, value, "must be a valid IPv4 address"))
 	}
@@ -377,11 +366,7 @@ func IsValidIPv4Address(fldPath *field.Path, value string) field.ErrorList {
 // IsValidIPv6Address tests that the argument is a valid IPv6 address.
 func IsValidIPv6Address(fldPath *field.Path, value string) field.ErrorList {
 	var allErrors field.ErrorList
-<<<<<<< HEAD
-	ip := net.ParseIP(value)
-=======
 	ip := netutils.ParseIPSloppy(value)
->>>>>>> upstream/master
 	if ip == nil || ip.To4() != nil {
 		allErrors = append(allErrors, field.Invalid(fldPath, value, "must be a valid IPv6 address"))
 	}
