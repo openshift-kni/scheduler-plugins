@@ -45,11 +45,11 @@ build: build-noderesourcetopology-plugin
 build.amd64: build-scheduler.amd64 build-noderesourcetopology-plugin.amd64
 
 .PHONY: build-noderesourcetopology-plugin
-build-noderesourcetopology-plugin: autogen
+build-noderesourcetopology-plugin: update-vendor
 	$(COMMONENVVAR) $(BUILDENVVAR) go build -ldflags '-X k8s.io/component-base/version.gitVersion=$(VERSION) -w' -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
 .PHONY: build-noderesourcetopology-plugin.amd64
-build-noderesourcetopology-plugin.amd64: autogen
+build-noderesourcetopology-plugin.amd64: update-vendor
 	$(COMMONENVVAR) $(BUILDENVVAR) GOARCH=amd64 go build -ldflags '-X k8s.io/component-base/version.gitVersion=$(VERSION) -w' -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
 .PHONY: local-noderesourcetopology-image
@@ -61,36 +61,42 @@ update-vendor:
 	hack/update-vendor.sh
 
 .PHONY: unit-test
-unit-test: autogen
+unit-test: update-vendor
 	hack/unit-test.sh
 
 .PHONY: unit-test-quick
 unit-test-quick:
 	hack-kni/unit-test-quick.sh
 
-.PHONY: install-etcd
-install-etcd:
-	hack/install-etcd.sh
-
-.PHONY: autogen
-autogen: update-vendor
-	hack/update-generated-openapi.sh
+.PHONY: install-envtest
+install-envtest: update-vendor
+	hack/install-envtest.sh
 
 .PHONY: integration-test
-integration-test: install-etcd autogen
+integration-test: install-envtest
 	hack/integration-test.sh
 
 .PHONY: integration-test-quick
-integration-test-quick: install-etcd autogen
+integration-test-quick: install-envtest
 	hack-kni/integration-test-quick.sh
+
+.PHONY: verify
+verify: update-vendor
+	hack/verify-gofmt.sh
+	hack/verify-crdgen.sh
+	hack/verify-structured-logging.sh
 
 .PHONY: verify-gofmt
 verify-gofmt:
 	hack/verify-gofmt.sh
 
 .PHONY: verify-crdgen
-verify-crdgen: autogen
+verify-crdgen: update-vendor
 	hack/verify-crdgen.sh
+
+.PHONY: verify-structured-logging
+verify-crdgen: update-vendor
+	hack/verify-structured-logging.sh
 
 .PHONY: clean
 clean:
