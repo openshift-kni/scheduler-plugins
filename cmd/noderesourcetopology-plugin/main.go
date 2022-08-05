@@ -24,6 +24,7 @@ import (
 	"k8s.io/component-base/logs"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
+	"sigs.k8s.io/scheduler-plugins/pkg-kni/knidebug"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology"
 	// Ensure scheme package is initialized.
 	_ "sigs.k8s.io/scheduler-plugins/pkg/apis/config/scheme"
@@ -37,6 +38,7 @@ func main() {
 	// used by various kinds of workloads.
 	command := app.NewSchedulerCommand(
 		app.WithPlugin(noderesourcetopology.Name, noderesourcetopology.New),
+		app.WithPlugin(knidebug.Name, knidebug.New),
 	)
 
 	// TODO: once we switch everything over to Cobra commands, we can go back to calling
