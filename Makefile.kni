@@ -29,7 +29,10 @@ RELEASE_VERSION?=devel-v0.0.$(shell date +%Y%m%d)$(RELEASE_SEQUENTIAL)
 VERSION=$(shell echo $(RELEASE_VERSION) | awk -F - '{print $$2}')
 
 .PHONY: all
-all: build
+all: image
+
+.PHONY: image
+image: build-noderesourcetopology-image
 
 .PHONY: build
 build: build-noderesourcetopology-plugin
