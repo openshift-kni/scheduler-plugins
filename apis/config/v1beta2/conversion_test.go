@@ -39,6 +39,15 @@ func TestConvert_v1beta2_NodeResourceTopologyMatchArgs_To_config_NodeResourceTop
 			expected: &config.NodeResourceTopologyMatchArgs{},
 		},
 		{
+			name: "cacheresyncperiod only",
+			in: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(42),
+			},
+			expected: &config.NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: 42,
+			},
+		},
+		{
 			name: "type leastallocated, no resources",
 			in: &NodeResourceTopologyMatchArgs{
 				ScoringStrategy: &ScoringStrategy{
@@ -158,6 +167,42 @@ func TestConvert_v1beta2_NodeResourceTopologyMatchArgs_To_config_NodeResourceTop
 						{
 							Name:   "bar",
 							Weight: 9999,
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "all the fields",
+			in: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(13),
+				ScoringStrategy: &ScoringStrategy{
+					Type: BalancedAllocation,
+					// random non-zero numbers
+					Resources: []schedulerconfigv1beta2.ResourceSpec{
+						{
+							Name:   "cpu",
+							Weight: 1111,
+						},
+						{
+							Name:   "memory",
+							Weight: 2222,
+						},
+					},
+				},
+			},
+			expected: &config.NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: 13,
+				ScoringStrategy: config.ScoringStrategy{
+					Type: config.BalancedAllocation,
+					Resources: []schedconfig.ResourceSpec{
+						{
+							Name:   "cpu",
+							Weight: 1111,
+						},
+						{
+							Name:   "memory",
+							Weight: 2222,
 						},
 					},
 				},
@@ -188,7 +233,18 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 			name: "empty NodeResourceTopologyMatchArgs",
 			in:   &config.NodeResourceTopologyMatchArgs{},
 			expected: &NodeResourceTopologyMatchArgs{
-				ScoringStrategy: &ScoringStrategy{},
+				CacheResyncPeriodSeconds: int64Ptr(0),
+				ScoringStrategy:          &ScoringStrategy{},
+			},
+		},
+		{
+			name: "cacheresyncperiod only",
+			in: &config.NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: 42,
+			},
+			expected: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(42),
+				ScoringStrategy:          &ScoringStrategy{},
 			},
 		},
 		{
@@ -199,6 +255,7 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 				},
 			},
 			expected: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(0),
 				ScoringStrategy: &ScoringStrategy{
 					Type: LeastAllocated,
 				},
@@ -212,6 +269,7 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 				},
 			},
 			expected: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(0),
 				ScoringStrategy: &ScoringStrategy{
 					Type: BalancedAllocation,
 				},
@@ -225,6 +283,7 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 				},
 			},
 			expected: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(0),
 				ScoringStrategy: &ScoringStrategy{
 					Type: MostAllocated,
 				},
@@ -244,6 +303,7 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 				},
 			},
 			expected: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(0),
 				ScoringStrategy: &ScoringStrategy{
 					Type: LeastAllocated,
 					// random non-zero numbers
@@ -274,6 +334,7 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 				},
 			},
 			expected: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(0),
 				ScoringStrategy: &ScoringStrategy{
 					Type: BalancedAllocation,
 					// random non-zero numbers
@@ -304,6 +365,7 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 				},
 			},
 			expected: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(0),
 				ScoringStrategy: &ScoringStrategy{
 					Type: MostAllocated,
 					// random non-zero numbers
@@ -311,6 +373,42 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 						{
 							Name:   "bar",
 							Weight: 9999,
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "all the fields",
+			in: &config.NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: 13,
+				ScoringStrategy: config.ScoringStrategy{
+					Type: config.BalancedAllocation,
+					Resources: []schedconfig.ResourceSpec{
+						{
+							Name:   "cpu",
+							Weight: 1111,
+						},
+						{
+							Name:   "memory",
+							Weight: 2222,
+						},
+					},
+				},
+			},
+			expected: &NodeResourceTopologyMatchArgs{
+				CacheResyncPeriodSeconds: int64Ptr(13),
+				ScoringStrategy: &ScoringStrategy{
+					Type: BalancedAllocation,
+					// random non-zero numbers
+					Resources: []schedulerconfigv1beta2.ResourceSpec{
+						{
+							Name:   "cpu",
+							Weight: 1111,
+						},
+						{
+							Name:   "memory",
+							Weight: 2222,
 						},
 					},
 				},
@@ -333,5 +431,8 @@ func TestConvert_config_NodeResourceTopologyMatchArgs_To_v1beta2_NodeResourceTop
 			t.Errorf("Got unexpected defaults (-want, +got):\n%s", diff)
 		}
 	}
+}
 
+func int64Ptr(v int64) *int64 {
+	return &v
 }

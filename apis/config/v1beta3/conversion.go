@@ -23,6 +23,7 @@ import (
 
 // Convert_v1beta3_NodeResourceTopologyMatchArgs_To_config_NodeResourceTopologyMatchArgs is an manually generated conversion function.
 func Convert_v1beta3_NodeResourceTopologyMatchArgs_To_config_NodeResourceTopologyMatchArgs(in *NodeResourceTopologyMatchArgs, out *config.NodeResourceTopologyMatchArgs, s conversion.Scope) error {
+	autoConvert_v1beta3_NodeResourceTopologyMatchArgs_To_config_NodeResourceTopologyMatchArgs(in, out, s)
 	if in.ScoringStrategy != nil {
 		if err := autoConvert_v1beta3_ScoringStrategy_To_config_ScoringStrategy(in.ScoringStrategy, &out.ScoringStrategy, s); err != nil {
 			return err
@@ -33,6 +34,7 @@ func Convert_v1beta3_NodeResourceTopologyMatchArgs_To_config_NodeResourceTopolog
 
 // Convert_config_NodeResourceTopologyMatchArgs_To_v1beta3_NodeResourceTopologyMatchArgs is an manually generated conversion function.
 func Convert_config_NodeResourceTopologyMatchArgs_To_v1beta3_NodeResourceTopologyMatchArgs(in *config.NodeResourceTopologyMatchArgs, out *NodeResourceTopologyMatchArgs, s conversion.Scope) error {
+	autoConvert_config_NodeResourceTopologyMatchArgs_To_v1beta3_NodeResourceTopologyMatchArgs(in, out, s)
 	out.ScoringStrategy = new(ScoringStrategy)
 	if err := autoConvert_config_ScoringStrategy_To_v1beta3_ScoringStrategy(&in.ScoringStrategy, out.ScoringStrategy, s); err != nil {
 		return err
