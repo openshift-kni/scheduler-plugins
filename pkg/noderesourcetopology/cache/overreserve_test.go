@@ -18,6 +18,7 @@ package cache
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"sort"
 	"testing"
@@ -28,9 +29,11 @@ import (
 	listerv1alpha1 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/generated/listers/topology/v1alpha1"
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/labels"
+	podlisterv1 "k8s.io/client-go/listers/core/v1"
 )
 
 const (
@@ -42,10 +45,10 @@ const (
 func TestInitEmptyLister(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
 	var err error
-	_, err = NewOverReserve(nil, fakeIndex)
+	_, err = NewOverReserve(nil, fakePodLister)
 	if err == nil {
 		t.Fatalf("accepted nil lister")
 	}
@@ -59,9 +62,9 @@ func TestInitEmptyLister(t *testing.T) {
 func TestNodesMaybeOverReservedCount(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 	dirtyNodes := nrtCache.NodesMaybeOverReserved("testing")
 	if len(dirtyNodes) != 0 {
 		t.Errorf("dirty nodes from pristine cache: %v", dirtyNodes)
@@ -71,9 +74,9 @@ func TestNodesMaybeOverReservedCount(t *testing.T) {
 func TestDirtyNodesMarkDiscarded(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	expectedNodes := []string{
 		"node-1",
@@ -104,9 +107,9 @@ func TestDirtyNodesMarkDiscarded(t *testing.T) {
 func TestDirtyNodesUnmarkedOnReserve(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	availNodes := []string{
 		"node-1",
@@ -143,9 +146,9 @@ func TestDirtyNodesUnmarkedOnReserve(t *testing.T) {
 func TestGetCachedNRTCopy(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	var nrtObj *topologyv1alpha1.NodeResourceTopology
 	nrtObj, _ = nrtCache.GetCachedNRTCopy("node1", &corev1.Pod{})
@@ -192,9 +195,9 @@ func TestGetCachedNRTCopy(t *testing.T) {
 func TestGetCachedNRTCopyReserve(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	nodeTopologies := makeDefaultTestTopology()
 	for _, obj := range nodeTopologies {
@@ -241,9 +244,9 @@ func TestGetCachedNRTCopyReserve(t *testing.T) {
 func TestGetCachedNRTCopyReleaseNone(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	nodeTopologies := makeDefaultTestTopology()
 	for _, obj := range nodeTopologies {
@@ -279,9 +282,9 @@ func TestGetCachedNRTCopyReleaseNone(t *testing.T) {
 func TestGetCachedNRTCopyReserveRelease(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	nodeTopologies := makeDefaultTestTopology()
 	for _, obj := range nodeTopologies {
@@ -318,9 +321,9 @@ func TestGetCachedNRTCopyReserveRelease(t *testing.T) {
 func TestFlush(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	nodeTopologies := makeDefaultTestTopology()
 	for _, obj := range nodeTopologies {
@@ -392,9 +395,9 @@ func TestFlush(t *testing.T) {
 func TestResyncNoPodFingerprint(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	nodeTopologies := makeDefaultTestTopology()
 	for _, obj := range nodeTopologies {
@@ -467,9 +470,9 @@ func TestResyncNoPodFingerprint(t *testing.T) {
 func TestResyncMatchFingerprint(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	nodeTopologies := makeDefaultTestTopology()
 	for _, obj := range nodeTopologies {
@@ -533,7 +536,7 @@ func TestResyncMatchFingerprint(t *testing.T) {
 	}
 
 	fakeInformer.Informer().GetStore().Add(expectedNodeTopology)
-	fakeIndex.Add(testPod)
+	fakePodLister.AddPod(testPod)
 
 	nrtCache.Resync()
 
@@ -551,9 +554,9 @@ func TestResyncMatchFingerprint(t *testing.T) {
 func TestUnknownNodeWithForeignPods(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	nrtCache.NodeHasForeignPods("node-bogus", &corev1.Pod{})
 
@@ -566,9 +569,9 @@ func TestUnknownNodeWithForeignPods(t *testing.T) {
 func TestNodeWithForeignPods(t *testing.T) {
 	fakeClient := faketopologyv1alpha1.NewSimpleClientset()
 	fakeInformer := topologyinformers.NewSharedInformerFactory(fakeClient, 0).Topology().V1alpha1().NodeResourceTopologies()
-	fakeIndex := &fakePodByNodeNameIndex{}
+	fakePodLister := &fakePodLister{}
 
-	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakeIndex)
+	nrtCache := mustOverReserve(t, fakeInformer.Lister(), fakePodLister)
 
 	nodeTopologies := []*topologyv1alpha1.NodeResourceTopology{
 		{
@@ -646,35 +649,38 @@ func dumpNRT(nrtObj *topologyv1alpha1.NodeResourceTopology) string {
 	return string(nrtJson)
 }
 
-type fakePodByNodeNameIndex struct {
+type fakePodLister struct {
 	pods []*corev1.Pod
 	err  error
 }
 
-func (fi *fakePodByNodeNameIndex) Add(pod *corev1.Pod) {
-	fi.pods = append(fi.pods, pod)
+type fakePodNamespaceLister struct {
+	parent    *fakePodLister
+	namespace string
 }
 
-func (fi *fakePodByNodeNameIndex) GetPodNamespacedNamesByNode(logID, nodeName string) ([]types.NamespacedName, error) {
-	if fi.err != nil {
-		return nil, fi.err
-	}
-
-	var objs []types.NamespacedName
-	for _, pod := range fi.pods {
-		if pod.Spec.NodeName != nodeName {
-			continue
-		}
-		objs = append(objs, types.NamespacedName{
-			Namespace: pod.GetNamespace(),
-			Name:      pod.GetName(),
-		})
-	}
-	return objs, nil
+func (fpl *fakePodLister) AddPod(pod *corev1.Pod) {
+	fpl.pods = append(fpl.pods, pod)
 }
 
-func (fi *fakePodByNodeNameIndex) TrackReservedPod(pod *corev1.Pod, nodeName string)   {}
-func (fi *fakePodByNodeNameIndex) UntrackReservedPod(pod *corev1.Pod, nodeName string) {}
+func (fpl *fakePodLister) List(selector labels.Selector) ([]*corev1.Pod, error) {
+	return fpl.pods, fpl.err
+}
+
+func (fpl *fakePodLister) Pods(namespace string) podlisterv1.PodNamespaceLister {
+	return &fakePodNamespaceLister{
+		parent:    fpl,
+		namespace: namespace,
+	}
+}
+
+func (fpnl *fakePodNamespaceLister) List(selector labels.Selector) ([]*v1.Pod, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}
+
+func (fpnl *fakePodNamespaceLister) Get(name string) (*v1.Pod, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}
 
 func MakeTopologyResInfo(name, capacity, available string) topologyv1alpha1.ResourceInfo {
 	return topologyv1alpha1.ResourceInfo{
@@ -713,8 +719,8 @@ func makeDefaultTestTopology() []*topologyv1alpha1.NodeResourceTopology {
 	}
 }
 
-func mustOverReserve(t *testing.T, lister listerv1alpha1.NodeResourceTopologyLister, indexer NodeIndexer) *OverReserve {
-	obj, err := NewOverReserve(lister, indexer)
+func mustOverReserve(t *testing.T, nrtLister listerv1alpha1.NodeResourceTopologyLister, podLister podlisterv1.PodLister) *OverReserve {
+	obj, err := NewOverReserve(nrtLister, podLister)
 	if err != nil {
 		t.Fatalf("unexpected error creating cache: %v", err)
 	}

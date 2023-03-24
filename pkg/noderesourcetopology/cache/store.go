@@ -21,6 +21,9 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
+	podlisterv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/klog/v2"
 
 	topologyv1alpha1 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha1"
@@ -210,13 +213,13 @@ func podFingerprintForNodeTopology(nrt *topologyv1alpha1.NodeResourceTopology) s
 // checkPodFingerprintForNode verifies if the given pods fingeprint (usually from NRT update) matches the
 // computed one using the stored data about pods running on nodes. Returns nil on success, or an error
 // describing the failure
-func checkPodFingerprintForNode(logID string, indexer NodeIndexer, nodeName, pfpExpected string) error {
-	objs, err := indexer.GetPodNamespacedNamesByNode(logID, nodeName)
+func checkPodFingerprintForNode(logID string, podLister podlisterv1.PodLister, nodeName, pfpExpected string) error {
+	objs, err := getPodNamespacedNamesByNode(podLister, logID, nodeName)
 	if err != nil {
 		return err
 	}
 
-	var st podfingerprint.Status
+	st := podfingerprint.MakeStatus(nodeName)
 	pfp := podfingerprint.NewTracingFingerprint(len(objs), &st)
 	for _, obj := range objs {
 		pfp.Add(obj.Namespace, obj.Name)
@@ -227,4 +230,22 @@ func checkPodFingerprintForNode(logID string, indexer NodeIndexer, nodeName, pfp
 	klog.V(6).InfoS("nrtcache: podset fingerprint debug", "logID", logID, "node", nodeName, "status", st.Repr())
 
 	return pfp.Check(pfpExpected)
+}
+
+func getPodNamespacedNamesByNode(podLister podlisterv1.PodLister, logID, nodeName string) ([]types.NamespacedName, error) {
+	pods, err := podLister.List(labels.Everything())
+	if err != nil {
+		return []types.NamespacedName{}, err
+	}
+	objs := make([]types.NamespacedName, 0, len(pods))
+	for _, pod := range pods {
+		if pod.Spec.NodeName != nodeName {
+			continue
+		}
+		objs = append(objs, types.NamespacedName{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+		})
+	}
+	return objs, nil
 }
