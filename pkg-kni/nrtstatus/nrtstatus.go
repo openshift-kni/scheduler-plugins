@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package pfpstatus
+package nrtstatus
 
 import (
 	"context"
@@ -27,17 +27,17 @@ import (
 )
 
 const (
-	BaseDirectory = "/run/pfpstatus"
+	BaseDirectory = "/run/nrtstatus"
 )
 
-type PFPNodeStatus struct {
+type NRTNodeStatus struct {
 	updates chan *StatusInfo
 }
 
-var nodes *PFPNodeStatus
+var nodes *NRTNodeStatus
 
 func init() {
-	nodes = &PFPNodeStatus{}
+	nodes = &NRTNodeStatus{}
 }
 
 type TracingStatus struct {
