@@ -302,8 +302,8 @@ github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8
 github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
 github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.0.12 h1:NhXbOjO1st8hIcVpegr3zw/AGG12vs3z//tCDDcfPpE=
 github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.0.12/go.mod h1:AkACMQGiTgCt0lQw3m7TTU8PLH9lYKNK5e9DqFf5VuM=
-github.com/k8stopologyawareschedwg/podfingerprint v0.1.3-0.20230320151543-cac6601de9ff h1:mK6Et1XE8H+Tg1lu+AfszA2yPR1wulZ4FLD6EaMHmug=
-github.com/k8stopologyawareschedwg/podfingerprint v0.1.3-0.20230320151543-cac6601de9ff/go.mod h1:C23pM15t06dXg/OihGlqBvnYzLr+MXDXJ7zMfbNAyXI=
+github.com/k8stopologyawareschedwg/podfingerprint v0.2.0 h1:3Wc58WPBqG0yry0noEARZIAljBOU7TQZDg1L7dQTyw0=
+github.com/k8stopologyawareschedwg/podfingerprint v0.2.0/go.mod h1:C23pM15t06dXg/OihGlqBvnYzLr+MXDXJ7zMfbNAyXI=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=

@@ -8,7 +8,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/google/go-cmp v0.5.5
 	github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.0.12
-	github.com/k8stopologyawareschedwg/podfingerprint v0.1.3-0.20230320151543-cac6601de9ff
+	github.com/k8stopologyawareschedwg/podfingerprint v0.2.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/paypal/load-watcher v0.2.2
 	github.com/spf13/pflag v1.0.5
