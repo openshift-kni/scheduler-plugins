@@ -128,6 +128,8 @@ const (
 	BalancedAllocation ScoringStrategyType = "BalancedAllocation"
 	// LeastAllocated strategy favors node with the most amount of available resource
 	LeastAllocated ScoringStrategyType = "LeastAllocated"
+	// LeastNUMANodes strategy favors nodes which requires least amount of NUMA nodes to satisfy resource requests for given pod
+	LeastNUMANodes ScoringStrategyType = "LeastNUMANodes"
 )
 
 // ScoringStrategy define ScoringStrategyType for node resource topology plugin
@@ -148,9 +150,39 @@ type NodeResourceTopologyMatchArgs struct {
 
 	// ScoringStrategy a scoring model that determine how the plugin will score the nodes.
 	ScoringStrategy ScoringStrategy
+	// If > 0, enables the caching facilities of the reserve plugin - which must be enabled
+	CacheResyncPeriodSeconds int64
+	// if set to true, exclude node from scheduling if there are any reserved pods for given node
+	// this option takes precedence over CacheResyncPeriodSeconds
+	// if DiscardReservedNodes is enabled, CacheResyncPeriodSeconds option is noop
+	DiscardReservedNodes bool
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // PreemptionTolerationArgs reuses DefaultPluginArgs.
 type PreemptionTolerationArgs schedconfig.DefaultPreemptionArgs
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type TopologicalSortArgs struct {
+	metav1.TypeMeta
+
+	// Namespaces to be considered by TopologySort plugin
+	Namespaces []string
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type NetworkOverheadArgs struct {
+	metav1.TypeMeta
+
+	// Namespaces to be considered by NetworkMinCost plugin
+	Namespaces []string
+
+	// Preferred weights (Default: UserDefined)
+	WeightsName string
+
+	// The NetworkTopology CRD name
+	NetworkTopologyName string
+}

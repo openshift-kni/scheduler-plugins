@@ -23,7 +23,6 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	corev1helpers "k8s.io/component-helpers/scheduling/corev1"
 	"k8s.io/klog/v2"
@@ -31,7 +30,6 @@ import (
 
 	"sigs.k8s.io/scheduler-plugins/apis/config"
 	"sigs.k8s.io/scheduler-plugins/apis/scheduling"
-	"sigs.k8s.io/scheduler-plugins/apis/scheduling/v1alpha1"
 	"sigs.k8s.io/scheduler-plugins/pkg/coscheduling/core"
 	pgclientset "sigs.k8s.io/scheduler-plugins/pkg/generated/clientset/versioned"
 	pgformers "sigs.k8s.io/scheduler-plugins/pkg/generated/informers/externalversions"
@@ -50,7 +48,7 @@ var _ framework.PreFilterPlugin = &Coscheduling{}
 var _ framework.PostFilterPlugin = &Coscheduling{}
 var _ framework.PermitPlugin = &Coscheduling{}
 var _ framework.ReservePlugin = &Coscheduling{}
-var _ framework.PostBindPlugin = &Coscheduling{}
+
 var _ framework.EnqueueExtensions = &Coscheduling{}
 
 const (
@@ -163,7 +161,7 @@ func (cs *Coscheduling) PostFilter(ctx context.Context, state *framework.CycleSt
 	// It's based on an implicit assumption: if the nth Pod failed,
 	// it's inferrable other Pods belonging to the same PodGroup would be very likely to fail.
 	cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
-		if waitingPod.GetPod().Namespace == pod.Namespace && waitingPod.GetPod().Labels[v1alpha1.PodGroupLabel] == pg.Name {
+		if waitingPod.GetPod().Namespace == pod.Namespace && util.GetPodGroupLabel(waitingPod.GetPod()) == pg.Name {
 			klog.V(3).InfoS("PostFilter rejects the pod", "podGroup", klog.KObj(pg), "pod", klog.KObj(waitingPod.GetPod()))
 			waitingPod.Reject(cs.Name(), "optimistic rejection in PostFilter")
 		}
@@ -225,25 +223,10 @@ func (cs *Coscheduling) Unreserve(ctx context.Context, state *framework.CycleSta
 		return
 	}
 	cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
-		if waitingPod.GetPod().Namespace == pod.Namespace && waitingPod.GetPod().Labels[v1alpha1.PodGroupLabel] == pg.Name {
+		if waitingPod.GetPod().Namespace == pod.Namespace && util.GetPodGroupLabel(waitingPod.GetPod()) == pg.Name {
 			klog.V(3).InfoS("Unreserve rejects", "pod", klog.KObj(waitingPod.GetPod()), "podGroup", klog.KObj(pg))
 			waitingPod.Reject(cs.Name(), "rejection in Unreserve")
 		}
 	})
 	cs.pgMgr.DeletePermittedPodGroup(pgName)
-}
-
-// PostBind is called after a pod is successfully bound. These plugins are used update PodGroup when pod is bound.
-func (cs *Coscheduling) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1.Pod, nodeName string) {
-	klog.V(5).InfoS("PostBind", "pod", klog.KObj(pod))
-	cs.pgMgr.PostBind(ctx, pod, nodeName)
-}
-
-// rejectPod rejects pod in cache
-func (cs *Coscheduling) rejectPod(uid types.UID) {
-	waitingPod := cs.frameworkHandler.GetWaitingPod(uid)
-	if waitingPod == nil {
-		return
-	}
-	waitingPod.Reject(Name, "")
 }

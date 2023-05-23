@@ -22,11 +22,13 @@ import (
 	"sigs.k8s.io/scheduler-plugins/apis/scheduling"
 )
 
+// ElasticQuota sets elastic quota restrictions per namespace
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName={eq,eqs}
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// ElasticQuota sets elastic quota restrictions per namespace
+// +kubebuilder:subresource:status
+// +kubebuilder:metadata:annotations="api-approved.kubernetes.io=https://github.com/kubernetes-sigs/scheduler-plugins/pull/52"
 type ElasticQuota struct {
 	metav1.TypeMeta `json:",inline"`
 
@@ -110,14 +112,16 @@ const (
 	PodGroupFailed PodGroupPhase = "Failed"
 
 	// PodGroupLabel is the default label of coscheduling
-	PodGroupLabel = "pod-group." + scheduling.GroupName
+	PodGroupLabel = scheduling.GroupName + "/pod-group"
 )
 
+// PodGroup is a collection of Pod; used for batch workload.
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName={pg,pgs}
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// PodGroup is a collection of Pod; used for batch workload.
+// +kubebuilder:subresource:status
+// +kubebuilder:metadata:annotations="api-approved.kubernetes.io=https://github.com/kubernetes-sigs/scheduler-plugins/pull/50"
 type PodGroup struct {
 	metav1.TypeMeta `json:",inline"`
 	// Standard object's metadata.
@@ -144,7 +148,7 @@ type PodGroupSpec struct {
 	// MinResources defines the minimal resource of members/tasks to run the pod group;
 	// if there's not enough resources to start all tasks, the scheduler
 	// will not start anyone.
-	MinResources *v1.ResourceList `json:"minResources,omitempty"`
+	MinResources v1.ResourceList `json:"minResources,omitempty"`
 
 	// ScheduleTimeoutSeconds defines the maximal time of members/tasks to wait before run the pod group;
 	ScheduleTimeoutSeconds *int32 `json:"scheduleTimeoutSeconds,omitempty"`
