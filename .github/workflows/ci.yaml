@@ -2,9 +2,9 @@ name: CI Go
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, release-4.12 ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, release-4.12 ]
 
 jobs:
   commit-check:
