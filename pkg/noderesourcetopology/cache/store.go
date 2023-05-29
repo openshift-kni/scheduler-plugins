@@ -34,6 +34,8 @@ import (
 	"sigs.k8s.io/scheduler-plugins/pkg/util"
 
 	"github.com/k8stopologyawareschedwg/podfingerprint"
+
+	kniinformer "sigs.k8s.io/scheduler-plugins/pkg-kni/podinformer"
 )
 
 // nrtStore maps the NRT data by node name. It is not thread safe and needs to be protected by a lock.
@@ -254,7 +256,7 @@ func makeNodeToPodDataMap(podLister podlisterv1.PodLister, logID string) (map[st
 		return nodeToObjsMap, err
 	}
 	for _, pod := range pods {
-		if pod.Status.Phase != corev1.PodRunning {
+		if !kniinformer.IsPodRelevantForState(pod) {
 			// we are interested only about nodes which consume resources
 			continue
 		}

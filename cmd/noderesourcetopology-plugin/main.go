@@ -34,6 +34,8 @@ import (
 	// Ensure scheme package is initialized.
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 
+	kniinformer "sigs.k8s.io/scheduler-plugins/pkg-kni/podinformer"
+
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 )
 
@@ -59,6 +61,8 @@ func setupPFPStatusDump() {
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
+
+	kniinformer.Setup()
 
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence
