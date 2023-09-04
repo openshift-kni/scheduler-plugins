@@ -17,12 +17,12 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"math/rand"
 	"os"
 	"time"
 
 	"k8s.io/component-base/logs"
-	"k8s.io/klog/v2/klogr"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/knidebug"
@@ -31,6 +31,7 @@ import (
 	// Ensure scheme package is initialized.
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 
+	knilogger "sigs.k8s.io/scheduler-plugins/pkg-kni/logger"
 	knistatus "sigs.k8s.io/scheduler-plugins/pkg-kni/pfpstatus"
 	kniinformer "sigs.k8s.io/scheduler-plugins/pkg-kni/podinformer"
 )
@@ -38,8 +39,9 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	logh := klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog))
+	ctx := context.Background()
 
+	logh := knilogger.Setup(ctx)
 	kniinformer.Setup(logh)
 	knistatus.Setup(logh)
 
