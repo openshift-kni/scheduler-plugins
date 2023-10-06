@@ -28,10 +28,6 @@ import (
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 )
 
-const (
-	BaseDirectory = "/run/pfpstatus"
-)
-
 type StatusInfo struct {
 	podfingerprint.Status
 	LastWrite time.Time `json:"lastWrite"`
@@ -65,7 +61,7 @@ func RunForever(ctx context.Context, logger logr.Logger, baseDirectory string, u
 				LastWrite: time.Now(),
 				SeqNo:     seqNo,
 			}
-			DumpNodeStatus(BaseDirectory, sti)
+			DumpNodeStatus(baseDirectory, sti)
 		}
 	}
 }
