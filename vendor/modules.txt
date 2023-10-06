@@ -1286,7 +1286,7 @@ k8s.io/gengo/types
 # k8s.io/klog/hack/tools v0.0.0-20210917071902-331d2323a192
 ## explicit; go 1.15
 k8s.io/klog/hack/tools/logcheck
-# k8s.io/klog/v2 v2.80.1
+# k8s.io/klog/v2 v2.100.1
 ## explicit; go 1.13
 k8s.io/klog/v2
 k8s.io/klog/v2/internal/buffer
