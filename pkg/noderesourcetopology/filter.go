@@ -33,6 +33,8 @@ import (
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/resourcerequests"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/stringify"
 	"sigs.k8s.io/scheduler-plugins/pkg/util"
+
+	knicustom "sigs.k8s.io/scheduler-plugins/pkg-kni/customization"
 )
 
 // The maximum number of NUMA nodes that Topology Manager allows is 8
@@ -208,7 +210,7 @@ func (tm *TopologyMatch) Filter(ctx context.Context, cycleState *framework.Cycle
 		return framework.NewStatus(framework.Unschedulable, "invalid node topology data")
 	}
 	if nodeTopology == nil {
-		return nil
+		return knicustom.RejectNode(nodeName, tm.scoreStrategyType, "missing topology data")
 	}
 
 	klog.V(5).InfoS("Found NodeResourceTopology", "nodeTopology", klog.KObj(nodeTopology))
