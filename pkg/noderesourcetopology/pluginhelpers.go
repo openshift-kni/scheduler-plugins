@@ -110,7 +110,7 @@ func initNodeTopologyForeignPodsDetection(cfg *apiconfig.NodeResourceTopologyCac
 	nrtcache.SetupForeignPodsDetector(profileName, podSharedInformer, nrtCache)
 }
 
-func createNUMANodeList(logID string, zones topologyv1alpha2.ZoneList) NUMANodeList {
+func createNUMANodeList(logID, nodeName string, zones topologyv1alpha2.ZoneList) NUMANodeList {
 	numaIDToZoneIDx := make([]int, maxNUMAId)
 	nodes := NUMANodeList{}
 	// filter non Node zones and create idToIdx lookup array

@@ -46,7 +46,7 @@ func singleNUMAContainerLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneLis
 	klog.V(5).InfoS("Single NUMA node handler", "logID", logID)
 
 	// prepare NUMANodes list from zoneMap
-	nodes := createNUMANodeList(logID, zones)
+	nodes := createNUMANodeList(logID, nodeInfo.Node().Name, zones)
 	qos := v1qos.GetPodQOS(pod)
 
 	LogNUMANodes(logID, "container handler NUMA resources", nodes)
@@ -177,13 +177,13 @@ func singleNUMAPodLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneList, nod
 
 	resources := util.GetPodEffectiveRequest(pod)
 
-	nodes := createNUMANodeList(logID, zones)
+	nodes := createNUMANodeList(logID, nodeInfo.Node().Name, zones)
 
 	// Node() != nil already verified in Filter(), which is the only public entry point
 	LogNUMANodes(logID, "pod handler NUMA resources", nodes)
 	klog.V(6).InfoS("target resources", stringify.ResourceListToLoggable(logID, "pod", resources)...)
 
-	if _, match := resourcesAvailableInAnyNUMANodes(logID, createNUMANodeList(logID, zones), resources, v1qos.GetPodQOS(pod), nodeInfo); !match {
+	if _, match := resourcesAvailableInAnyNUMANodes(logID, nodes, resources, v1qos.GetPodQOS(pod), nodeInfo); !match {
 		klog.V(2).InfoS("cannot align pod", "name", pod.Name)
 		return framework.NewStatus(framework.Unschedulable, "cannot align pod")
 	}
