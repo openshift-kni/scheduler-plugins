@@ -18,7 +18,6 @@ package noderesourcetopology
 
 import (
 	"context"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -30,6 +29,7 @@ import (
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
+	nrtlog "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/resourcerequests"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/stringify"
 	"sigs.k8s.io/scheduler-plugins/pkg/util"
@@ -42,21 +42,20 @@ const highestNUMAID = 8
 type PolicyHandler func(pod *v1.Pod, zoneMap topologyv1alpha2.ZoneList) *framework.Status
 
 func singleNUMAContainerLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneList, nodeInfo *framework.NodeInfo) *framework.Status {
-	klog.V(5).InfoS("Single NUMA node handler")
+	logID := nrtlog.PodRef(pod)
+	klog.V(5).InfoS("Single NUMA node handler", "logID", logID)
 
 	// prepare NUMANodes list from zoneMap
-	nodes := createNUMANodeList(zones)
+	nodes := createNUMANodeList(logID, zones)
 	qos := v1qos.GetPodQOS(pod)
 
-	// Node() != nil already verified in Filter(), which is the only public entry point
-	logNumaNodes("container handler NUMA resources", nodeInfo.Node().Name, nodes)
+	LogNUMANodes(logID, "container handler NUMA resources", nodes)
 
 	// the init containers are running SERIALLY and BEFORE the normal containers.
 	// https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#understanding-init-containers
 	// therefore, we don't need to accumulate their resources together
 	for _, initContainer := range pod.Spec.InitContainers {
-		logID := fmt.Sprintf("%s/%s/%s", pod.Namespace, pod.Name, initContainer.Name)
-		klog.V(6).InfoS("target resources", stringify.ResourceListToLoggable(logID, initContainer.Resources.Requests)...)
+		klog.V(6).InfoS("target resources", stringify.ResourceListToLoggable(logID, initContainer.Name, initContainer.Resources.Requests)...)
 
 		_, match := resourcesAvailableInAnyNUMANodes(logID, nodes, initContainer.Resources.Requests, qos, nodeInfo)
 		if !match {
@@ -67,8 +66,7 @@ func singleNUMAContainerLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneLis
 	}
 
 	for _, container := range pod.Spec.Containers {
-		logID := fmt.Sprintf("%s/%s/%s", pod.Namespace, pod.Name, container.Name)
-		klog.V(6).InfoS("target resources", stringify.ResourceListToLoggable(logID, container.Resources.Requests)...)
+		klog.V(6).InfoS("target resources", stringify.ResourceListToLoggable(logID, container.Name, container.Resources.Requests)...)
 
 		numaID, match := resourcesAvailableInAnyNUMANodes(logID, nodes, container.Resources.Requests, qos, nodeInfo)
 		if !match {
@@ -79,7 +77,7 @@ func singleNUMAContainerLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneLis
 
 		// subtract the resources requested by the container from the given NUMA.
 		// this is necessary, so we won't allocate the same resources for the upcoming containers
-		subtractFromNUMA(nodes, numaID, container)
+		subtractFromNUMA(logID, nodes, numaID, container)
 	}
 	return nil
 }
@@ -174,18 +172,18 @@ func isResourceSetSuitable(qos v1.PodQOSClass, resource v1.ResourceName, quantit
 }
 
 func singleNUMAPodLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneList, nodeInfo *framework.NodeInfo) *framework.Status {
-	klog.V(5).InfoS("Pod Level Resource handler")
+	logID := nrtlog.PodRef(pod)
+	klog.V(5).InfoS("Pod Level Resource handler", "logID", logID)
 
 	resources := util.GetPodEffectiveRequest(pod)
 
-	logID := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
-	nodes := createNUMANodeList(zones)
+	nodes := createNUMANodeList(logID, zones)
 
 	// Node() != nil already verified in Filter(), which is the only public entry point
-	logNumaNodes("pod handler NUMA resources", nodeInfo.Node().Name, nodes)
-	klog.V(6).InfoS("target resources", stringify.ResourceListToLoggable(logID, resources)...)
+	LogNUMANodes(logID, "pod handler NUMA resources", nodes)
+	klog.V(6).InfoS("target resources", stringify.ResourceListToLoggable(logID, "pod", resources)...)
 
-	if _, match := resourcesAvailableInAnyNUMANodes(logID, createNUMANodeList(zones), resources, v1qos.GetPodQOS(pod), nodeInfo); !match {
+	if _, match := resourcesAvailableInAnyNUMANodes(logID, createNUMANodeList(logID, zones), resources, v1qos.GetPodQOS(pod), nodeInfo); !match {
 		klog.V(2).InfoS("cannot align pod", "name", pod.Name)
 		return framework.NewStatus(framework.Unschedulable, "cannot align pod")
 	}
@@ -225,7 +223,7 @@ func (tm *TopologyMatch) Filter(ctx context.Context, cycleState *framework.Cycle
 }
 
 // subtractFromNUMA finds the correct NUMA ID's resources and subtract them from `nodes`.
-func subtractFromNUMA(nodes NUMANodeList, numaID int, container v1.Container) {
+func subtractFromNUMA(logID string, nodes NUMANodeList, numaID int, container v1.Container) {
 	for i := 0; i < len(nodes); i++ {
 		if nodes[i].NUMAID != numaID {
 			continue
@@ -239,7 +237,7 @@ func subtractFromNUMA(nodes NUMANodeList, numaID int, container v1.Container) {
 			// when resourcesAvailableInAnyNUMANodes function is passed
 			// but let's log here if such unlikely case will occur
 			if nodeResQuan.Sign() == -1 {
-				klog.V(4).InfoS("resource quantity should not be a negative value", "resource", resName, "quantity", nodeResQuan.String())
+				klog.V(4).InfoS("resource quantity should not be a negative value", "logID", logID, "resource", resName, "quantity", nodeResQuan.String())
 			}
 			nRes[resName] = nodeResQuan
 		}

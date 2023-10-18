@@ -28,6 +28,7 @@ import (
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
 	"gonum.org/v1/gonum/stat/combin"
 
+	nrtlog "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 	"sigs.k8s.io/scheduler-plugins/pkg/util"
 )
 
@@ -37,7 +38,8 @@ const (
 )
 
 func leastNUMAContainerScopeScore(pod *v1.Pod, zones topologyv1alpha2.ZoneList) (int64, *framework.Status) {
-	nodes := createNUMANodeList(zones)
+	logID := nrtlog.PodRef(pod)
+	nodes := createNUMANodeList(logID, zones)
 	qos := v1qos.GetPodQOS(pod)
 
 	maxNUMANodesCount := 0
@@ -79,10 +81,9 @@ func leastNUMAContainerScopeScore(pod *v1.Pod, zones topologyv1alpha2.ZoneList) 
 }
 
 func leastNUMAPodScopeScore(pod *v1.Pod, zones topologyv1alpha2.ZoneList) (int64, *framework.Status) {
-	nodes := createNUMANodeList(zones)
+	logID := nrtlog.PodRef(pod)
+	nodes := createNUMANodeList(logID, zones)
 	qos := v1qos.GetPodQOS(pod)
-
-	identifier := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
 
 	resources := util.GetPodEffectiveRequest(pod)
 	// if a pod requests only non NUMA resources return max score
@@ -90,11 +91,11 @@ func leastNUMAPodScopeScore(pod *v1.Pod, zones topologyv1alpha2.ZoneList) (int64
 		return framework.MaxNodeScore, nil
 	}
 
-	numaNodes, isMinAvgDistance := numaNodesRequired(identifier, qos, nodes, resources)
+	numaNodes, isMinAvgDistance := numaNodesRequired(logID, qos, nodes, resources)
 	// pod's resources can't fit onto node, return MinNodeScore
 	if numaNodes == nil {
 		// score plugin should be running after resource filter plugin so we should always find sufficient amount of NUMA nodes
-		klog.Warningf("cannot calculate how many NUMA nodes are required for: %s", identifier)
+		klog.Warningf("cannot calculate how many NUMA nodes are required for: %s", logID)
 		return framework.MinNodeScore, nil
 	}
 

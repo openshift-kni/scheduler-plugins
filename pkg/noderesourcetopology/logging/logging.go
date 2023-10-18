@@ -14,27 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package noderesourcetopology
+package logging
 
 import (
 	"encoding/json"
-	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/klog/v2"
 
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
-
-	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/stringify"
 )
 
-func logNumaNodes(desc, nodeName string, nodes NUMANodeList) {
-	for _, numaNode := range nodes {
-		numaLogKey := fmt.Sprintf("%s/node-%d", nodeName, numaNode.NUMAID)
-		klog.V(6).InfoS(desc, stringify.ResourceListToLoggable(numaLogKey, numaNode.Resources)...)
+func PodRef(pod *corev1.Pod) string {
+	if pod == nil {
+		return ""
 	}
+	return pod.Namespace + "/" + pod.Name
 }
 
-func logNRT(desc string, nrtObj *topologyv1alpha2.NodeResourceTopology) {
+func NodeResourceTopology(logID, desc string, nrtObj *topologyv1alpha2.NodeResourceTopology) {
 	if !klog.V(6).Enabled() {
 		// avoid the expensive marshal operation
 		return
@@ -45,5 +43,5 @@ func logNRT(desc string, nrtObj *topologyv1alpha2.NodeResourceTopology) {
 		klog.V(6).ErrorS(err, "failed to marshal noderesourcetopology object")
 		return
 	}
-	klog.V(6).Info(desc, "noderesourcetopology", string(ntrJson))
+	klog.V(6).InfoS(desc, "logID", logID, "noderesourcetopology", string(ntrJson))
 }

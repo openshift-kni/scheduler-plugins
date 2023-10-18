@@ -29,6 +29,7 @@ import (
 	topologyv1alpha2attr "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/attribute"
 
 	apiconfig "sigs.k8s.io/scheduler-plugins/apis/config"
+	nrtlog "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/resourcerequests"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/stringify"
 	"sigs.k8s.io/scheduler-plugins/pkg/util"
@@ -100,27 +101,29 @@ func (rs *resourceStore) String() string {
 
 // AddPod returns true if updating existing pod, false if adding for the first time
 func (rs *resourceStore) AddPod(pod *corev1.Pod) bool {
-	key := pod.Namespace + "/" + pod.Name // this is also a valid logID
+	logID := nrtlog.PodRef(pod)
+	key := pod.Namespace + "/" + pod.Name
 	_, ok := rs.data[key]
 	if ok {
 		// should not happen, so we log with a low level
-		klog.V(4).InfoS("updating existing entry", "key", key)
+		klog.V(4).InfoS("updating existing entry", "logID", logID, "key", key)
 	}
 	resData := util.GetPodEffectiveRequest(pod)
-	klog.V(5).InfoS("nrtcache: resourcestore ADD", stringify.ResourceListToLoggable(key, resData)...)
+	klog.V(5).InfoS("nrtcache: resourcestore ADD", stringify.ResourceListToLoggable(logID, "pod", resData)...)
 	rs.data[key] = resData
 	return ok
 }
 
 // DeletePod returns true if deleted an existing pod, false otherwise
 func (rs *resourceStore) DeletePod(pod *corev1.Pod) bool {
-	key := pod.Namespace + "/" + pod.Name // this is also a valid logID
+	logID := nrtlog.PodRef(pod)
+	key := pod.Namespace + "/" + pod.Name
 	_, ok := rs.data[key]
 	if ok {
 		// should not happen, so we log with a low level
-		klog.V(4).InfoS("removing missing entry", "key", key)
+		klog.V(4).InfoS("removing missing entry", "logID", logID, "key", key)
 	}
-	klog.V(5).InfoS("nrtcache: resourcestore DEL", stringify.ResourceListToLoggable(key, rs.data[key])...)
+	klog.V(5).InfoS("nrtcache: resourcestore DEL", stringify.ResourceListToLoggable(key, "pod", rs.data[key])...)
 	delete(rs.data, key)
 	return ok
 }

@@ -110,7 +110,7 @@ func initNodeTopologyForeignPodsDetection(cfg *apiconfig.NodeResourceTopologyCac
 	nrtcache.SetupForeignPodsDetector(profileName, podSharedInformer, nrtCache)
 }
 
-func createNUMANodeList(zones topologyv1alpha2.ZoneList) NUMANodeList {
+func createNUMANodeList(logID string, zones topologyv1alpha2.ZoneList) NUMANodeList {
 	numaIDToZoneIDx := make([]int, maxNUMAId)
 	nodes := NUMANodeList{}
 	// filter non Node zones and create idToIdx lookup array
@@ -128,7 +128,7 @@ func createNUMANodeList(zones topologyv1alpha2.ZoneList) NUMANodeList {
 		numaIDToZoneIDx[numaID] = i
 
 		resources := extractResources(zone)
-		klog.V(6).InfoS("extracted NUMA resources", stringify.ResourceListToLoggable(zone.Name, resources)...)
+		klog.V(6).InfoS("extracted NUMA resources", stringify.ResourceListToLoggable(logID, zone.Name, resources)...)
 		nodes = append(nodes, NUMANode{NUMAID: numaID, Resources: resources})
 	}
 
@@ -210,4 +210,10 @@ func getForeignPodsDetectMode(cfg *apiconfig.NodeResourceTopologyCache) apiconfi
 		klog.InfoS("foreign pods detection value missing", "fallback", foreignPodsDetect)
 	}
 	return foreignPodsDetect
+}
+
+func LogNUMANodes(logID, desc string, nodes NUMANodeList) {
+	for _, numaNode := range nodes {
+		klog.V(6).InfoS(desc, stringify.ResourceListToLoggable(logID, fmt.Sprintf("node-%d", numaNode.NUMAID), numaNode.Resources)...)
+	}
 }

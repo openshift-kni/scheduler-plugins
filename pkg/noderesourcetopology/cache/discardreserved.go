@@ -22,6 +22,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
+	nrtlog "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
 	listerv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/generated/listers/topology/v1alpha2"
@@ -72,7 +73,7 @@ func (pt *DiscardReserved) NodeMaybeOverReserved(nodeName string, pod *corev1.Po
 func (pt *DiscardReserved) NodeHasForeignPods(nodeName string, pod *corev1.Pod)    {}
 
 func (pt *DiscardReserved) ReserveNodeResources(nodeName string, pod *corev1.Pod) {
-	klog.V(5).InfoS("nrtcache NRT Reserve", "logID", klog.KObj(pod), "UID", pod.GetUID(), "node", nodeName)
+	klog.V(5).InfoS("nrtcache NRT Reserve", "logID", nrtlog.PodRef(pod), "UID", pod.GetUID(), "node", nodeName)
 	pt.rMutex.Lock()
 	defer pt.rMutex.Unlock()
 
@@ -83,14 +84,14 @@ func (pt *DiscardReserved) ReserveNodeResources(nodeName string, pod *corev1.Pod
 }
 
 func (pt *DiscardReserved) UnreserveNodeResources(nodeName string, pod *corev1.Pod) {
-	klog.V(5).InfoS("nrtcache NRT Unreserve", "logID", klog.KObj(pod), "UID", pod.GetUID(), "node", nodeName)
+	klog.V(5).InfoS("nrtcache NRT Unreserve", "logID", nrtlog.PodRef(pod), "UID", pod.GetUID(), "node", nodeName)
 
 	pt.removeReservationForNode(nodeName, pod)
 }
 
 // PostBind is invoked to cleanup reservationMap
 func (pt *DiscardReserved) PostBind(nodeName string, pod *corev1.Pod) {
-	klog.V(5).InfoS("nrtcache NRT PostBind", "logID", klog.KObj(pod), "UID", pod.GetUID(), "node", nodeName)
+	klog.V(5).InfoS("nrtcache NRT PostBind", "logID", nrtlog.PodRef(pod), "UID", pod.GetUID(), "node", nodeName)
 
 	pt.removeReservationForNode(nodeName, pod)
 }

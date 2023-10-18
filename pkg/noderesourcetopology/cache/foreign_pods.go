@@ -22,6 +22,7 @@ import (
 	k8scache "k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
 
+	nrtlog "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/resourcerequests"
 )
 
@@ -47,7 +48,7 @@ func SetupForeignPodsDetector(schedProfileName string, podInformer k8scache.Shar
 		}
 
 		cc.NodeHasForeignPods(pod.Spec.NodeName, pod)
-		klog.V(6).InfoS("nrtcache: has foreign pods", "logID", klog.KObj(pod), "node", pod.Spec.NodeName, "podUID", pod.UID)
+		klog.V(6).InfoS("nrtcache: has foreign pods", "logID", nrtlog.PodRef(pod), "node", pod.Spec.NodeName, "podUID", pod.UID)
 	}
 
 	podInformer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{

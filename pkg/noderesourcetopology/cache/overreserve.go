@@ -33,6 +33,7 @@ import (
 	listerv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/generated/listers/topology/v1alpha2"
 
 	apiconfig "sigs.k8s.io/scheduler-plugins/apis/config"
+	nrtlog "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/stringify"
 
 	"github.com/k8stopologyawareschedwg/podfingerprint"
@@ -92,10 +93,10 @@ func (ov *OverReserve) GetCachedNRTCopy(nodeName string, pod *corev1.Pod) (*topo
 		return nrt, true
 	}
 
-	klog.V(6).InfoS("nrtcache NRT", "logID", klog.KObj(pod), "vanilla", stringify.NodeResourceTopologyResources(nrt))
-	nodeAssumedResources.UpdateNRT(klog.KObj(pod).String(), nrt)
+	klog.V(6).InfoS("nrtcache NRT", "logID", nrtlog.PodRef(pod), "vanilla", stringify.NodeResourceTopologyResources(nrt))
+	nodeAssumedResources.UpdateNRT(nrtlog.PodRef(pod), nrt)
 
-	klog.V(5).InfoS("nrtcache NRT", "logID", klog.KObj(pod), "updated", stringify.NodeResourceTopologyResources(nrt))
+	klog.V(5).InfoS("nrtcache NRT", "logID", nrtlog.PodRef(pod), "updated", stringify.NodeResourceTopologyResources(nrt))
 	return nrt, true
 }
 
@@ -103,18 +104,18 @@ func (ov *OverReserve) NodeMaybeOverReserved(nodeName string, pod *corev1.Pod) {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
 	val := ov.nodesMaybeOverreserved.Incr(nodeName)
-	klog.V(4).InfoS("nrtcache: mark discarded", "logID", klog.KObj(pod), "node", nodeName, "count", val)
+	klog.V(4).InfoS("nrtcache: mark discarded", "logID", nrtlog.PodRef(pod), "node", nodeName, "count", val)
 }
 
 func (ov *OverReserve) NodeHasForeignPods(nodeName string, pod *corev1.Pod) {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
 	if !ov.nrts.Contains(nodeName) {
-		klog.V(5).InfoS("nrtcache: ignoring foreign pods", "logID", klog.KObj(pod), "node", nodeName, "nrtinfo", "missing")
+		klog.V(5).InfoS("nrtcache: ignoring foreign pods", "logID", nrtlog.PodRef(pod), "node", nodeName, "nrtinfo", "missing")
 		return
 	}
 	val := ov.nodesWithForeignPods.Incr(nodeName)
-	klog.V(4).InfoS("nrtcache: marked with foreign pods", "logID", klog.KObj(pod), "node", nodeName, "count", val)
+	klog.V(4).InfoS("nrtcache: marked with foreign pods", "logID", nrtlog.PodRef(pod), "node", nodeName, "count", val)
 }
 
 func (ov *OverReserve) ReserveNodeResources(nodeName string, pod *corev1.Pod) {
@@ -127,10 +128,10 @@ func (ov *OverReserve) ReserveNodeResources(nodeName string, pod *corev1.Pod) {
 	}
 
 	nodeAssumedResources.AddPod(pod)
-	klog.V(5).InfoS("nrtcache post reserve", "logID", klog.KObj(pod), "node", nodeName, "assumedResources", nodeAssumedResources.String())
+	klog.V(5).InfoS("nrtcache post reserve", "logID", nrtlog.PodRef(pod), "node", nodeName, "assumedResources", nodeAssumedResources.String())
 
 	ov.nodesMaybeOverreserved.Delete(nodeName)
-	klog.V(6).InfoS("nrtcache: reset discard counter", "logID", klog.KObj(pod), "node", nodeName)
+	klog.V(6).InfoS("nrtcache: reset discard counter", "logID", nrtlog.PodRef(pod), "node", nodeName)
 }
 
 func (ov *OverReserve) UnreserveNodeResources(nodeName string, pod *corev1.Pod) {
@@ -140,12 +141,12 @@ func (ov *OverReserve) UnreserveNodeResources(nodeName string, pod *corev1.Pod) 
 	if !ok {
 		// this should not happen, so we're vocal about it
 		// we don't return error because not much to do to recover anyway
-		klog.V(3).InfoS("nrtcache: no resources tracked", "logID", klog.KObj(pod), "node", nodeName)
+		klog.V(3).InfoS("nrtcache: no resources tracked", "logID", nrtlog.PodRef(pod), "node", nodeName)
 		return
 	}
 
 	nodeAssumedResources.DeletePod(pod)
-	klog.V(5).InfoS("nrtcache post release", "logID", klog.KObj(pod), "node", nodeName, "assumedResources", nodeAssumedResources.String())
+	klog.V(5).InfoS("nrtcache post release", "logID", nrtlog.PodRef(pod), "node", nodeName, "assumedResources", nodeAssumedResources.String())
 }
 
 // NodesMaybeOverReserved returns a slice of all the node names which have been discarded previously,
