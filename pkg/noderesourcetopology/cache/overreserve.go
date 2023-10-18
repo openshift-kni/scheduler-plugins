@@ -111,11 +111,11 @@ func (ov *OverReserve) NodeHasForeignPods(nodeName string, pod *corev1.Pod) {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
 	if !ov.nrts.Contains(nodeName) {
-		klog.V(5).InfoS("nrtcache: ignoring foreign pods", "logID", nrtlog.PodRef(pod), "node", nodeName, "nrtinfo", "missing")
+		klog.V(5).InfoS("nrtcache: ignoring foreign pods", "logID", "foreign", "pod", klog.KObj(pod), "podUID", pod.UID, "node", nodeName, "nrtinfo", "missing")
 		return
 	}
 	val := ov.nodesWithForeignPods.Incr(nodeName)
-	klog.V(4).InfoS("nrtcache: marked with foreign pods", "logID", nrtlog.PodRef(pod), "node", nodeName, "count", val)
+	klog.V(4).InfoS("nrtcache: marked with foreign pods", "logID", "foreign", "pod", klog.KObj(pod), "podUID", pod.UID, "node", nodeName, "count", val)
 }
 
 func (ov *OverReserve) ReserveNodeResources(nodeName string, pod *corev1.Pod) {
