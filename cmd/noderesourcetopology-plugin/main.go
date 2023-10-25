@@ -26,6 +26,7 @@ import (
 
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/knidebug"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology"
+
 	// Ensure scheme package is initialized.
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 )
