@@ -29,6 +29,8 @@ import (
 	"k8s.io/klog/v2"
 	resourcehelper "k8s.io/kubernetes/pkg/api/v1/resource"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
+
+	knifeatures "sigs.k8s.io/scheduler-plugins/pkg-kni/features"
 )
 
 type KNIDebug struct{}
@@ -49,6 +51,7 @@ func (kd *KNIDebug) Name() string {
 // New initializes a new plugin and returns it.
 func New(args runtime.Object, handle framework.Handle) (framework.Plugin, error) {
 	klog.V(6).InfoS("Creating new KNIDebug plugin")
+	knifeatures.LogState(Name, 2, knifeatures.Names())
 	return &KNIDebug{}, nil
 }
 
