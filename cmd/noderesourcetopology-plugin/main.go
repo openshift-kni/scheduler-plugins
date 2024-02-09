@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"math/rand"
 	"os"
 	"time"
@@ -33,6 +34,7 @@ import (
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 
 	knifeatures "sigs.k8s.io/scheduler-plugins/pkg-kni/features"
+	knilogger "sigs.k8s.io/scheduler-plugins/pkg-kni/logtracr"
 	knistatus "sigs.k8s.io/scheduler-plugins/pkg-kni/pfpstatus"
 )
 
@@ -41,8 +43,11 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
-	logh := klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog))
-
+	logh, ok := knilogger.Setup(context.Background())
+	if !ok {
+		// fully disabled, restore classic flow
+		logh = klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog))
+	}
 	knistatus.Setup(logh)
 
 	// Register custom plugins to the scheduler framework.
