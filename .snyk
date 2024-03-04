@@ -1,0 +1,21 @@
+# References:
+# https://docs.snyk.io/scan-applications/snyk-code/using-snyk-code-from-the-cli/excluding-directories-and-files-from-the-snyk-code-cli-test
+# https://docs.snyk.io/snyk-cli/commands/ignore
+exclude:
+  global:
+    - vendor/k8s.io/apiserver/pkg/audit/format.go
+    - vendor/k8s.io/apiserver/pkg/server/storage/storage_factory.go
+    - vendor/k8s.io/client-go/util/cert/server_inspection.go
+    - vendor/k8s.io/csi-translation-lib/plugins/rbd.go
+    - vendor/k8s.io/klog/v2/klog_file.go
+    - vendor/k8s.io/kubernetes/pkg/volume/util/attach_limit.go
+    - vendor/sigs.k8s.io/controller-runtime/pkg/envtest/crd.go
+    - vendor/sigs.k8s.io/controller-runtime/pkg/envtest/webhook.go
+    - vendor/sigs.k8s.io/controller-runtime/pkg/internal/testing/process/process.go
+    - vendor/sigs.k8s.io/controller-runtime/pkg/webhook/server.go
+    - vendor/github.com/google/uuid/hash.go
+    - vendor/github.com/paypal/load-watcher/pkg/watcher/internal/metricsprovider/prometheus.go
+    - vendor/golang.org/x/net/websocket/hybi.go
+    - vendor/golang.org/x/tools/go/analysis/unitchecker/unitchecker.go
+    - vendor/golang.org/x/tools/internal/pkgbits/encoder.go
+    - vendor/go.etcd.io/etcd/client/pkg/v3/transport/listener.go
