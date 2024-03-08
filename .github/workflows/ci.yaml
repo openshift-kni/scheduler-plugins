@@ -15,15 +15,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get branch name (pull request)
+      - name: Get branch names (pull request)
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+        run: |
+          echo "SOURCE_BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+          echo "TARGET_BRANCH_NAME=$(echo ${GITHUB_BASE_REF} | tr / -)" >> $GITHUB_ENV
 
       - name: Debug
-        run: echo ${{ env.BRANCH_NAME }}
+        run: |
+          echo ${{ env.SOURCE_BRANCH_NAME }}
+          echo ${{ env.TARGET_BRANCH_NAME }}
 
       - name: Verify commits
-        run: TRIGGER_BRANCH=${{ env.BRANCH_NAME }} ./hack-kni/verify-commits.sh
+        run: |
+          TRIGGER_BRANCH=${{ env.SOURCE_BRANCH_NAME }} \
+          UPSTREAM_BRANCH=${{ env.TARGET_BRANCH_NAME }} \
+          ./hack-kni/verify-commits.sh
 
   integration-test:
     runs-on: ubuntu-latest
