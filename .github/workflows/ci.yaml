@@ -30,6 +30,7 @@ jobs:
         run: |
           TRIGGER_BRANCH=${{ env.SOURCE_BRANCH_NAME }} \
           UPSTREAM_BRANCH=${{ env.TARGET_BRANCH_NAME }} \
+          COMMITS=${{ github.event.pull_request.commits }} \
           ./hack-kni/verify-commits.sh
 
   integration-test:
