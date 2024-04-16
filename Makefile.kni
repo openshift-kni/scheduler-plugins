@@ -69,7 +69,7 @@ unit-test-quick: update-vendor
 
 .PHONY: install-envtest
 install-envtest: update-vendor
-	hack/install-envtest.sh
+	hack-kni/install-envtest.sh
 
 .PHONY: integration-test
 integration-test: install-envtest
