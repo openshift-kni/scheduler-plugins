@@ -137,10 +137,10 @@ func nodesAvgDistance(numaNodes NUMANodeList, nodes ...int) float32 {
 
 	for _, node1 := range nodes {
 		for _, node2 := range nodes {
-			cost, ok := numaNodes[node1].Costs[node2]
+			cost, ok := numaNodes[node1].Costs[numaNodes[node2].NUMAID]
 			// we couldn't read Costs assign maxDistanceValue
 			if !ok {
-				klog.Warningf("cannot retrieve Costs information for node %d", node2)
+				klog.Warningf("cannot retrieve Costs information for node ID %d", numaNodes[node1].NUMAID)
 				cost = maxDistanceValue
 			}
 			accu += cost
@@ -176,7 +176,9 @@ func numaNodesRequired(identifier string, qos v1.PodQOSClass, numaNodes NUMANode
 		// we have found suitable combination for given bitmaskLen
 		if suitableCombination != nil {
 			bm := bitmask.NewEmptyBitMask()
-			bm.Add(suitableCombination...)
+			for _, nodeIdx := range suitableCombination {
+				bm.Add(numaNodes[nodeIdx].NUMAID)
+			}
 			return bm, isMinDistance
 		}
 	}
@@ -195,6 +197,9 @@ func findSuitableCombination(identifier string, qos v1.PodQOSClass, numaNodes NU
 		minDistance float32 = 256
 	)
 	for _, combination := range numaNodesCombination {
+		if !isValidCombineResources(numaNodes, resources, combination) {
+			continue
+		}
 		combinationResources := combineResources(numaNodes, combination)
 		resourcesFit := checkResourcesFit(identifier, qos, resources, combinationResources)
 
@@ -226,5 +231,16 @@ func checkResourcesFit(identifier string, qos v1.PodQOSClass, resources v1.Resou
 		}
 	}
 
+	return true
+}
+
+func isValidCombineResources(numaNodes NUMANodeList, resources v1.ResourceList, combination []int) bool {
+	for _, nodeIndex := range combination {
+		for resourceName := range resources {
+			if _, ok := numaNodes[nodeIndex].Resources[resourceName]; !ok {
+				return false
+			}
+		}
+	}
 	return true
 }
