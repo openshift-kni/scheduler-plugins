@@ -140,7 +140,7 @@ func isResourceSetSuitable(qos corev1.PodQOSClass, resource corev1.ResourceName,
 }
 
 // subtractResourcesFromNUMANodeList finds the correct NUMA ID's resources and always subtract them from `nodes` in-place.
-func subtractResourcesFromNUMANodeList(lh logr.Logger, nodes NUMANodeList, numaID int, qos corev1.PodQOSClass, containerRes corev1.ResourceList) error {
+func subtractResourcesFromNUMANodeList(lh logr.Logger, nodes NUMANodeList, numaID int, qos corev1.PodQOSClass, containerRes corev1.ResourceList, logID string) error {
 	logEntries := []any{"numaCell", numaID}
 
 	for _, node := range nodes {
@@ -148,7 +148,7 @@ func subtractResourcesFromNUMANodeList(lh logr.Logger, nodes NUMANodeList, numaI
 			continue
 		}
 
-		lh.V(5).Info("NUMA resources before", append(logEntries, stringify.ResourceListToLoggable(node.Resources)...)...)
+		lh.V(5).Info("NUMA resources before", append(logEntries, stringify.ResourceListToLoggable(logID, node.Resources)...)...)
 
 		for resName, resQty := range containerRes {
 			isAffine := isNUMAAffineResource(resName)
@@ -174,7 +174,7 @@ func subtractResourcesFromNUMANodeList(lh logr.Logger, nodes NUMANodeList, numaI
 			node.Resources[resName] = nodeResQty
 		}
 
-		lh.V(5).Info("NUMA resources after", append(logEntries, stringify.ResourceListToLoggable(node.Resources)...)...)
+		lh.V(5).Info("NUMA resources after", append(logEntries, stringify.ResourceListToLoggable(logID, node.Resources)...)...)
 	}
 	return nil
 }
