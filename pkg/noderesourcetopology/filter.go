@@ -22,6 +22,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog/v2"
+	"k8s.io/klog/v2/klogr"
 	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
 	kubeletconfig "k8s.io/kubernetes/pkg/kubelet/apis/config"
 	bm "k8s.io/kubernetes/pkg/kubelet/cm/topologymanager/bitmask"
@@ -77,7 +78,8 @@ func singleNUMAContainerLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneLis
 
 		// subtract the resources requested by the container from the given NUMA.
 		// this is necessary, so we won't allocate the same resources for the upcoming containers
-		err := subtractResourcesFromNUMANodeList(clh, nodes, numaID, qos, container.Resources.Requests)
+		clh := klogr.New().WithValues("logID", logID, "node", nodeInfo.Node().Name)
+		err := subtractResourcesFromNUMANodeList(clh, nodes, numaID, qos, container.Resources.Requests, logID)
 		if err != nil {
 			// this is an internal error which should never happen
 			return framework.NewStatus(framework.Error, "inconsistent resource accounting", err.Error())

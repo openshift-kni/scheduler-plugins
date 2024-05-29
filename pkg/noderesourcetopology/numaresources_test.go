@@ -361,7 +361,7 @@ func TestSubtractResourcesFromNUMANodeList(t *testing.T) {
 		t.Run(string(testCase.name), func(t *testing.T) {
 			nodes := testCase.nodes.DeepCopy()
 			logh := ktesting.NewLogger(t, ktesting.DefaultConfig)
-			err := subtractResourcesFromNUMANodeList(logh, nodes, testCase.numaID, testCase.qos, testCase.containerRes)
+			err := subtractResourcesFromNUMANodeList(logh, nodes, testCase.numaID, testCase.qos, testCase.containerRes, "test")
 			if (err != nil) != (testCase.expectedError != nil) {
 				t.Fatalf("got err %v expected err %v", err, testCase.expectedError)
 			}
