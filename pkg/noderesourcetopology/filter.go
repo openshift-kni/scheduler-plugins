@@ -21,9 +21,8 @@ import (
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/klog/v2"
-	v1helper "k8s.io/kubernetes/pkg/apis/core/v1/helper"
+	"k8s.io/klog/v2/klogr"
 	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
 	kubeletconfig "k8s.io/kubernetes/pkg/kubelet/apis/config"
 	bm "k8s.io/kubernetes/pkg/kubelet/cm/topologymanager/bitmask"
@@ -79,7 +78,13 @@ func singleNUMAContainerLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneLis
 
 		// subtract the resources requested by the container from the given NUMA.
 		// this is necessary, so we won't allocate the same resources for the upcoming containers
-		subtractFromNUMA(nodes, numaID, container)
+		clh := klogr.New().WithValues("logID", logID, "node", nodeInfo.Node().Name)
+		err := subtractResourcesFromNUMANodeList(clh, nodes, numaID, qos, container.Resources.Requests, logID)
+		if err != nil {
+			// this is an internal error which should never happen
+			return framework.NewStatus(framework.Error, "inconsistent resource accounting", err.Error())
+		}
+		clh.V(4).Info("container aligned", "numaCell", numaID)
 	}
 	return nil
 }
@@ -133,7 +138,7 @@ func resourcesAvailableInAnyNUMANodes(logID string, numaNodes NUMANodeList, reso
 
 		// non-native resources or ephemeral-storage may not expose NUMA affinity,
 		// but since they are available at node level, this is fine
-		if !hasNUMAAffinity && (!v1helper.IsNativeResource(resource) || resource == v1.ResourceEphemeralStorage) {
+		if !hasNUMAAffinity && isHostLevelResource(resource) {
 			klog.V(6).InfoS("resource available at node level (no NUMA affinity)", "logID", logID, "node", nodeName, "resource", resource)
 			continue
 		}
@@ -154,25 +159,6 @@ func resourcesAvailableInAnyNUMANodes(logID string, numaNodes NUMANodeList, reso
 	ret := !bitmask.IsEmpty()
 	klog.V(5).InfoS("final verdict", "logID", logID, "node", nodeName, "suitable", ret)
 	return numaID, ret
-}
-
-func isResourceSetSuitable(qos v1.PodQOSClass, resource v1.ResourceName, quantity, numaQuantity resource.Quantity) bool {
-	// Check for the following:
-	if qos != v1.PodQOSGuaranteed {
-		// 1. set numa node as possible node if resource is memory or Hugepages
-		if resource == v1.ResourceMemory {
-			return true
-		}
-		if v1helper.IsHugePageResourceName(resource) {
-			return true
-		}
-		// 2. set numa node as possible node if resource is CPU
-		if resource == v1.ResourceCPU {
-			return true
-		}
-	}
-	// 3. otherwise check amount of resources
-	return numaQuantity.Cmp(quantity) >= 0
 }
 
 func singleNUMAPodLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneList, nodeInfo *framework.NodeInfo) *framework.Status {
@@ -224,28 +210,6 @@ func (tm *TopologyMatch) Filter(ctx context.Context, cycleState *framework.Cycle
 		tm.nrtCache.NodeMaybeOverReserved(nodeName, pod)
 	}
 	return status
-}
-
-// subtractFromNUMA finds the correct NUMA ID's resources and subtract them from `nodes`.
-func subtractFromNUMA(nodes NUMANodeList, numaID int, container v1.Container) {
-	for i := 0; i < len(nodes); i++ {
-		if nodes[i].NUMAID != numaID {
-			continue
-		}
-
-		nRes := nodes[i].Resources
-		for resName, quan := range container.Resources.Requests {
-			nodeResQuan := nRes[resName]
-			nodeResQuan.Sub(quan)
-			// we do not expect a negative value here, since this function only called
-			// when resourcesAvailableInAnyNUMANodes function is passed
-			// but let's log here if such unlikely case will occur
-			if nodeResQuan.Sign() == -1 {
-				klog.V(4).InfoS("resource quantity should not be a negative value", "resource", resName, "quantity", nodeResQuan.String())
-			}
-			nRes[resName] = nodeResQuan
-		}
-	}
 }
 
 func filterHandlerFromTopologyManagerConfig(conf TopologyManagerConfig) filterFn {
