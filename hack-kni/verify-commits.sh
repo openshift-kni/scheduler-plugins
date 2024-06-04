@@ -3,9 +3,9 @@
 set -e -o pipefail
 
 function finish {
-	if [ -f "$commit_msg_filename" ]; then
-		rm -f "$commit_msg_filename"
-	fi
+  if [ -f "$commit_msg_filename" ]; then
+    rm -f "$commit_msg_filename"
+  fi
 }
 trap finish EXIT
 
@@ -17,9 +17,9 @@ if [[ "$TRIGGER_BRANCH" == resync-* ]]; then
   exit 0
 fi
 
-if (( $COMMITS <= 0 )); then
-	echo "WARN: no changes detected"
-	exit 0
+if [ -z "$COMMITS" ] || (( $COMMITS <= 0 )); then
+  echo "WARN: no changes detected [COMMITS=${COMMITS}]"
+  exit 0
 fi
 
 echo "considering ${COMMITS} commits in PR whose head is $TRIGGER_BRANCH (into $UPSTREAM_BRANCH):"
