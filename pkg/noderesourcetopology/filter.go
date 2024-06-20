@@ -78,7 +78,7 @@ func singleNUMAContainerLevelHandler(pod *v1.Pod, zones topologyv1alpha2.ZoneLis
 
 		// subtract the resources requested by the container from the given NUMA.
 		// this is necessary, so we won't allocate the same resources for the upcoming containers
-		clh := klogr.New().WithValues("logID", logID, "node", nodeInfo.Node().Name)
+		clh := klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog)).WithValues("logID", logID, "node", nodeInfo.Node().Name)
 		err := subtractResourcesFromNUMANodeList(clh, nodes, numaID, qos, container.Resources.Requests, logID)
 		if err != nil {
 			// this is an internal error which should never happen
