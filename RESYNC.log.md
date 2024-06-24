@@ -1,5 +1,6 @@
 | Resync Date | Merge With Upstream Tag/Commit                                                                       | Author      |
 |-------------|------------------------------------------------------------------------------------------------------|-------------|
+| 2024.06.24  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/2c1c0cfe6134c5d55a23dae1726264664a943f4b | ffromani    |
 | 2024.05.29  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/0834feb92676712cebe8290615ce1c47537fe078 | ffromani    |
 | 2024.05.07  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/70981813a19f16c4202f6f74a2525bf917b63685 | ffromani    |
 | 2024.01.29  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/93c518b7350fdba82238daa559cb0c11a9353e87 | ffromani    |
