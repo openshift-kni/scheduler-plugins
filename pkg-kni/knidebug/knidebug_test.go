@@ -94,6 +94,20 @@ func TestFrameworkResourceToLoggable(t *testing.T) {
 			expected: ` logKey="TEST4" cpu="24000 (24)" memory="17179869184 (16 GiB)" hugepages-2Mi="1073741824 (1.0 GiB)"`,
 		},
 		{
+			name:   "CPUs, Memory, hugepages-2Mi, ephemeral-storage",
+			logKey: "TEST4",
+			resources: &framework.Resource{
+				MilliCPU:         24000,
+				Memory:           16 * 1024 * 1024 * 1024,
+				EphemeralStorage: 128 * 1024 * 1024 * 1024,
+				ScalarResources: map[corev1.ResourceName]int64{
+					corev1.ResourceName("hugepages-2Mi"): 1 * 1024 * 1024 * 1024,
+				},
+			},
+			expected: ` logKey="TEST4" cpu="24000 (24)" memory="17179869184 (16 GiB)" ephemeral-storage="137438953472 (128 GiB)" hugepages-2Mi="1073741824 (1.0 GiB)"`,
+		},
+
+		{
 			name:   "CPUs, Memory, hugepages-2Mi, hugepages-1Gi",
 			logKey: "TEST4",
 			resources: &framework.Resource{
@@ -119,6 +133,21 @@ func TestFrameworkResourceToLoggable(t *testing.T) {
 				},
 			},
 			expected: ` logKey="TEST4" cpu="24000 (24)" memory="17179869184 (16 GiB)" awesome.net/gpu="4" example.com/netdevice="16" hugepages-2Mi="1073741824 (1.0 GiB)"`,
+		},
+		{
+			name:   "CPUs, Memory, hugepages-2Mi, devices, ephemeral-storage",
+			logKey: "TEST4",
+			resources: &framework.Resource{
+				MilliCPU:         24000,
+				Memory:           16 * 1024 * 1024 * 1024,
+				EphemeralStorage: 128 * 1024 * 1024 * 1024,
+				ScalarResources: map[corev1.ResourceName]int64{
+					corev1.ResourceName("hugepages-2Mi"):         1 * 1024 * 1024 * 1024,
+					corev1.ResourceName("example.com/netdevice"): 16,
+					corev1.ResourceName("awesome.net/gpu"):       4,
+				},
+			},
+			expected: ` logKey="TEST4" cpu="24000 (24)" memory="17179869184 (16 GiB)" ephemeral-storage="137438953472 (128 GiB)" awesome.net/gpu="4" example.com/netdevice="16" hugepages-2Mi="1073741824 (1.0 GiB)"`,
 		},
 	}
 
