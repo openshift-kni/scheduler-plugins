@@ -85,6 +85,16 @@ func frameworkResourceToLoggable(logKey string, req *framework.Resource) []inter
 		"memory", humanMemory(req.Memory),
 	}
 
+	if req.EphemeralStorage > 0 {
+		items = append(items,
+			"ephemeral-storage", humanMemory(req.EphemeralStorage),
+		)
+	}
+
+	if len(req.ScalarResources) == 0 {
+		return items
+	}
+
 	resNames := []string{}
 	for resName := range req.ScalarResources {
 		resNames = append(resNames, string(resName))
@@ -123,25 +133,26 @@ func (hc humanCPU) String() string {
 // the max in each dimension iteratively. In contrast, we sum the resource vectors for
 // regular containers since they run simultaneously.
 //
-// The resources defined for Overhead should be added to the calculated Resource request sum
+// # The resources defined for Overhead should be added to the calculated Resource request sum
 //
 // Example:
 //
 // Pod:
-//   InitContainers
-//     IC1:
-//       CPU: 2
-//       Memory: 1G
-//     IC2:
-//       CPU: 2
-//       Memory: 3G
-//   Containers
-//     C1:
-//       CPU: 2
-//       Memory: 1G
-//     C2:
-//       CPU: 1
-//       Memory: 1G
+//
+//	InitContainers
+//	  IC1:
+//	    CPU: 2
+//	    Memory: 1G
+//	  IC2:
+//	    CPU: 2
+//	    Memory: 3G
+//	Containers
+//	  C1:
+//	    CPU: 2
+//	    Memory: 1G
+//	  C2:
+//	    CPU: 1
+//	    Memory: 1G
 //
 // Result: CPU: 3, Memory: 3G
 func computePodResourceRequest(pod *corev1.Pod) *framework.Resource {
