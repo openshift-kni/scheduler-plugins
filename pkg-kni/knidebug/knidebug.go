@@ -78,12 +78,20 @@ func (kd *KNIDebug) Filter(ctx context.Context, cycleState *framework.CycleState
 	return nil // must never fail
 }
 
-func frameworkResourceToLoggable(pod *corev1.Pod, req *framework.Resource) []interface{} {
+func frameworkResourceToLoggable(req *framework.Resource) []interface{} {
 	items := []interface{}{
-		"pod", klog.KObj(pod).String(),
-		"podUID", podGetUID(pod),
 		"cpu", humanCPU(req.MilliCPU),
 		"memory", humanMemory(req.Memory),
+	}
+
+	if req.EphemeralStorage > 0 {
+		items = append(items,
+			"ephemeral-storage", humanMemory(req.EphemeralStorage),
+		)
+	}
+
+	if len(req.ScalarResources) == 0 {
+		return items
 	}
 
 	resNames := []string{}
@@ -172,7 +180,7 @@ func checkRequest(lh logr.Logger, pod *corev1.Pod, nodeInfo *framework.NodeInfo)
 		lh.Info("target resource requests none")
 		return
 	}
-	lh.Info("target resource requests", frameworkResourceToLoggable(pod, req)...)
+	lh.Info("target resource requests", frameworkResourceToLoggable(req)...)
 
 	violations := 0
 	if availCPU := (nodeInfo.Allocatable.MilliCPU - nodeInfo.Requested.MilliCPU); req.MilliCPU > availCPU {
