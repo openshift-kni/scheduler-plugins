@@ -35,59 +35,38 @@ import (
 func TestFrameworkResourceToLoggable(t *testing.T) {
 	tests := []struct {
 		name      string
-		pod       *corev1.Pod
 		resources *framework.Resource
 		expected  string
 	}{
 		{
 			name:      "empty",
-			pod:       nil,
 			resources: &framework.Resource{},
-			expected:  ` pod="" podUID="<nil>" cpu="0 (0)" memory="0 (0 B)"`,
-		},
-		{
-			name:      "only pod",
-			pod:       makePod("uid0", "namespace0", "name0"),
-			resources: &framework.Resource{},
-			expected:  ` pod="namespace0/name0" podUID="uid0" cpu="0 (0)" memory="0 (0 B)"`,
+			expected:  ` cpu="0 (0)" memory="0 (0 B)"`,
 		},
 		{
 			name: "only cpus",
-			pod:  makePod("uid1", "namespace1", "name1"),
 			resources: &framework.Resource{
 				MilliCPU: 16000,
 			},
-			expected: ` pod="namespace1/name1" podUID="uid1" cpu="16000 (16)" memory="0 (0 B)"`,
+			expected: ` cpu="16000 (16)" memory="0 (0 B)"`,
 		},
 		{
 			name: "only Memory",
-			pod:  makePod("uid2", "namespace2", "name2"),
 			resources: &framework.Resource{
 				Memory: 16 * 1024 * 1024 * 1024,
 			},
-			expected: ` pod="namespace2/name2" podUID="uid2" cpu="0 (0)" memory="17179869184 (16 GiB)"`,
-		},
-		{
-			name: "cpus and Memory, no pod",
-			pod:  nil,
-			resources: &framework.Resource{
-				MilliCPU: 24000,
-				Memory:   16 * 1024 * 1024 * 1024,
-			},
-			expected: ` pod="" podUID="<nil>" cpu="24000 (24)" memory="17179869184 (16 GiB)"`,
+			expected: ` cpu="0 (0)" memory="17179869184 (16 GiB)"`,
 		},
 		{
 			name: "cpus and Memory",
-			pod:  makePod("uid3", "namespace3", "name3"),
 			resources: &framework.Resource{
 				MilliCPU: 24000,
 				Memory:   16 * 1024 * 1024 * 1024,
 			},
-			expected: ` pod="namespace3/name3" podUID="uid3" cpu="24000 (24)" memory="17179869184 (16 GiB)"`,
+			expected: ` cpu="24000 (24)" memory="17179869184 (16 GiB)"`,
 		},
 		{
 			name: "cpus, Memory, hugepages-2Mi",
-			pod:  makePod("uid4", "namespace4", "name4"),
 			resources: &framework.Resource{
 				MilliCPU: 24000,
 				Memory:   16 * 1024 * 1024 * 1024,
@@ -95,11 +74,22 @@ func TestFrameworkResourceToLoggable(t *testing.T) {
 					corev1.ResourceName("hugepages-2Mi"): 1 * 1024 * 1024 * 1024,
 				},
 			},
-			expected: ` pod="namespace4/name4" podUID="uid4" cpu="24000 (24)" memory="17179869184 (16 GiB)" hugepages-2Mi="1073741824 (1.0 GiB)"`,
+			expected: ` cpu="24000 (24)" memory="17179869184 (16 GiB)" hugepages-2Mi="1073741824 (1.0 GiB)"`,
+		},
+		{
+			name: "cpus, Memory, hugepages-2Mi, ephemeral-storage",
+			resources: &framework.Resource{
+				MilliCPU:         24000,
+				Memory:           16 * 1024 * 1024 * 1024,
+				EphemeralStorage: 128 * 1024 * 1204 * 1024,
+				ScalarResources: map[corev1.ResourceName]int64{
+					corev1.ResourceName("hugepages-2Mi"): 1 * 1024 * 1024 * 1024,
+				},
+			},
+			expected: ` cpu="24000 (24)" memory="17179869184 (16 GiB)" ephemeral-storage="161598144512 (150 GiB)" hugepages-2Mi="1073741824 (1.0 GiB)"`,
 		},
 		{
 			name: "cpus, Memory, hugepages-2Mi, hugepages-1Gi",
-			pod:  makePod("uid5", "namespace5", "name5"),
 			resources: &framework.Resource{
 				MilliCPU: 24000,
 				Memory:   16 * 1024 * 1024 * 1024,
@@ -108,11 +98,10 @@ func TestFrameworkResourceToLoggable(t *testing.T) {
 					corev1.ResourceName("hugepages-1Gi"): 2 * 1024 * 1024 * 1024,
 				},
 			},
-			expected: ` pod="namespace5/name5" podUID="uid5" cpu="24000 (24)" memory="17179869184 (16 GiB)" hugepages-1Gi="2147483648 (2.0 GiB)" hugepages-2Mi="1073741824 (1.0 GiB)"`,
+			expected: ` cpu="24000 (24)" memory="17179869184 (16 GiB)" hugepages-1Gi="2147483648 (2.0 GiB)" hugepages-2Mi="1073741824 (1.0 GiB)"`,
 		},
 		{
 			name: "cpus, Memory, hugepages-2Mi, devices",
-			pod:  makePod("uid6", "namespace6", "name6"),
 			resources: &framework.Resource{
 				MilliCPU: 24000,
 				Memory:   16 * 1024 * 1024 * 1024,
@@ -122,14 +111,28 @@ func TestFrameworkResourceToLoggable(t *testing.T) {
 					corev1.ResourceName("awesome.net/gpu"):       4,
 				},
 			},
-			expected: ` pod="namespace6/name6" podUID="uid6" cpu="24000 (24)" memory="17179869184 (16 GiB)" awesome.net/gpu="4" example.com/netdevice="16" hugepages-2Mi="1073741824 (1.0 GiB)"`,
+			expected: ` cpu="24000 (24)" memory="17179869184 (16 GiB)" awesome.net/gpu="4" example.com/netdevice="16" hugepages-2Mi="1073741824 (1.0 GiB)"`,
+		},
+		{
+			name: "cpus, Memory, hugepages-2Mi, devices, ephemeral-storage",
+			resources: &framework.Resource{
+				MilliCPU:         24000,
+				Memory:           16 * 1024 * 1024 * 1024,
+				EphemeralStorage: 128 * 1024 * 1024 * 1024,
+				ScalarResources: map[corev1.ResourceName]int64{
+					corev1.ResourceName("hugepages-2Mi"):         1 * 1024 * 1024 * 1024,
+					corev1.ResourceName("example.com/netdevice"): 16,
+					corev1.ResourceName("awesome.net/gpu"):       4,
+				},
+			},
+			expected: ` cpu="24000 (24)" memory="17179869184 (16 GiB)" ephemeral-storage="137438953472 (128 GiB)" awesome.net/gpu="4" example.com/netdevice="16" hugepages-2Mi="1073741824 (1.0 GiB)"`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer
-			keysAndValues := frameworkResourceToLoggable(tt.pod, tt.resources)
+			keysAndValues := frameworkResourceToLoggable(tt.resources)
 			kvListFormat(&buf, keysAndValues...)
 			got := buf.String()
 			if got != tt.expected {
