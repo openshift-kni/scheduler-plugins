@@ -33,7 +33,7 @@ import (
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 
 	knifeatures "sigs.k8s.io/scheduler-plugins/pkg-kni/features"
-	knistatus "sigs.k8s.io/scheduler-plugins/pkg-kni/pfpstatus"
+	knizpages "sigs.k8s.io/scheduler-plugins/pkg-kni/zpages"
 )
 
 func main() {
@@ -43,7 +43,7 @@ func main() {
 
 	logh := klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog))
 
-	knistatus.Setup(logh)
+	go knizpages.Serve(logh)
 
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence
