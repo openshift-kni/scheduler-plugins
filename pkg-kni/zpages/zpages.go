@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/go-logr/logr"
 	"github.com/gorilla/mux"
@@ -29,15 +28,8 @@ import (
 )
 
 func Serve(logh logr.Logger) {
-	host, ok := os.LookupEnv("KNI_ZPAGES_ADDR")
-	if !ok {
-		logh.Info("missing addr, KNI zpages disabled")
-		return
-	}
-	port, ok := os.LookupEnv("KNI_ZPAGES_PORT")
-	if !ok {
-		logh.Info("missing port, KNI zpages disabled")
-	}
+	host := ""
+	port := 13579
 	addr := fmt.Sprintf("%s:%d", host, port)
 
 	logh.Info("KNI zpages serving", "addr", addr)
