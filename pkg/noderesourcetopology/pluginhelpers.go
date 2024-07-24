@@ -32,7 +32,6 @@ import (
 
 	apiconfig "sigs.k8s.io/scheduler-plugins/apis/config"
 	nrtcache "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/cache"
-	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/podprovider"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/stringify"
 )
 
@@ -55,9 +54,9 @@ func initNodeTopologyInformer(tcfg *apiconfig.NodeResourceTopologyMatchArgs, han
 		return nrtcache.NewPassthrough(client), nil
 	}
 
-	podSharedInformer, podLister, isPodRelevant := podprovider.NewFromHandle(handle, tcfg.Cache)
+	podSharedInformer, podLister := nrtcache.InformerFromHandle(handle)
 
-	nrtCache, err := nrtcache.NewOverReserve(tcfg.Cache, client, podLister, isPodRelevant)
+	nrtCache, err := nrtcache.NewOverReserve(tcfg.Cache, client, podLister)
 	if err != nil {
 		return nil, err
 	}

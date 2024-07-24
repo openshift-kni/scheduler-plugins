@@ -89,8 +89,6 @@ var (
 
 	defaultResyncMethod = CacheResyncAutodetect
 
-	defaultInformerMode = CacheInformerDedicated
-
 	// Defaults for NetworkOverhead
 	// DefaultWeightsName contains the default costs to be used by networkAware plugins
 	DefaultWeightsName = "UserDefined"
@@ -201,9 +199,6 @@ func SetDefaults_NodeResourceTopologyMatchArgs(obj *NodeResourceTopologyMatchArg
 	}
 	if obj.Cache.ResyncMethod == nil {
 		obj.Cache.ResyncMethod = &defaultResyncMethod
-	}
-	if obj.Cache.InformerMode == nil {
-		obj.Cache.InformerMode = &defaultInformerMode
 	}
 }
 
