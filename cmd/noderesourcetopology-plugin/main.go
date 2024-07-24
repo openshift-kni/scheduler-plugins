@@ -36,6 +36,7 @@ import (
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 
 	knifeatures "sigs.k8s.io/scheduler-plugins/pkg-kni/features"
+	kniinformer "sigs.k8s.io/scheduler-plugins/pkg-kni/podinformer"
 
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 )
@@ -64,6 +65,8 @@ func main() {
 	utilfeature.DefaultMutableFeatureGate.SetFromMap(knifeatures.Desired())
 
 	rand.Seed(time.Now().UnixNano())
+
+	kniinformer.Setup()
 
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence
