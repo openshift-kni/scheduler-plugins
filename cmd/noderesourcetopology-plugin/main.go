@@ -22,8 +22,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-logr/logr"
+
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/component-base/logs"
+	"k8s.io/component-base/version"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
@@ -45,7 +48,7 @@ const (
 	PFPStatusDumpEnvVar string = "PFP_STATUS_DUMP"
 )
 
-func setupPFPStatusDump() {
+func setupPFPStatusDump(logh logr.Logger) {
 	dumpDir, ok := os.LookupEnv(PFPStatusDumpEnvVar)
 	if !ok || dumpDir == "" {
 		klog.InfoS("PFP Status dump disabled", "variableFound", ok, "valueGiven", dumpDir != "")
@@ -55,13 +58,15 @@ func setupPFPStatusDump() {
 	klog.InfoS("PFP Status dump enabled", "statusDirectory", dumpDir)
 
 	ch := make(chan podfingerprint.Status)
-	logh := klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog))
 
 	podfingerprint.SetCompletionSink(ch)
 	go pfpstatus.RunForever(context.Background(), logh, dumpDir, ch)
 }
 
 func main() {
+	logh := klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog))
+	printVersion(logh) // this must be the first thing logged ever. Note: we can't use V() yet - no flags parsed
+
 	utilfeature.DefaultMutableFeatureGate.SetFromMap(knifeatures.Desired())
 
 	rand.Seed(time.Now().UnixNano())
@@ -83,9 +88,14 @@ func main() {
 	logs.InitLogs()
 	defer logs.FlushLogs()
 
-	setupPFPStatusDump()
+	setupPFPStatusDump(logh)
 
 	if err := command.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+func printVersion(logh logr.Logger) {
+	ver := version.Get()
+	logh.Info("starting noderesourcetopology scheduler", "version", ver.GitVersion, "goversion", ver.GoVersion, "platform", ver.Platform)
 }
