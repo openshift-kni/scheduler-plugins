@@ -21,8 +21,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-logr/logr"
+
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/component-base/logs"
+	"k8s.io/component-base/version"
 	"k8s.io/klog/v2/klogr"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
@@ -37,11 +40,12 @@ import (
 )
 
 func main() {
+	logh := klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog))
+	printVersion(logh) // this must be the first thing logged ever. Note: we can't use V() yet - no flags parsed
+
 	utilfeature.DefaultMutableFeatureGate.SetFromMap(knifeatures.Desired())
 
 	rand.Seed(time.Now().UnixNano())
-
-	logh := klogr.NewWithOptions(klogr.WithFormat(klogr.FormatKlog))
 
 	knistatus.Setup(logh)
 
@@ -63,4 +67,9 @@ func main() {
 	if err := command.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+func printVersion(logh logr.Logger) {
+	ver := version.Get()
+	logh.Info("starting noderesourcetopology scheduler", "version", ver.GitVersion, "goversion", ver.GoVersion, "platform", ver.Platform)
 }
