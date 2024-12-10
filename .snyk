@@ -16,6 +16,7 @@ exclude:
     - vendor/sigs.k8s.io/controller-runtime/pkg/webhook/server.go
     - vendor/github.com/google/uuid/hash.go
     - vendor/github.com/paypal/load-watcher/pkg/watcher/internal/metricsprovider/prometheus.go
+    - vendor/github.com/spf13/cobra/command.go
     - vendor/golang.org/x/net/websocket/hybi.go
     - vendor/golang.org/x/tools/go/analysis/unitchecker/unitchecker.go
     - vendor/golang.org/x/tools/internal/pkgbits/encoder.go
