@@ -23,6 +23,7 @@ SCRIPT_ROOT=$(dirname "${BASH_SOURCE}")/..
 
 cd "${SCRIPT_ROOT}"
 
+go version
 go mod vendor
 if [[ $? -ne 0  ]]; then
   echo echo 'Command "go mod vendor" failed' >&2
