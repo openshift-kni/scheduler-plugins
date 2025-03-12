@@ -19,5 +19,5 @@ exclude:
     - vendor/github.com/spf13/cobra/command.go
     - vendor/golang.org/x/net/websocket/hybi.go
     - vendor/golang.org/x/tools/go/analysis/unitchecker/unitchecker.go
-    - vendor/golang.org/x/tools/internal/pkgbits/encoder.go
+    - vendor/golang.org/x/tools/internal/**
     - vendor/go.etcd.io/etcd/client/pkg/v3/transport/listener.go
