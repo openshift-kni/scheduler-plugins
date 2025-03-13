@@ -158,3 +158,9 @@ replace (
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.25.16
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.25.16
 )
+
+// local pinning
+replace (
+	golang.org/x/crypto => github.com/openshift/golang-crypto v0.33.1-0.20250310193910-9003f682e581
+	golang.org/x/oauth2 => github.com/openshift/golang-oauth2 v0.26.1-0.20250310184649-06a918c6239d
+)
