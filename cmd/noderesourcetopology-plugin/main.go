@@ -27,7 +27,6 @@ import (
 	"k8s.io/component-base/logs"
 	"k8s.io/component-base/version"
 	"k8s.io/klog/v2/klogr"
-	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/knidebug"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology"
@@ -35,6 +34,7 @@ import (
 	// Ensure scheme package is initialized.
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 
+	kniapp "sigs.k8s.io/scheduler-plugins/pkg-kni/app"
 	knifeatures "sigs.k8s.io/scheduler-plugins/pkg-kni/features"
 	knistatus "sigs.k8s.io/scheduler-plugins/pkg-kni/pfpstatus"
 )
@@ -52,9 +52,9 @@ func main() {
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence
 	// used by various kinds of workloads.
-	command := app.NewSchedulerCommand(
-		app.WithPlugin(noderesourcetopology.Name, noderesourcetopology.New),
-		app.WithPlugin(knidebug.Name, knidebug.New),
+	command := kniapp.NewSchedulerCommand(
+		kniapp.WithPlugin(noderesourcetopology.Name, noderesourcetopology.New),
+		kniapp.WithPlugin(knidebug.Name, knidebug.New),
 	)
 
 	// TODO: once we switch everything over to Cobra commands, we can go back to calling
