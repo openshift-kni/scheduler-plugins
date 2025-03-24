@@ -61,6 +61,7 @@ type Options struct {
 	Authorization  *apiserveroptions.DelegatingAuthorizationOptions
 	Metrics        *metrics.Options
 	Logs           *logs.Options
+	LogTracr       *TracrOptions
 	Deprecated     *DeprecatedOptions
 	LeaderElection *componentbaseconfig.LeaderElectionConfiguration
 
@@ -85,6 +86,7 @@ func NewOptions() *Options {
 		Deprecated: &DeprecatedOptions{
 			PodMaxInUnschedulablePodsDuration: 5 * time.Minute,
 		},
+		LogTracr: &TracrOptions{},
 		LeaderElection: &componentbaseconfig.LeaderElectionConfiguration{
 			LeaderElect:       true,
 			LeaseDuration:     metav1.Duration{Duration: 15 * time.Second},
@@ -192,6 +194,7 @@ func (o *Options) initFlags() {
 	utilfeature.DefaultMutableFeatureGate.AddFlag(nfs.FlagSet("feature gate"))
 	o.Metrics.AddFlags(nfs.FlagSet("metrics"))
 	logsapi.AddFlags(o.Logs, nfs.FlagSet("logs"))
+	o.LogTracr.AddFlags(nfs.FlagSet("logs"))
 
 	o.Flags = &nfs
 }

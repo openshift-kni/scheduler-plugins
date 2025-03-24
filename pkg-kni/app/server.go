@@ -57,7 +57,6 @@ import (
 	"k8s.io/component-base/version/verflag"
 	"k8s.io/klog/v2"
 	schedulerserverconfig "k8s.io/kubernetes/cmd/kube-scheduler/app/config"
-	"k8s.io/kubernetes/cmd/kube-scheduler/app/options"
 	"k8s.io/kubernetes/pkg/scheduler"
 	kubeschedulerconfig "k8s.io/kubernetes/pkg/scheduler/apis/config"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config/latest"
@@ -66,8 +65,12 @@ import (
 	"k8s.io/kubernetes/pkg/scheduler/metrics/resources"
 	"k8s.io/kubernetes/pkg/scheduler/profile"
 
+	nrtlogging "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
+
+	"sigs.k8s.io/scheduler-plugins/pkg-kni/app/options"
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/logtracr"
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/logtracr/fanout"
+	"sigs.k8s.io/scheduler-plugins/pkg-kni/logtracr/flusher"
 )
 
 func init() {
@@ -135,7 +138,15 @@ func runCommand(cmd *cobra.Command, opts *options.Options, registryOptions ...Op
 	}
 	cliflag.PrintFlags(cmd.Flags())
 
-	tracr, ctrl := logtracr.NewTracrWithConfig(logtracr.Config{})
+	tracr, ctrl := logtracr.NewTracrWithConfig(logtracr.Config{
+		LogKey:      nrtlogging.KeyLogID,
+		FlushPeriod: opts.LogTracr.FlushPeriod,
+		Flusher: flusher.Config{
+			BaseDirectory:  opts.LogTracr.BaseDirectory,
+			MaxAge:         opts.LogTracr.MaxAge,
+			ErrPropagation: flusher.ErrorIgnore,
+		},
+	})
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
