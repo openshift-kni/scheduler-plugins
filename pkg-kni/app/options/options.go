@@ -62,7 +62,6 @@ type Options struct {
 	Metrics        *metrics.Options
 	Logs           *logs.Options
 	LogTracr       *TracrOptions
-	Deprecated     *DeprecatedOptions
 	LeaderElection *componentbaseconfig.LeaderElectionConfiguration
 
 	// ConfigFile is the location of the scheduler server's configuration file.
@@ -83,10 +82,7 @@ func NewOptions() *Options {
 		SecureServing:  apiserveroptions.NewSecureServingOptions().WithLoopback(),
 		Authentication: apiserveroptions.NewDelegatingAuthenticationOptions(),
 		Authorization:  apiserveroptions.NewDelegatingAuthorizationOptions(),
-		Deprecated: &DeprecatedOptions{
-			PodMaxInUnschedulablePodsDuration: 5 * time.Minute,
-		},
-		LogTracr: &TracrOptions{},
+		LogTracr:       &TracrOptions{},
 		LeaderElection: &componentbaseconfig.LeaderElectionConfiguration{
 			LeaderElect:       true,
 			LeaseDuration:     metav1.Duration{Duration: 15 * time.Second},
@@ -112,33 +108,6 @@ func NewOptions() *Options {
 	o.initFlags()
 
 	return o
-}
-
-// ApplyDeprecated obtains the deprecated CLI args and set them to `o.ComponentConfig` if specified.
-func (o *Options) ApplyDeprecated() {
-	if o.Flags == nil {
-		return
-	}
-	// Obtain deprecated CLI args. Set them to cfg if specified in command line.
-	deprecated := o.Flags.FlagSet("deprecated")
-	if deprecated.Changed("profiling") {
-		o.ComponentConfig.EnableProfiling = o.Deprecated.EnableProfiling
-	}
-	if deprecated.Changed("contention-profiling") {
-		o.ComponentConfig.EnableContentionProfiling = o.Deprecated.EnableContentionProfiling
-	}
-	if deprecated.Changed("kubeconfig") {
-		o.ComponentConfig.ClientConnection.Kubeconfig = o.Deprecated.Kubeconfig
-	}
-	if deprecated.Changed("kube-api-content-type") {
-		o.ComponentConfig.ClientConnection.ContentType = o.Deprecated.ContentType
-	}
-	if deprecated.Changed("kube-api-qps") {
-		o.ComponentConfig.ClientConnection.QPS = o.Deprecated.QPS
-	}
-	if deprecated.Changed("kube-api-burst") {
-		o.ComponentConfig.ClientConnection.Burst = o.Deprecated.Burst
-	}
 }
 
 // ApplyLeaderElectionTo obtains the CLI args related with leaderelection, and override the values in `cfg`.
@@ -189,7 +158,6 @@ func (o *Options) initFlags() {
 	o.SecureServing.AddFlags(nfs.FlagSet("secure serving"))
 	o.Authentication.AddFlags(nfs.FlagSet("authentication"))
 	o.Authorization.AddFlags(nfs.FlagSet("authorization"))
-	o.Deprecated.AddFlags(nfs.FlagSet("deprecated"))
 	options.BindLeaderElectionFlags(o.LeaderElection, nfs.FlagSet("leader election"))
 	utilfeature.DefaultMutableFeatureGate.AddFlag(nfs.FlagSet("feature gate"))
 	o.Metrics.AddFlags(nfs.FlagSet("metrics"))
@@ -203,7 +171,6 @@ func (o *Options) initFlags() {
 func (o *Options) ApplyTo(logger klog.Logger, c *schedulerappconfig.Config) error {
 	if len(o.ConfigFile) == 0 {
 		// If the --config arg is not specified, honor the deprecated as well as leader election CLI args.
-		o.ApplyDeprecated()
 		o.ApplyLeaderElectionTo(o.ComponentConfig)
 		c.ComponentConfig = *o.ComponentConfig
 	} else {
@@ -242,11 +209,6 @@ func (o *Options) ApplyTo(logger klog.Logger, c *schedulerappconfig.Config) erro
 		}
 	}
 	o.Metrics.Apply()
-
-	// Apply value independently instead of using ApplyDeprecated() because it can't be configured via ComponentConfig.
-	if o.Deprecated != nil {
-		c.PodMaxInUnschedulablePodsDuration = o.Deprecated.PodMaxInUnschedulablePodsDuration
-	}
 
 	return nil
 }
