@@ -68,6 +68,7 @@ import (
 	nrtlogging "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/app/options"
+	"sigs.k8s.io/scheduler-plugins/pkg-kni/logrotate"
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/logtracr"
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/logtracr/fanout"
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/logtracr/flusher"
@@ -138,23 +139,12 @@ func runCommand(cmd *cobra.Command, opts *options.Options, registryOptions ...Op
 	}
 	cliflag.PrintFlags(cmd.Flags())
 
-	tracr, ctrl := logtracr.NewTracrWithConfig(logtracr.Config{
-		LogKey:      nrtlogging.KeyLogID,
-		FlushPeriod: opts.LogTracr.FlushPeriod,
-		Flusher: flusher.Config{
-			BaseDirectory:  opts.LogTracr.BaseDirectory,
-			MaxAge:         opts.LogTracr.MaxAge,
-			ErrPropagation: flusher.ErrorIgnore,
-		},
-	})
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go func() {
 		stopCh := server.SetupSignalHandler()
 		<-stopCh
 		cancel()
-		ctrl.Cancel()
 	}()
 
 	cc, sched, err := Setup(ctx, opts, registryOptions...)
@@ -162,12 +152,26 @@ func runCommand(cmd *cobra.Command, opts *options.Options, registryOptions ...Op
 		return err
 	}
 
-	schedulePod := sched.SchedulePod
-	sched.SchedulePod = func(ctx context.Context, fwk framework.Framework, state *framework.CycleState, pod *v1.Pod) (scheduler.ScheduleResult, error) {
-		logger := klog.FromContext(ctx)
-		mx := logr.New(fanout.NewWithLeaves(logger, tracr))
-		ctx2 := logr.NewContext(ctx, mx)
-		return schedulePod(ctx2, fwk, state, pod)
+	if opts.LogTracr.BaseDirectory != "" {
+		go logrotate.Directory(opts.LogTracr.BaseDirectory).LoopByAge(ctx, klog.Background(), opts.LogTracr.RotateMaxAge, opts.LogTracr.RotatePeriod)
+
+		tracr, _ := logtracr.NewTracrWithConfig(ctx, logtracr.Config{
+			LogKey:      nrtlogging.KeyLogID,
+			FlushPeriod: opts.LogTracr.FlushPeriod,
+			Flusher: flusher.Config{
+				BaseDirectory:  opts.LogTracr.BaseDirectory,
+				MaxAge:         opts.LogTracr.FlushMaxAge,
+				ErrPropagation: flusher.ErrorIgnore,
+			},
+		})
+
+		schedulePod := sched.SchedulePod
+		sched.SchedulePod = func(ctx context.Context, fwk framework.Framework, state *framework.CycleState, pod *v1.Pod) (scheduler.ScheduleResult, error) {
+			logger := klog.FromContext(ctx)
+			mx := logr.New(fanout.NewWithLeaves(logger, tracr))
+			ctx2 := logr.NewContext(ctx, mx)
+			return schedulePod(ctx2, fwk, state, pod)
+		}
 	}
 
 	// add feature enablement metrics
