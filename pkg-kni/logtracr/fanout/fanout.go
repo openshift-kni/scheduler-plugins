@@ -25,28 +25,24 @@ import (
 type Fanout struct {
 	// protects the `leaves` slice, not the logger instances
 	rwlock sync.RWMutex
-	leaves []logr.Logger
+	leaves []logr.LogSink
 }
 
-func (fo *Fanout) GetUnderlying() []logr.Logger {
-	return fo.leaves
-}
-
-func NewWithLeaves(leaves ...logr.Logger) logr.LogSink {
+func NewWithLeaves(leaves ...logr.LogSink) logr.LogSink {
 	return &Fanout{
 		leaves: leaves,
 	}
 }
 
-// Init is not implemented and does not use any runtime info.
 func (fo *Fanout) Init(info logr.RuntimeInfo) {
-	// not implemented
+	for _, leaf := range fo.leaves {
+		leaf.Init(info)
+	}
 }
 
-// Enabled delegate this check to leaves later on.
-// There's no easy way to query loggers (vs their logsinks, but
-// we don't have access to them), so this is the best we can do
 func (fo *Fanout) Enabled(level int) bool {
+	// need to postpone the decision,
+	// this causes overhead but it is unavoidable.
 	return true
 }
 
@@ -54,17 +50,21 @@ func (fo *Fanout) Enabled(level int) bool {
 func (fo *Fanout) Info(level int, msg string, kv ...any) {
 	fo.rwlock.RLock() // we don't mutate the leaves slice
 	defer fo.rwlock.RUnlock()
-	for _, leaf := range fo.leaves {
-		leaf.Info(msg, kv...)
+	for idx := range fo.leaves {
+		if !fo.leaves[idx].Enabled(level) {
+			continue
+		}
+		fo.leaves[idx].Info(level, msg, kv...)
 	}
 }
 
 // Error dispatches the call to all the leaves
 func (fo *Fanout) Error(err error, msg string, kv ...any) {
 	fo.rwlock.RLock() // we don't mutate the leaves slice
-	defer fo.rwlock.Unlock()
-	for _, leaf := range fo.leaves {
-		leaf.Error(err, msg, kv...)
+	defer fo.rwlock.RUnlock()
+	for idx := range fo.leaves {
+		// errors must be always propagated
+		fo.leaves[idx].Error(err, msg, kv...)
 	}
 }
 
@@ -72,7 +72,7 @@ func (fo *Fanout) Error(err error, msg string, kv ...any) {
 func (fo *Fanout) WithValues(kv ...any) logr.LogSink {
 	fo.rwlock.Lock()
 	defer fo.rwlock.Unlock()
-	leaves := make([]logr.Logger, 0, len(fo.leaves))
+	leaves := make([]logr.LogSink, 0, len(fo.leaves))
 	for _, leaf := range fo.leaves {
 		leaves = append(leaves, leaf.WithValues(kv...))
 	}
@@ -85,7 +85,7 @@ func (fo *Fanout) WithValues(kv ...any) logr.LogSink {
 func (fo *Fanout) WithName(name string) logr.LogSink {
 	fo.rwlock.Lock()
 	defer fo.rwlock.Unlock()
-	leaves := make([]logr.Logger, 0, len(fo.leaves))
+	leaves := make([]logr.LogSink, 0, len(fo.leaves))
 	for _, leaf := range fo.leaves {
 		leaves = append(leaves, leaf.WithName(name))
 	}
@@ -94,16 +94,7 @@ func (fo *Fanout) WithName(name string) logr.LogSink {
 	}
 }
 
-// Underlier exposes access to the underlying logging function. Since
-// callers only have a logr.Logger, they have to know which
-// implementation is in use, so this interface is less of an
-// abstraction and more of a way to test type conversion.
-type Underlier interface {
-	GetUnderlying() []logr.Logger
-}
-
 // Assert conformance to the interfaces.
 var _ logr.LogSink = &Fanout{}
-var _ Underlier = &Fanout{}
 
 // TODO: implement logr.CallDepthLogSink

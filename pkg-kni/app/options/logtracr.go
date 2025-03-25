@@ -32,8 +32,8 @@ type TracrOptions struct {
 
 func NewTracrOptions() *TracrOptions {
 	return &TracrOptions{
-		FlushPeriod:  30 * time.Second,
-		FlushMaxAge:  42 * time.Second,
+		FlushPeriod:  2 * time.Second,
+		FlushMaxAge:  1 * time.Second,
 		RotatePeriod: 5 * time.Minute,
 		RotateMaxAge: 12 * time.Hour,
 	}

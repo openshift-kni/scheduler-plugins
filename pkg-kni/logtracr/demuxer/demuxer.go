@@ -18,7 +18,9 @@ package demuxer
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -26,10 +28,9 @@ import (
 	"github.com/go-logr/logr"
 )
 
-const (
-	LevelError = "ERROR"
-	LevelInfo  = "INFO"
-	LevelV     = "V[%d]"
+var (
+	ErrMissingKeyFinder         = errors.New("missing key finder")
+	ErrMissingKeyValueFormatter = errors.New("missing keyvalue formatter")
 )
 
 var (
@@ -37,60 +38,13 @@ var (
 	NameSeparator = "."
 )
 
-type logBuffer struct {
-	bytes.Buffer
-	ts time.Time // last updated
-}
-
 type Demuxer struct {
-	// protects the `leaves` slice, not the logger instances
 	lock    sync.Mutex
 	opts    Options
 	name    string
 	values  []any
 	logBufs map[string]*logBuffer
 	msgDone func(val string)
-}
-
-type Options struct {
-	// KeyFinder can assume len(kv) >= 2 && len(kv)%2 == 0
-	KeyFinder func(kv []any) (string, bool)
-	// KeyValueFormatter can assume len(kv) > 0
-	KeyValueFormatter func(kv []any) string
-}
-
-func DefaultKeyValueFormatter(kv ...any) string {
-	var sb strings.Builder
-	if s, ok := toString(kv[0]); ok {
-		sb.WriteString(s)
-	}
-	for _, x := range kv[1:] {
-		if s, ok := toString(x); ok {
-			sb.WriteString(" ")
-			sb.WriteString(s)
-		}
-	}
-	return sb.String()
-}
-
-func DefaultKeyFinder(key string) func(kv []any) (string, bool) {
-	return func(kv []any) (string, bool) {
-		if s, ok := toString(kv[0]); !ok || s != key {
-			return "", false
-		}
-		return toString(kv[1])
-	}
-}
-
-func GenericKeyFinder(key string) func(kv []any) (string, bool) {
-	return func(kv []any) (string, bool) {
-		for idx := 0; idx < len(kv); idx += 2 {
-			if s, ok := toString(kv[idx]); ok && s == key {
-				return toString(kv[idx+1])
-			}
-		}
-		return "", false
-	}
 }
 
 func (dmx *Demuxer) Register(cb func(string)) {
@@ -120,11 +74,18 @@ func (dmx *Demuxer) PopBuffer(val string) *bytes.Buffer {
 	return &logBuf.Buffer
 }
 
-func NewWithOptions(opts *Options) *Demuxer {
-	return &Demuxer{
-		opts:    *opts,
-		msgDone: func(_ string) {},
+func NewWithOptions(opts Options) (*Demuxer, error) {
+	if opts.KeyFinder == nil {
+		return nil, ErrMissingKeyFinder
 	}
+	if opts.KeyValueFormatter == nil {
+		return nil, ErrMissingKeyValueFormatter
+	}
+	return &Demuxer{
+		opts:    opts,
+		logBufs: make(map[string]*logBuffer),
+		msgDone: func(_ string) {},
+	}, nil
 }
 
 // Init is not implemented and does not use any runtime info.
@@ -134,11 +95,11 @@ func (dmx *Demuxer) Init(info logr.RuntimeInfo) {
 
 // Enabled tests whether this Logger is enabled.
 func (dmx *Demuxer) Enabled(level int) bool {
-	return true // hardcoded, we filter using a different way
+	return matchLoggerByName(dmx.name)
 }
 
 func (dmx *Demuxer) Info(level int, msg string, kv ...any) {
-	dmx.writeLine(dmx.levelString(level), msg, kv...)
+	dmx.writeLine(levelString(level), msg, kv...)
 }
 
 func (dmx *Demuxer) Error(err error, msg string, kv ...any) {
@@ -151,6 +112,7 @@ func (dmx *Demuxer) WithValues(kv ...any) logr.LogSink {
 		values:  append(dmx.values, kv...),
 		opts:    dmx.opts,
 		logBufs: dmx.logBufs,
+		msgDone: dmx.msgDone,
 	}
 }
 
@@ -163,19 +125,21 @@ func (dmx *Demuxer) WithName(name string) logr.LogSink {
 		values:  dmx.values,
 		opts:    dmx.opts,
 		logBufs: dmx.logBufs,
+		msgDone: dmx.msgDone,
 	}
 }
 
 func (dmx *Demuxer) writeLine(level, msg string, kv ...any) {
-	if len(kv) < 2 || len(kv)%2 != 0 {
-		return
+	var val string
+	var ok bool
+	if len(dmx.values) > 0 && len(dmx.values)%2 == 0 {
+		val, ok = dmx.opts.KeyFinder(dmx.values)
 	}
-	if dmx.opts.KeyFinder == nil {
-		return
+	if !ok && len(kv) > 0 && len(kv)%2 == 0 {
+		val, ok = dmx.opts.KeyFinder(kv)
 	}
-
-	val, ok := dmx.opts.KeyFinder(kv)
 	if !ok {
+		fmt.Fprintf(os.Stderr, "XXX: dmx.writeLine KeyFinder miss: %q\n", msg)
 		return
 	}
 
@@ -190,41 +154,14 @@ func (dmx *Demuxer) writeLine(level, msg string, kv ...any) {
 	}
 
 	logBuf.ts = ts
-	logBuf.WriteString(level)
-	if dmx.name != "" {
-		logBuf.WriteString(" ")
-		logBuf.WriteString(dmx.name)
-	}
-	if msg != "" {
-		logBuf.WriteString(" ")
-		logBuf.WriteString(msg)
-	}
-	if len(dmx.values) > 0 {
-		logBuf.WriteString(" ")
-		logBuf.WriteString(dmx.opts.KeyValueFormatter(dmx.values))
-	}
-	logBuf.WriteString(" ")
-	logBuf.WriteString(dmx.opts.KeyValueFormatter(kv))
-	logBuf.WriteString("\n")
+	logBuf.WriteLine(dmx.opts, dmx.name, level, msg, dmx.values, kv)
 
 	dmx.msgDone(val)
 }
 
-func (dmx *Demuxer) levelString(level int) string {
-	if level > 0 {
-		return fmt.Sprintf(LevelV, level)
-	}
-	return LevelInfo
-}
-
-func toString(v any) (string, bool) {
-	if s, ok := v.(string); ok {
-		return s, true
-	}
-	if st, ok := v.(fmt.Stringer); ok {
-		return st.String(), true
-	}
-	return "<unrep>", false
+func matchLoggerByName(name string) bool {
+	name = strings.ToLower(name)
+	return strings.Contains(name, "knidebug") || strings.Contains(name, "nrtcache") || strings.Contains(name, "NodeResourceTopologyMatch")
 }
 
 // Assert conformance to the interfaces.

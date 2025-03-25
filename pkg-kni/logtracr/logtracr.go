@@ -41,10 +41,14 @@ type Control struct {
 	AsyncFlush AsyncFlushFunc
 }
 
-func NewTracrWithConfig(ctx context.Context, cfg Config) (logr.Logger, Control) {
-	dmx := demuxer.NewWithOptions(&demuxer.Options{
-		KeyFinder: demuxer.GenericKeyFinder(cfg.LogKey),
+func NewTracrWithConfig(ctx context.Context, cfg Config) (logr.LogSink, Control, error) {
+	dmx, err := demuxer.NewWithOptions(demuxer.Options{
+		KeyFinder:         demuxer.GenericKeyFinder(cfg.LogKey),
+		KeyValueFormatter: demuxer.DefaultKeyValueFormatter,
 	})
+	if err != nil {
+		return logr.Discard().GetSink(), Control{}, err
+	}
 
 	stdLog := log.New(os.Stderr, "", log.Lshortfile)
 	fl := flusher.NewWithLogger(stdr.New(stdLog), cfg.Flusher, dmx)
@@ -56,11 +60,11 @@ func NewTracrWithConfig(ctx context.Context, cfg Config) (logr.Logger, Control) 
 
 	go flushLoop(ctx, flushReqCh, cfg.FlushPeriod, fl)
 
-	return logr.New(dmx), Control{
+	return dmx, Control{
 		AsyncFlush: func() {
 			flushReqCh <- struct{}{}
 		},
-	}
+	}, nil
 }
 
 func flushLoop(ctx context.Context, flushReqCh chan struct{}, flushPeriod time.Duration, fl *flusher.Flusher) {

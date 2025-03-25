@@ -137,6 +137,7 @@ func runCommand(cmd *cobra.Command, opts *options.Options, registryOptions ...Op
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
+	klog.EnableContextualLogging(true)
 	cliflag.PrintFlags(cmd.Flags())
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -147,16 +148,17 @@ func runCommand(cmd *cobra.Command, opts *options.Options, registryOptions ...Op
 		cancel()
 	}()
 
-	cc, sched, err := Setup(ctx, opts, registryOptions...)
-	if err != nil {
-		return err
-	}
+	lh := klog.FromContext(ctx)
 
+	var err error
+	var tracr logr.LogSink
 	if opts.LogTracr.BaseDirectory != "" {
-		go logrotate.Directory(opts.LogTracr.BaseDirectory).LoopByAge(ctx, klog.Background(), opts.LogTracr.RotateMaxAge, opts.LogTracr.RotatePeriod)
+		go logrotate.Directory(opts.LogTracr.BaseDirectory).LoopByAge(ctx, lh, opts.LogTracr.RotateMaxAge, opts.LogTracr.RotatePeriod)
 
-		tracr, _ := logtracr.NewTracrWithConfig(ctx, logtracr.Config{
-			LogKey:      nrtlogging.KeyLogID,
+		lh.Info("enabled log rotation", "directory", opts.LogTracr.BaseDirectory, "maxAge", opts.LogTracr.RotateMaxAge, "period", opts.LogTracr.RotatePeriod)
+
+		tracr, _, err = logtracr.NewTracrWithConfig(ctx, logtracr.Config{
+			LogKey:      nrtlogging.KeyPod,
 			FlushPeriod: opts.LogTracr.FlushPeriod,
 			Flusher: flusher.Config{
 				BaseDirectory:  opts.LogTracr.BaseDirectory,
@@ -164,14 +166,34 @@ func runCommand(cmd *cobra.Command, opts *options.Options, registryOptions ...Op
 				ErrPropagation: flusher.ErrorIgnore,
 			},
 		})
-
-		schedulePod := sched.SchedulePod
-		sched.SchedulePod = func(ctx context.Context, fwk framework.Framework, state *framework.CycleState, pod *v1.Pod) (scheduler.ScheduleResult, error) {
-			logger := klog.FromContext(ctx)
-			mx := logr.New(fanout.NewWithLeaves(logger, tracr))
-			ctx2 := logr.NewContext(ctx, mx)
-			return schedulePod(ctx2, fwk, state, pod)
+		if err != nil {
+			return err
 		}
+
+		sink := klog.FromContext(ctx).GetSink()
+
+		lh.Info("enabled log tracing", "directory", opts.LogTracr.BaseDirectory, "maxAge", opts.LogTracr.FlushMaxAge, "period", opts.LogTracr.FlushPeriod)
+
+		ctx = logr.NewContext(ctx, logr.New(fanout.NewWithLeaves(sink, tracr))) // force on
+	}
+
+	lh = klog.FromContext(ctx) // refresh
+
+	cc, sched, err := Setup(ctx, opts, registryOptions...)
+	if err != nil {
+		return err
+	}
+	lh.Info("log setup done")
+
+	if tracr != nil {
+		schedulePod := sched.SchedulePod
+		sched.SchedulePod = func(schedCtx context.Context, fwk framework.Framework, state *framework.CycleState, pod *v1.Pod) (scheduler.ScheduleResult, error) {
+			schedLogger := klog.FromContext(schedCtx)
+			mx := logr.New(fanout.NewWithLeaves(schedLogger.GetSink(), tracr))
+			schedCtx = logr.NewContext(schedCtx, mx) // force on
+			return schedulePod(schedCtx, fwk, state, pod)
+		}
+		lh.Info("enabled pod scheduling extension")
 	}
 
 	// add feature enablement metrics
