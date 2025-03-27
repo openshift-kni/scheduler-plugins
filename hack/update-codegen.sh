@@ -23,7 +23,7 @@ SCRIPT_ROOT=$(dirname "${BASH_SOURCE[@]}")/..
 TOOLS_DIR=$(realpath ./hack/tools)
 TOOLS_BIN_DIR="${TOOLS_DIR}/bin"
 GO_INSTALL=$(realpath ./hack/go-install.sh)
-CONTROLLER_GEN_VER=v0.14.0
+CONTROLLER_GEN_VER=v0.16.5
 CONTROLLER_GEN_BIN=controller-gen
 CONTROLLER_GEN=${TOOLS_BIN_DIR}/${CONTROLLER_GEN_BIN}-${CONTROLLER_GEN_VER}
 # Need v1 to support defaults in CRDs, unfortunately limiting us to k8s 1.16+
@@ -31,7 +31,7 @@ CRD_OPTIONS="crd:crdVersions=v1"
 
 GOBIN=${TOOLS_BIN_DIR} ${GO_INSTALL} sigs.k8s.io/controller-tools/cmd/controller-gen ${CONTROLLER_GEN_BIN} ${CONTROLLER_GEN_VER}
 
-CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${SCRIPT_ROOT}"; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
+CODEGEN_PKG=${CODEGEN_PKG:-$(go list -f '{{.Dir}}' k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
 
 source "${CODEGEN_PKG}/kube_codegen.sh"
 

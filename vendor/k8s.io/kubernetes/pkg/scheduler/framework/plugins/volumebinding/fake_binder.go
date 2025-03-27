@@ -20,6 +20,7 @@ import (
 	"context"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/klog/v2"
 )
 
@@ -52,6 +53,11 @@ var _ SchedulerVolumeBinder = &FakeVolumeBinder{}
 // GetPodVolumeClaims implements SchedulerVolumeBinder.GetPodVolumes.
 func (b *FakeVolumeBinder) GetPodVolumeClaims(_ klog.Logger, pod *v1.Pod) (podVolumeClaims *PodVolumeClaims, err error) {
 	return &PodVolumeClaims{}, nil
+}
+
+// GetEligibleNodes implements SchedulerVolumeBinder.GetEligibleNodes.
+func (b *FakeVolumeBinder) GetEligibleNodes(_ klog.Logger, boundClaims []*v1.PersistentVolumeClaim) (eligibleNodes sets.Set[string]) {
+	return nil
 }
 
 // FindPodVolumes implements SchedulerVolumeBinder.FindPodVolumes.
