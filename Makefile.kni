@@ -69,7 +69,7 @@ unit-test-quick: update-gomod
 
 .PHONY: install-envtest
 install-envtest: update-gomod
-	hack-kni/install-envtest.sh
+	hack/install-envtest.sh
 
 .PHONY: integration-test
 integration-test: install-envtest

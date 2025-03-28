@@ -24,14 +24,14 @@ SCRIPT_ROOT=$(dirname "${BASH_SOURCE}")/..
 cd "${SCRIPT_ROOT}"
 
 go version
-go mod vendor
+go mod download
 if [[ $? -ne 0  ]]; then
-  echo echo 'Command "go mod vendor" failed' >&2
+  echo echo 'Command "go mod download" failed' >&2
   exit 1
 fi
 
 GIT_STATUS=$(git status -s 2>&1)
 if [[ -n ${GIT_STATUS} ]]; then
-  echo "Run go mod vendor" >&2
+  echo "Run go mod download" >&2
   exit 1
 fi
