@@ -44,31 +44,31 @@ image: build-noderesourcetopology-image
 build.amd64: build-scheduler.amd64 build-noderesourcetopology-plugin.amd64
 
 .PHONY: build-noderesourcetopology-plugin
-build-noderesourcetopology-plugin: update-vendor
+build-noderesourcetopology-plugin: update-gomod
 	$(COMMONENVVAR) $(BUILDENVVAR) go build -ldflags '-X k8s.io/component-base/version.gitVersion=$(VERSION) -w' -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
 .PHONY: build-noderesourcetopology-plugin.amd64
-build-noderesourcetopology-plugin.amd64: update-vendor
+build-noderesourcetopology-plugin.amd64: update-gomod
 	$(COMMONENVVAR) $(BUILDENVVAR) GOARCH=amd64 go build -ldflags '-X k8s.io/component-base/version.gitVersion=$(VERSION) -w' -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
 .PHONY: local-noderesourcetopology-image
 build-noderesourcetopology-image: clean
 	podman build -f ./build/noderesourcetopology-plugin/Dockerfile --build-arg ARCH="amd64" --build-arg RELEASE_VERSION="$(RELEASE_VERSION)" -t $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION) .
 
-.PHONY: update-vendor
-update-vendor:
-	hack/update-vendor.sh
+.PHONY: update-gomod
+update-gomod:
+	hack/update-gomod.sh
 
 .PHONY: unit-test
-unit-test: update-vendor
+unit-test: update-gomod
 	hack/unit-test.sh
 
 .PHONY: unit-test-quick
-unit-test-quick: update-vendor
+unit-test-quick: update-gomod
 	hack-kni/unit-test-quick.sh
 
 .PHONY: install-envtest
-install-envtest: update-vendor
+install-envtest: update-gomod
 	hack-kni/install-envtest.sh
 
 .PHONY: integration-test
@@ -84,7 +84,7 @@ verify-gofmt:
 	hack/verify-gofmt.sh
 
 .PHONY: verify-crdgen
-verify-crdgen: update-vendor
+verify-crdgen: update-gomod
 	hack/verify-crdgen.sh
 
 .PHONY: clean
