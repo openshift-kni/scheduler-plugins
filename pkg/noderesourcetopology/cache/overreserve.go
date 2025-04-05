@@ -139,7 +139,6 @@ func (ov *OverReserve) NodeHasForeignPods(nodeName string, pod *corev1.Pod) {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
 	if !ov.nrts.Contains(nodeName) {
-		lh.V(5).Info("ignoring foreign pods", "nrtinfo", "missing")
 		return
 	}
 	val := ov.nodesWithForeignPods.Incr(nodeName)
@@ -260,7 +259,7 @@ func (ov *OverReserve) Resync() {
 
 	nodes := ov.GetDesyncedNodes(lh_)
 	// we start without because chicken/egg problem. This is the earliest we can use the generation value.
-	lh_ = lh_.WithValues(logging.KeyGeneration, nodes.Generation)
+	lh_ = lh_.WithValues(logging.KeyPod, fmt.Sprintf("resync/%d", nodes.Generation), logging.KeyGeneration, nodes.Generation)
 
 	// avoid as much as we can unnecessary work and logs.
 	if nodes.Len() == 0 {
