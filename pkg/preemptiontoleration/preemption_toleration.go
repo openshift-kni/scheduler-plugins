@@ -129,6 +129,8 @@ func ExemptedFromPreemption(
 	pcLister schedulinglisters.PriorityClassLister,
 	now time.Time,
 ) (bool, error) {
+	logger := klog.FromContext(context.TODO())
+
 	if victimCandidate.Spec.PriorityClassName == "" {
 		return false, nil
 	}
@@ -149,7 +151,7 @@ func ExemptedFromPreemption(
 	policy, err := parsePreemptionTolerationPolicy(*victimPriorityClass)
 	if err != nil {
 		// if any error raised, no toleration at all
-		klog.ErrorS(err, "Failed to parse preemption toleration policy of victim candidate's priorityclass.  This victim candidate can't tolerate the preemption",
+		logger.Error(err, "Failed to parse preemption toleration policy of victim candidate's priorityclass.  This victim candidate can't tolerate the preemption",
 			"PreemptorPod", klog.KObj(preemptor),
 			"VictimCandidatePod", klog.KObj(victimCandidate),
 			"VictimCandidatePriorityClass", klog.KRef("", victimPriorityClass.Name),
@@ -219,7 +221,7 @@ func (pl *PreemptionToleration) SelectVictimsOnNode(
 		// For a pod with lower priority, check if it can be exempted from the preemption.
 		exempted, err := ExemptedFromPreemption(pi.Pod, preemptor, pl.priorityClassLister, pl.curTime)
 		if err != nil {
-			klog.ErrorS(err, "Encountered error while selecting victims on node", "Node", nodeInfo.Node().Name)
+			logger.Error(err, "Encountered error while selecting victims on node", "Node", nodeInfo.Node().Name)
 			return nil, 0, framework.AsStatus(err)
 		}
 
@@ -248,6 +250,8 @@ func (pl *PreemptionToleration) SelectVictimsOnNode(
 	}
 	var victims []*v1.Pod
 	numViolatingVictim := 0
+	// Sort potentialVictims by pod priority from high to low, which ensures to
+	// reprieve higher priority pods first.
 	sort.Slice(potentialVictims, func(i, j int) bool { return util.MoreImportantPod(potentialVictims[i].Pod, potentialVictims[j].Pod) })
 	// Try to reprieve as many pods as possible. We first try to reprieve the PDB
 	// violating victims and then other non-violating ones. In both cases, we start
@@ -265,7 +269,7 @@ func (pl *PreemptionToleration) SelectVictimsOnNode(
 			}
 			rpi := pi.Pod
 			victims = append(victims, rpi)
-			klog.V(5).InfoS("Pod is a potential preemption victim on node", "pod", klog.KObj(rpi), "node", klog.KObj(nodeInfo.Node()))
+			logger.V(5).Info("Pod is a potential preemption victim on node", "pod", klog.KObj(rpi), "node", klog.KObj(nodeInfo.Node()))
 		}
 		return fits, nil
 	}
@@ -281,6 +285,11 @@ func (pl *PreemptionToleration) SelectVictimsOnNode(
 		if _, err := reprievePod(p); err != nil {
 			return nil, 0, framework.AsStatus(err)
 		}
+	}
+
+	// Sort victims after reprieving pods to keep the pods in the victims sorted in order of priority from high to low.
+	if len(violatingVictims) != 0 && len(nonViolatingVictims) != 0 {
+		sort.Slice(victims, func(i, j int) bool { return util.MoreImportantPod(victims[i], victims[j]) })
 	}
 	return victims, numViolatingVictim, framework.NewStatus(framework.Success)
 }
@@ -324,8 +333,9 @@ func (pl *PreemptionToleration) calculateNumCandidates(numNodes int32) int32 {
 // We look at the node that is nominated for this pod and as long as there are
 // terminating pods on the node, we don't consider this for preempting more pods.
 func (pl *PreemptionToleration) PodEligibleToPreemptOthers(pod *v1.Pod, nominatedNodeStatus *framework.Status) (bool, string) {
+	logger := klog.FromContext(context.TODO())
 	if pod.Spec.PreemptionPolicy != nil && *pod.Spec.PreemptionPolicy == v1.PreemptNever {
-		klog.V(5).InfoS("Pod is not eligible for preemption because it has a preemptionPolicy of Never", "pod", klog.KObj(pod))
+		logger.V(5).Info("Pod is not eligible for preemption because it has a preemptionPolicy of Never", "pod", klog.KObj(pod))
 		return false, "not eligible due to preemptionPolicy=Never."
 	}
 	nodeInfos := pl.fh.SnapshotSharedLister().NodeInfos()

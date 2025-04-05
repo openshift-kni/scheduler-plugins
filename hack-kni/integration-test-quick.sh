@@ -33,7 +33,7 @@ runTests() {
 
   kube::log::status "Running integration test cases"
   # TODO: make args customizable.
-  go test -timeout=40m -mod=vendor -v \
+  go test -timeout=40m -v \
 	  test/integration/noderesourcetopology_cache_test.go \
 	  test/integration/noderesourcetopology_test.go \
 	  test/integration/nrtutils.go \
