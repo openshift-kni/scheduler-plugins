@@ -66,7 +66,7 @@ func (kd *KNIDebug) EventsToRegister() []framework.ClusterEvent {
 }
 
 func (kd *KNIDebug) Filter(ctx context.Context, cycleState *framework.CycleState, pod *corev1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
-	lh := klog.FromContext(ctx)
+	lh := klog.FromContext(ctx).WithName("knidebug")
 	node := nodeInfo.Node()
 	if node == nil {
 		// should never happen
