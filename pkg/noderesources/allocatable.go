@@ -59,6 +59,7 @@ func validateResources(resources []schedulerconfig.ResourceSpec) error {
 
 // Score invoked at the score extension point.
 func (alloc *Allocatable) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
+	logger := klog.FromContext(ctx)
 	nodeInfo, err := alloc.handle.SnapshotSharedLister().NodeInfos().Get(nodeName)
 	if err != nil {
 		return 0, framework.NewStatus(framework.Error, fmt.Sprintf("getting node %q from Snapshot: %v", nodeName, err))
@@ -68,7 +69,7 @@ func (alloc *Allocatable) Score(ctx context.Context, state *framework.CycleState
 	// It calculates the sum of the node's weighted allocatable resources.
 	//
 	// Note: the returned "score" is negative for least allocatable, and positive for most allocatable.
-	return alloc.score(pod, nodeInfo)
+	return alloc.score(logger, pod, nodeInfo)
 }
 
 // ScoreExtensions of the Score plugin.
@@ -77,7 +78,8 @@ func (alloc *Allocatable) ScoreExtensions() framework.ScoreExtensions {
 }
 
 // NewAllocatable initializes a new plugin and returns it.
-func NewAllocatable(_ context.Context, allocArgs runtime.Object, h framework.Handle) (framework.Plugin, error) {
+func NewAllocatable(ctx context.Context, allocArgs runtime.Object, h framework.Handle) (framework.Plugin, error) {
+	logger := klog.FromContext(ctx)
 	// Start with default values.
 	mode := config.Least
 	resToWeightMap := defaultResourcesToWeightMap
@@ -111,18 +113,18 @@ func NewAllocatable(_ context.Context, allocArgs runtime.Object, h framework.Han
 		handle: h,
 		resourceAllocationScorer: resourceAllocationScorer{
 			Name:                AllocatableName,
-			scorer:              resourceScorer(resToWeightMap, mode),
+			scorer:              resourceScorer(logger, resToWeightMap, mode),
 			resourceToWeightMap: resToWeightMap,
 		},
 	}, nil
 }
 
-func resourceScorer(resToWeightMap resourceToWeightMap, mode config.ModeType) func(resourceToValueMap, resourceToValueMap) int64 {
+func resourceScorer(logger klog.Logger, resToWeightMap resourceToWeightMap, mode config.ModeType) func(resourceToValueMap, resourceToValueMap) int64 {
 	return func(requested, allocable resourceToValueMap) int64 {
 		// TODO: consider volumes in scoring.
 		var nodeScore, weightSum int64
 		for resource, weight := range resToWeightMap {
-			resourceScore := score(allocable[resource], mode)
+			resourceScore := score(logger, allocable[resource], mode)
 			nodeScore += resourceScore * weight
 			weightSum += weight
 		}
@@ -130,7 +132,7 @@ func resourceScorer(resToWeightMap resourceToWeightMap, mode config.ModeType) fu
 	}
 }
 
-func score(capacity int64, mode config.ModeType) int64 {
+func score(logger klog.Logger, capacity int64, mode config.ModeType) int64 {
 	switch mode {
 	case config.Least:
 		return -1 * capacity
@@ -138,7 +140,7 @@ func score(capacity int64, mode config.ModeType) int64 {
 		return capacity
 	}
 
-	klog.V(10).InfoS("No match for mode", "mode", mode)
+	logger.V(10).Info("No match for mode", "mode", mode)
 	return 0
 }
 

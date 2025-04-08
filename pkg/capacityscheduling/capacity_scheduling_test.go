@@ -327,13 +327,14 @@ func TestPostFilter(t *testing.T) {
 				frameworkruntime.WithInformerFactory(informerFactory),
 				frameworkruntime.WithPodNominator(testutil.NewPodNominator(informerFactory.Core().V1().Pods().Lister())),
 				frameworkruntime.WithSnapshotSharedLister(testutil.NewFakeSharedLister(tt.existPods, tt.nodes)),
+				frameworkruntime.WithWaitingPods(frameworkruntime.NewWaitingPodsMap()),
 			)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			state := framework.NewCycleState()
-			_, preFilterStatus := fwk.RunPreFilterPlugins(ctx, state, tt.pod)
+			_, preFilterStatus, _ := fwk.RunPreFilterPlugins(ctx, state, tt.pod)
 			if !preFilterStatus.IsSuccess() {
 				t.Errorf("Unexpected preFilterStatus: %v", preFilterStatus)
 			}
@@ -384,7 +385,7 @@ func TestReserve(t *testing.T) {
 			elasticQuotas: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.String{},
+					pods:      sets.Set[string]{},
 					Min: &framework.Resource{
 						Memory: 1000,
 					},
@@ -404,7 +405,7 @@ func TestReserve(t *testing.T) {
 				{
 					"ns1": {
 						Namespace: "ns1",
-						pods:      sets.NewString("t1-p1"),
+						pods:      sets.New("t1-p1"),
 						Min: &framework.Resource{
 							Memory: 1000,
 						},
@@ -422,7 +423,7 @@ func TestReserve(t *testing.T) {
 				{
 					"ns1": {
 						Namespace: "ns1",
-						pods:      sets.NewString("t1-p1"),
+						pods:      sets.New("t1-p1"),
 						Min: &framework.Resource{
 							Memory: 1000,
 						},
@@ -469,7 +470,7 @@ func TestReserve(t *testing.T) {
 
 			state := framework.NewCycleState()
 			for i, pod := range tt.pods {
-				got := cs.Reserve(nil, state, pod, "node-a")
+				got := cs.Reserve(context.TODO(), state, pod, "node-a")
 				if got.Code() != tt.expectedCodes[i] {
 					t.Errorf("expected %v, got %v : %v", tt.expected[i], got.Code(), got.Message())
 				}
@@ -498,7 +499,7 @@ func TestUnreserve(t *testing.T) {
 			elasticQuotas: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.NewString("t1-p3", "t1-p4"),
+					pods:      sets.New("t1-p3", "t1-p4"),
 					Min: &framework.Resource{
 						Memory: 1000,
 					},
@@ -514,7 +515,7 @@ func TestUnreserve(t *testing.T) {
 				{
 					"ns1": {
 						Namespace: "ns1",
-						pods:      sets.NewString("t1-p3", "t1-p4"),
+						pods:      sets.New("t1-p3", "t1-p4"),
 						Min: &framework.Resource{
 							Memory: 1000,
 						},
@@ -529,7 +530,7 @@ func TestUnreserve(t *testing.T) {
 				{
 					"ns1": {
 						Namespace: "ns1",
-						pods:      sets.NewString("t1-p3", "t1-p4"),
+						pods:      sets.New("t1-p3", "t1-p4"),
 						Min: &framework.Resource{
 							Memory: 1000,
 						},
@@ -544,7 +545,7 @@ func TestUnreserve(t *testing.T) {
 				{
 					"ns1": {
 						Namespace: "ns1",
-						pods:      sets.NewString("t1-p4"),
+						pods:      sets.New("t1-p4"),
 						Min: &framework.Resource{
 							Memory: 1000,
 						},
@@ -591,7 +592,7 @@ func TestUnreserve(t *testing.T) {
 
 			state := framework.NewCycleState()
 			for i, pod := range tt.pods {
-				cs.Unreserve(nil, state, pod, "node-a")
+				cs.Unreserve(context.TODO(), state, pod, "node-a")
 				if !reflect.DeepEqual(cs.elasticQuotaInfos["ns1"], tt.expected[i]["ns1"]) {
 					t.Errorf("expected %#v, got %#v", tt.expected[i]["ns1"].Used, cs.elasticQuotaInfos["ns1"].Used)
 				}
@@ -741,7 +742,7 @@ func TestDryRunPreemption(t *testing.T) {
 			state := framework.NewCycleState()
 
 			// Some tests rely on PreFilter plugin to compute its CycleState.
-			_, preFilterStatus := fwk.RunPreFilterPlugins(ctx, state, tt.pod)
+			_, preFilterStatus, _ := fwk.RunPreFilterPlugins(ctx, state, tt.pod)
 			if !preFilterStatus.IsSuccess() {
 				t.Errorf("Unexpected preFilterStatus: %v", preFilterStatus)
 			}
@@ -988,7 +989,7 @@ func TestPodEligibleToPreemptOthers(t *testing.T) {
 			}
 
 			state := framework.NewCycleState()
-			_, preFilterStatus := fwk.RunPreFilterPlugins(ctx, state, tt.pod)
+			_, preFilterStatus, _ := fwk.RunPreFilterPlugins(ctx, state, tt.pod)
 			if !preFilterStatus.IsSuccess() {
 				t.Errorf("Unexpected preFilterStatus: %v", preFilterStatus)
 			}
@@ -1029,7 +1030,7 @@ func TestAddElasticQuota(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.String{},
+					pods:      sets.Set[string]{},
 					Max: &framework.Resource{
 						MilliCPU: 100,
 						Memory:   1000,
@@ -1054,7 +1055,7 @@ func TestAddElasticQuota(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.String{},
+					pods:      sets.Set[string]{},
 					Max: &framework.Resource{
 						MilliCPU:         UpperBoundOfMax,
 						Memory:           UpperBoundOfMax,
@@ -1080,7 +1081,7 @@ func TestAddElasticQuota(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.String{},
+					pods:      sets.Set[string]{},
 					Max: &framework.Resource{
 						MilliCPU: 100,
 						Memory:   1000,
@@ -1106,7 +1107,7 @@ func TestAddElasticQuota(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.String{},
+					pods:      sets.Set[string]{},
 					Max: &framework.Resource{
 						MilliCPU:         UpperBoundOfMax,
 						Memory:           UpperBoundOfMax,
@@ -1181,7 +1182,7 @@ func TestUpdateElasticQuota(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.String{},
+					pods:      sets.Set[string]{},
 					Max: &framework.Resource{
 						MilliCPU: 300,
 						Memory:   1000,
@@ -1308,7 +1309,7 @@ func TestAddPod(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.NewString("t1-p1", "t1-p2", "t1-p3"),
+					pods:      sets.New("t1-p1", "t1-p2", "t1-p3"),
 					Max: &framework.Resource{
 						MilliCPU: 100,
 						Memory:   1000,
@@ -1388,7 +1389,7 @@ func TestUpdatePod(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.NewString("t1-p1"),
+					pods:      sets.New("t1-p1"),
 					Max: &framework.Resource{
 						MilliCPU: 100,
 						Memory:   1000,
@@ -1420,7 +1421,7 @@ func TestUpdatePod(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.String{},
+					pods:      sets.Set[string]{},
 					Max: &framework.Resource{
 						MilliCPU: 100,
 						Memory:   1000,
@@ -1504,7 +1505,7 @@ func TestDeletePod(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.NewString(),
+					pods:      sets.New[string](),
 					Max: &framework.Resource{
 						MilliCPU: 100,
 						Memory:   1000,
@@ -1537,7 +1538,7 @@ func TestDeletePod(t *testing.T) {
 			expected: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
-					pods:      sets.NewString("t1-p2"),
+					pods:      sets.New("t1-p2"),
 					Max: &framework.Resource{
 						MilliCPU: 100,
 						Memory:   1000,
