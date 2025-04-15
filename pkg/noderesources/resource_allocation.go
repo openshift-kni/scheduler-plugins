@@ -21,6 +21,7 @@ package noderesources
 
 import (
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 	schedutil "k8s.io/kubernetes/pkg/scheduler/util"
@@ -106,13 +107,13 @@ func calculatePodResourceRequest(pod *v1.Pod, resource v1.ResourceName) int64 {
 	var podRequest int64
 	for i := range pod.Spec.Containers {
 		container := &pod.Spec.Containers[i]
-		qty := schedutil.GetRequestForResource(resource, &container.Resources.Requests, true)
+		qty := getNonZeroRequestForResource(resource, &container.Resources.Requests)
 		podRequest += qty.Value()
 	}
 
 	for i := range pod.Spec.InitContainers {
 		initContainer := &pod.Spec.InitContainers[i]
-		qty := schedutil.GetRequestForResource(resource, &initContainer.Resources.Requests, true)
+		qty := getNonZeroRequestForResource(resource, &initContainer.Resources.Requests)
 		if value := qty.Value(); podRequest < value {
 			podRequest = value
 		}
@@ -126,4 +127,32 @@ func calculatePodResourceRequest(pod *v1.Pod, resource v1.ResourceName) int64 {
 	}
 
 	return podRequest
+}
+
+// getNonZeroRequestForResource returns the requested values,
+// if the resource has undefined request for CPU or memory, it returns a default value.
+func getNonZeroRequestForResource(resourceName v1.ResourceName, requests *v1.ResourceList) resource.Quantity {
+	if requests == nil {
+		return resource.Quantity{}
+	}
+	switch resourceName {
+	case v1.ResourceCPU:
+		// Override if un-set, but not if explicitly set to zero
+		if _, found := (*requests)[v1.ResourceCPU]; !found {
+			return *resource.NewMilliQuantity(schedutil.DefaultMilliCPURequest, resource.DecimalSI)
+		}
+		return requests.Cpu().DeepCopy()
+	case v1.ResourceMemory:
+		// Override if un-set, but not if explicitly set to zero
+		if _, found := (*requests)[v1.ResourceMemory]; !found {
+			return *resource.NewQuantity(schedutil.DefaultMemoryRequest, resource.DecimalSI)
+		}
+		return requests.Memory().DeepCopy()
+	default:
+		quantity, found := (*requests)[resourceName]
+		if !found {
+			return resource.Quantity{}
+		}
+		return quantity.DeepCopy()
+	}
 }

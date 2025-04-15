@@ -113,7 +113,7 @@ func (cs *Coscheduling) EventsToRegister(_ context.Context) ([]framework.Cluster
 	pgGVK := fmt.Sprintf("podgroups.v1alpha1.%v", scheduling.GroupName)
 	return []framework.ClusterEventWithHint{
 		{Event: framework.ClusterEvent{Resource: framework.Pod, ActionType: framework.Add}},
-		{Event: framework.ClusterEvent{Resource: framework.GVK(pgGVK), ActionType: framework.Add | framework.Update}},
+		{Event: framework.ClusterEvent{Resource: framework.EventResource(pgGVK), ActionType: framework.Add | framework.Update}},
 	}, nil
 }
 
@@ -156,7 +156,7 @@ func (cs *Coscheduling) PreFilter(ctx context.Context, state *framework.CycleSta
 
 // PostFilter is used to reject a group of pods if a pod does not pass PreFilter or Filter.
 func (cs *Coscheduling) PostFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod,
-	filteredNodeStatusMap framework.NodeToStatusMap) (*framework.PostFilterResult, *framework.Status) {
+	_ framework.NodeToStatusReader) (*framework.PostFilterResult, *framework.Status) {
 	lh := klog.FromContext(ctx)
 	pgName, pg := cs.pgMgr.GetPodGroup(ctx, pod)
 	if pg == nil {
