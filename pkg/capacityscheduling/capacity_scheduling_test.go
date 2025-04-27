@@ -189,7 +189,7 @@ func TestPostFilter(t *testing.T) {
 		pod                   *v1.Pod
 		existPods             []*v1.Pod
 		nodes                 []*v1.Node
-		filteredNodesStatuses framework.NodeToStatusMap
+		filteredNodesStatuses *framework.NodeToStatus
 		elasticQuotas         map[string]*ElasticQuotaInfo
 		wantResult            *framework.PostFilterResult
 		wantStatus            *framework.Status
@@ -205,9 +205,9 @@ func TestPostFilter(t *testing.T) {
 			nodes: []*v1.Node{
 				st.MakeNode().Name("node-a").Capacity(res).Obj(),
 			},
-			filteredNodesStatuses: framework.NodeToStatusMap{
+			filteredNodesStatuses: framework.NewNodeToStatus(map[string]*framework.Status{
 				"node-a": framework.NewStatus(framework.Unschedulable),
-			},
+			}, framework.NewStatus(framework.UnschedulableAndUnresolvable)),
 			elasticQuotas: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
@@ -248,9 +248,9 @@ func TestPostFilter(t *testing.T) {
 			nodes: []*v1.Node{
 				st.MakeNode().Name("node-a").Capacity(res).Obj(),
 			},
-			filteredNodesStatuses: framework.NodeToStatusMap{
+			filteredNodesStatuses: framework.NewNodeToStatus(map[string]*framework.Status{
 				"node-a": framework.NewStatus(framework.Unschedulable),
-			},
+			}, framework.NewStatus(framework.UnschedulableAndUnresolvable)),
 			elasticQuotas: map[string]*ElasticQuotaInfo{
 				"ns1": {
 					Namespace: "ns1",
@@ -291,9 +291,9 @@ func TestPostFilter(t *testing.T) {
 			nodes: []*v1.Node{
 				st.MakeNode().Name("node-a").Capacity(res).Obj(),
 			},
-			filteredNodesStatuses: framework.NodeToStatusMap{
+			filteredNodesStatuses: framework.NewNodeToStatus(map[string]*framework.Status{
 				"node-a": framework.NewStatus(framework.Unschedulable),
-			},
+			}, framework.NewStatus(framework.UnschedulableAndUnresolvable)),
 			elasticQuotas: map[string]*ElasticQuotaInfo{},
 			wantResult:    framework.NewPostFilterResultWithNominatedNode("node-a"),
 			wantStatus:    framework.NewStatus(framework.Success),
@@ -649,9 +649,9 @@ func TestDryRunPreemption(t *testing.T) {
 					},
 				},
 			},
-			nodesStatuses: framework.NodeToStatusMap{
+			nodesStatuses: framework.NewNodeToStatus(map[string]*framework.Status{
 				"node-a": framework.NewStatus(framework.Unschedulable),
-			},
+			}, framework.NewStatus(framework.UnschedulableAndUnresolvable)),
 			want: []preemption.Candidate{
 				&candidate{
 					victims: &extenderv1.Victims{
@@ -701,9 +701,9 @@ func TestDryRunPreemption(t *testing.T) {
 					},
 				},
 			},
-			nodesStatuses: framework.NodeToStatusMap{
+			nodesStatuses: framework.NewNodeToStatus(map[string]*framework.Status{
 				"node-a": framework.NewStatus(framework.Unschedulable),
-			},
+			}, framework.NewStatus(framework.UnschedulableAndUnresolvable)),
 			want: []preemption.Candidate{
 				&candidate{
 					victims: &extenderv1.Victims{
@@ -764,7 +764,6 @@ func TestDryRunPreemption(t *testing.T) {
 				Handler:    fwk,
 				PodLister:  fwk.SharedInformerFactory().Core().V1().Pods().Lister(),
 				PdbLister:  getPDBLister(fwk.SharedInformerFactory()),
-				State:      state,
 				Interface: &preemptor{
 					fh:    fwk,
 					state: state,
@@ -772,7 +771,7 @@ func TestDryRunPreemption(t *testing.T) {
 			}
 
 			nodeInfos, _ := fwk.SnapshotSharedLister().NodeInfos().List()
-			got, _, err := pe.DryRunPreemption(ctx, tt.pod, nodeInfos, nil, 0, int32(len(nodeInfos)))
+			got, _, err := pe.DryRunPreemption(ctx, state, tt.pod, nodeInfos, nil, 0, int32(len(nodeInfos)))
 			if err != nil {
 				t.Fatalf("unexpected error during DryRunPreemption(): %v", err)
 			}
@@ -1007,7 +1006,7 @@ func TestPodEligibleToPreemptOthers(t *testing.T) {
 			state.Write(ElasticQuotaSnapshotKey, elasticQuotaSnapshotState)
 
 			p := preemptor{fh: fwk, state: state}
-			if got, _ := p.PodEligibleToPreemptOthers(tt.pod, tt.nominatedNodeStatus); got != tt.expected {
+			if got, _ := p.PodEligibleToPreemptOthers(context.TODO(), tt.pod, tt.nominatedNodeStatus); got != tt.expected {
 				t.Errorf("expected %t, got %t for pod: %s", tt.expected, got, tt.pod.Name)
 			}
 		})
