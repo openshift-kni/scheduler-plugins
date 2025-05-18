@@ -26,7 +26,7 @@ require (
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kube-scheduler v0.31.2
 	k8s.io/kubernetes v1.31.2
-	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
+	k8s.io/utils 0f33e8f1c979
 	sigs.k8s.io/controller-runtime v0.19.2
 	sigs.k8s.io/logtools v0.9.0
 	sigs.k8s.io/security-profiles-operator v0.4.0
