@@ -31,6 +31,8 @@ Branch the target openshift-kni/scheduler master branch to a new resync local br
 
 fix conflicts introduced by kni-local changes and send PR for review
 
+Note: following RH internal agreement that resulted in https://github.com/openshift-kni/scheduler-plugins/pull/285/commits/4d80e29f16036cf8a75890785d4bf3c3fb914022, future resyncs that pull `go.mod` updates from u/s will require to run ` make -f Makefile.kni update-vendor` in order to update the vendor resources.
+
 ### Patching openshift-kni specific commits
 
 Every commit that is openshift-kni/scheduler-plugins specific should have a prefix of [KNI] 
