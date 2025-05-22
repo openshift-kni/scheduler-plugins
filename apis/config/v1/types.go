@@ -178,7 +178,9 @@ const (
 type CacheInformerMode string
 
 const (
-	CacheInformerShared    CacheInformerMode = "Shared"
+	CacheInformerShared CacheInformerMode = "Shared"
+	// DEPRECATED: starting K8s 1.30, the recommended cache informer mode is shared which
+	// aligns with how kubelet reflect allocatable resources. TBD
 	CacheInformerDedicated CacheInformerMode = "Dedicated"
 )
 
@@ -208,8 +210,9 @@ type NodeResourceTopologyCache struct {
 	ResyncMethod *CacheResyncMethod `json:"resyncMethod,omitempty"`
 	// InformerMode controls the channel the cache uses to get updates about pods.
 	// "Shared" uses the default settings; "Dedicated" creates a specific subscription which is
-	// guaranteed to best suit the cache needs, at cost of one extra connection.
-	// If unspecified, default is "Dedicated"
+	// guaranteed to best suit the cache needs, at cost of one extra connection. This option is
+	// recommended in < K8s 1.30 as it aligns with how kubelet reports the resources via PodResourcesAPI.
+	// If unspecified, default is "Shared"
 	InformerMode *CacheInformerMode `json:"informerMode,omitempty"`
 	// ResyncScope controls which changes the resync logic monitors to trigger an update.
 	// "All" consider both Attributes (metadata, node config details) and per-NUMA resources,

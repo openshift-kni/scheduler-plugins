@@ -89,7 +89,7 @@ var (
 
 	defaultResyncMethod = CacheResyncAutodetect
 
-	defaultInformerMode = CacheInformerDedicated
+	defaultInformerMode = CacheInformerShared
 
 	// Defaults for NetworkOverhead
 	// DefaultWeightsName contains the default costs to be used by networkAware plugins
