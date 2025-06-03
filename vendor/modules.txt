@@ -11,8 +11,8 @@ github.com/OneOfOne/xxhash
 # github.com/antlr4-go/antlr/v4 v4.13.0
 ## explicit; go 1.20
 github.com/antlr4-go/antlr/v4
-# github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
-## explicit
+# github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
+## explicit; go 1.13
 github.com/asaskevich/govalidator
 # github.com/beorn7/perks v1.0.1
 ## explicit; go 1.11
@@ -26,8 +26,8 @@ github.com/cenkalti/backoff/v4
 # github.com/cespare/xxhash/v2 v2.3.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/containers/common v0.46.0
-## explicit; go 1.15
+# github.com/containers/common v0.60.4
+## explicit; go 1.21.0
 github.com/containers/common/pkg/seccomp
 # github.com/coreos/go-semver v0.3.1
 ## explicit; go 1.8
@@ -37,8 +37,8 @@ github.com/coreos/go-semver/semver
 github.com/coreos/go-systemd/v22/daemon
 github.com/coreos/go-systemd/v22/dbus
 github.com/coreos/go-systemd/v22/journal
-# github.com/crossplane/crossplane-runtime v0.14.1-0.20210713194031-85b19c28ea88
-## explicit; go 1.13
+# github.com/crossplane/crossplane-runtime v0.16.1
+## explicit; go 1.17
 github.com/crossplane/crossplane-runtime/apis/common/v1
 # github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 ## explicit
@@ -89,8 +89,8 @@ github.com/go-logr/stdr
 # github.com/go-openapi/jsonpointer v0.19.6
 ## explicit; go 1.13
 github.com/go-openapi/jsonpointer
-# github.com/go-openapi/jsonreference v0.20.2
-## explicit; go 1.13
+# github.com/go-openapi/jsonreference v0.21.0
+## explicit; go 1.20
 github.com/go-openapi/jsonreference
 github.com/go-openapi/jsonreference/internal
 # github.com/go-openapi/swag v0.22.4

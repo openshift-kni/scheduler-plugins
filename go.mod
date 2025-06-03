@@ -3,7 +3,7 @@ module sigs.k8s.io/scheduler-plugins
 go 1.23.0
 
 require (
-	github.com/containers/common v0.46.0
+	github.com/containers/common v0.60.4
 	github.com/diktyo-io/appgroup-api v1.0.1-alpha
 	github.com/diktyo-io/networktopology-api v1.0.1-alpha
 	github.com/dustin/go-humanize v1.0.1
@@ -40,14 +40,14 @@ require (
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
-	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/crossplane/crossplane-runtime v0.14.1-0.20210713194031-85b19c28ea88 // indirect
+	github.com/crossplane/crossplane-runtime v0.16.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
@@ -59,7 +59,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
-	github.com/go-openapi/jsonreference v0.20.2 // indirect
+	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -70,6 +70,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
+	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
