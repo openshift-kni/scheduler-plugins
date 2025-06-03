@@ -6,20 +6,13 @@ package seccomp
 
 // Seccomp represents the config for a seccomp profile for syscall restriction.
 type Seccomp struct {
-	DefaultAction Action `json:"defaultAction"`
-
-	// DefaultErrnoRet is obsolete, please use DefaultErrno
+	DefaultAction   Action `json:"defaultAction"`
 	DefaultErrnoRet *uint  `json:"defaultErrnoRet,omitempty"`
-	DefaultErrno    string `json:"defaultErrno,omitempty"`
-
 	// Architectures is kept to maintain backward compatibility with the old
 	// seccomp profile.
-	Architectures    []Arch         `json:"architectures,omitempty"`
-	ArchMap          []Architecture `json:"archMap,omitempty"`
-	Syscalls         []*Syscall     `json:"syscalls"`
-	Flags            []string       `json:"flags,omitempty"`
-	ListenerPath     string         `json:"listenerPath,omitempty"`
-	ListenerMetadata string         `json:"listenerMetadata,omitempty"`
+	Architectures []Arch         `json:"architectures,omitempty"`
+	ArchMap       []Architecture `json:"archMap,omitempty"`
+	Syscalls      []*Syscall     `json:"syscalls"`
 }
 
 // Architecture is used to represent a specific architecture
@@ -75,7 +68,6 @@ const (
 	ActTrace      Action = "SCMP_ACT_TRACE"
 	ActAllow      Action = "SCMP_ACT_ALLOW"
 	ActLog        Action = "SCMP_ACT_LOG"
-	ActNotify     Action = "SCMP_ACT_NOTIFY"
 )
 
 // Operator used to match syscall arguments in Seccomp
@@ -115,7 +107,5 @@ type Syscall struct {
 	Comment  string   `json:"comment"`
 	Includes Filter   `json:"includes"`
 	Excludes Filter   `json:"excludes"`
-	// ErrnoRet is obsolete, please use Errno
-	ErrnoRet *uint  `json:"errnoRet,omitempty"`
-	Errno    string `json:"errno,omitempty"`
+	ErrnoRet *uint    `json:"errnoRet,omitempty"`
 }

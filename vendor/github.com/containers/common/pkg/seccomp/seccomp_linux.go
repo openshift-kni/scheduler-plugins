@@ -1,4 +1,4 @@
-//go:build seccomp
+// +build seccomp
 
 // SPDX-License-Identifier: Apache-2.0
 
@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/opencontainers/runtime-spec/specs-go"
 	libseccomp "github.com/seccomp/libseccomp-golang"
@@ -67,37 +66,6 @@ func inSlice(slice []string, s string) bool {
 	return false
 }
 
-func getArchitectures(config *Seccomp, newConfig *specs.LinuxSeccomp) error {
-	if len(config.Architectures) != 0 && len(config.ArchMap) != 0 {
-		return errors.New("'architectures' and 'archMap' were specified in the seccomp profile, use either 'architectures' or 'archMap'")
-	}
-
-	// if config.Architectures == 0 then libseccomp will figure out the architecture to use
-	if len(config.Architectures) != 0 {
-		for _, a := range config.Architectures {
-			newConfig.Architectures = append(newConfig.Architectures, specs.Arch(a))
-		}
-	}
-	return nil
-}
-
-func getErrno(errno string, def *uint) (*uint, error) {
-	if errno == "" {
-		return def, nil
-	}
-	v, err := strconv.ParseUint(errno, 10, 32)
-	if err == nil {
-		v2 := uint(v)
-		return &v2, nil
-	}
-
-	v2, found := errnoArch[errno]
-	if !found {
-		return nil, fmt.Errorf("unknown errno %s", errno)
-	}
-	return &v2, nil
-}
-
 func setupSeccomp(config *Seccomp, rs *specs.Spec) (*specs.LinuxSeccomp, error) {
 	if config == nil {
 		return nil, nil
@@ -111,21 +79,21 @@ func setupSeccomp(config *Seccomp, rs *specs.Spec) (*specs.LinuxSeccomp, error) 
 	newConfig := &specs.LinuxSeccomp{}
 
 	var arch string
-	native, err := libseccomp.GetNativeArch()
+	var native, err = libseccomp.GetNativeArch()
 	if err == nil {
 		arch = native.String()
 	}
 
-	if err := getArchitectures(config, newConfig); err != nil {
-		return nil, err
+	if len(config.Architectures) != 0 && len(config.ArchMap) != 0 {
+		return nil, errors.New("'architectures' and 'archMap' were specified in the seccomp profile, use either 'architectures' or 'archMap'")
 	}
 
-	for _, flag := range config.Flags {
-		newConfig.Flags = append(newConfig.Flags, specs.LinuxSeccompFlag(flag))
+	// if config.Architectures == 0 then libseccomp will figure out the architecture to use
+	if len(config.Architectures) != 0 {
+		for _, a := range config.Architectures {
+			newConfig.Architectures = append(newConfig.Architectures, specs.Arch(a))
+		}
 	}
-
-	newConfig.ListenerPath = config.ListenerPath
-	newConfig.ListenerMetadata = config.ListenerMetadata
 
 	if len(config.ArchMap) != 0 {
 		for _, a := range config.ArchMap {
@@ -143,11 +111,7 @@ func setupSeccomp(config *Seccomp, rs *specs.Spec) (*specs.LinuxSeccomp, error) 
 	}
 
 	newConfig.DefaultAction = specs.LinuxSeccompAction(config.DefaultAction)
-
-	newConfig.DefaultErrnoRet, err = getErrno(config.DefaultErrno, config.DefaultErrnoRet)
-	if err != nil {
-		return nil, err
-	}
+	newConfig.DefaultErrnoRet = config.DefaultErrnoRet
 
 Loop:
 	// Loop through all syscall blocks and convert them to libcontainer format after filtering them
@@ -181,17 +145,12 @@ Loop:
 			return nil, errors.New("'name' and 'names' were specified in the seccomp profile, use either 'name' or 'names'")
 		}
 
-		errno, err := getErrno(call.Errno, call.ErrnoRet)
-		if err != nil {
-			return nil, err
-		}
-
 		if call.Name != "" {
-			newConfig.Syscalls = append(newConfig.Syscalls, createSpecsSyscall([]string{call.Name}, call.Action, call.Args, errno))
+			newConfig.Syscalls = append(newConfig.Syscalls, createSpecsSyscall([]string{call.Name}, call.Action, call.Args, call.ErrnoRet))
 		}
 
 		if len(call.Names) > 0 {
-			newConfig.Syscalls = append(newConfig.Syscalls, createSpecsSyscall(call.Names, call.Action, call.Args, errno))
+			newConfig.Syscalls = append(newConfig.Syscalls, createSpecsSyscall(call.Names, call.Action, call.Args, call.ErrnoRet))
 		}
 	}
 

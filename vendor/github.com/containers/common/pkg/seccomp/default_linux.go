@@ -51,16 +51,9 @@ func DefaultProfile() *Seccomp {
 		{
 			Names: []string{
 				"bdflush",
-				"cachestat",
-				"futex_requeue",
-				"futex_wait",
-				"futex_waitv",
-				"futex_wake",
 				"io_pgetevents",
-				"io_pgetevents_time64",
 				"kexec_file_load",
 				"kexec_load",
-				"map_shadow_stack",
 				"migrate_pages",
 				"move_pages",
 				"nfsservctl",
@@ -75,9 +68,9 @@ func DefaultProfile() *Seccomp {
 				"pciconfig_write",
 				"sgetmask",
 				"ssetmask",
+				"swapcontext",
 				"swapoff",
 				"swapon",
-				"syscall",
 				"sysfs",
 				"uselib",
 				"userfaultfd",
@@ -87,7 +80,6 @@ func DefaultProfile() *Seccomp {
 				"vmsplice",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 		},
@@ -149,7 +141,6 @@ func DefaultProfile() *Seccomp {
 				"fchdir",
 				"fchmod",
 				"fchmodat",
-				"fchmodat2",
 				"fchown",
 				"fchown32",
 				"fchownat",
@@ -177,7 +168,6 @@ func DefaultProfile() *Seccomp {
 				"futex",
 				"futex_time64",
 				"futimesat",
-				"get_mempolicy",
 				"get_robust_list",
 				"get_thread_area",
 				"getcpu",
@@ -193,6 +183,7 @@ func DefaultProfile() *Seccomp {
 				"getgroups",
 				"getgroups32",
 				"getitimer",
+				"get_mempolicy",
 				"getpeername",
 				"getpgid",
 				"getpgrp",
@@ -229,9 +220,6 @@ func DefaultProfile() *Seccomp {
 				"ipc",
 				"keyctl",
 				"kill",
-				"landlock_add_rule",
-				"landlock_create_ruleset",
-				"landlock_restrict_self",
 				"lchown",
 				"lchown32",
 				"lgetxattr",
@@ -247,7 +235,6 @@ func DefaultProfile() *Seccomp {
 				"lstat64",
 				"madvise",
 				"mbind",
-				"membarrier",
 				"memfd_create",
 				"memfd_secret",
 				"mincore",
@@ -261,7 +248,6 @@ func DefaultProfile() *Seccomp {
 				"mmap",
 				"mmap2",
 				"mount",
-				"mount_setattr",
 				"move_mount",
 				"mprotect",
 				"mq_getsetattr",
@@ -285,9 +271,9 @@ func DefaultProfile() *Seccomp {
 				"nanosleep",
 				"newfstatat",
 				"open",
-				"open_tree",
 				"openat",
 				"openat2",
+				"open_tree",
 				"pause",
 				"pidfd_getfd",
 				"pidfd_open",
@@ -306,17 +292,14 @@ func DefaultProfile() *Seccomp {
 				"preadv",
 				"preadv2",
 				"prlimit64",
-				"process_mrelease",
-				"process_vm_readv",
-				"process_vm_writev",
 				"pselect6",
 				"pselect6_time64",
-				"ptrace",
 				"pwrite64",
 				"pwritev",
 				"pwritev2",
 				"read",
 				"readahead",
+				"readdir",
 				"readlink",
 				"readlinkat",
 				"readv",
@@ -369,6 +352,7 @@ func DefaultProfile() *Seccomp {
 				"sendmmsg",
 				"sendmsg",
 				"sendto",
+				"setns",
 				"set_mempolicy",
 				"set_robust_list",
 				"set_thread_area",
@@ -382,7 +366,6 @@ func DefaultProfile() *Seccomp {
 				"setgroups",
 				"setgroups32",
 				"setitimer",
-				"setns",
 				"setpgid",
 				"setpriority",
 				"setregid",
@@ -405,10 +388,8 @@ func DefaultProfile() *Seccomp {
 				"shmget",
 				"shutdown",
 				"sigaltstack",
-				"signal",
 				"signalfd",
 				"signalfd4",
-				"sigprocmask",
 				"sigreturn",
 				"socketcall",
 				"socketpair",
@@ -524,7 +505,6 @@ func DefaultProfile() *Seccomp {
 		{
 			Names: []string{
 				"sync_file_range2",
-				"swapcontext",
 			},
 			Action: ActAllow,
 			Args:   []*Arg{},
@@ -536,10 +516,10 @@ func DefaultProfile() *Seccomp {
 			Names: []string{
 				"arm_fadvise64_64",
 				"arm_sync_file_range",
+				"sync_file_range2",
 				"breakpoint",
 				"cacheflush",
 				"set_tls",
-				"sync_file_range2",
 			},
 			Action: ActAllow,
 			Args:   []*Arg{},
@@ -581,16 +561,6 @@ func DefaultProfile() *Seccomp {
 		},
 		{
 			Names: []string{
-				"riscv_flush_icache",
-			},
-			Action: ActAllow,
-			Args:   []*Arg{},
-			Includes: Filter{
-				Arches: []string{"riscv64"},
-			},
-		},
-		{
-			Names: []string{
 				"open_by_handle_at",
 			},
 			Action: ActAllow,
@@ -604,7 +574,6 @@ func DefaultProfile() *Seccomp {
 				"open_by_handle_at",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -616,8 +585,8 @@ func DefaultProfile() *Seccomp {
 				"bpf",
 				"fanotify_init",
 				"lookup_dcookie",
+				"perf_event_open",
 				"quotactl",
-				"quotactl_fd",
 				"setdomainname",
 				"sethostname",
 				"setns",
@@ -630,17 +599,16 @@ func DefaultProfile() *Seccomp {
 		},
 		{
 			Names: []string{
+				"bpf",
 				"fanotify_init",
 				"lookup_dcookie",
 				"perf_event_open",
 				"quotactl",
-				"quotactl_fd",
 				"setdomainname",
 				"sethostname",
 				"setns",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -662,7 +630,6 @@ func DefaultProfile() *Seccomp {
 				"chroot",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -672,8 +639,8 @@ func DefaultProfile() *Seccomp {
 		{
 			Names: []string{
 				"delete_module",
-				"finit_module",
 				"init_module",
+				"finit_module",
 				"query_module",
 			},
 			Action: ActAllow,
@@ -685,12 +652,11 @@ func DefaultProfile() *Seccomp {
 		{
 			Names: []string{
 				"delete_module",
-				"finit_module",
 				"init_module",
+				"finit_module",
 				"query_module",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -712,7 +678,6 @@ func DefaultProfile() *Seccomp {
 				"acct",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -723,6 +688,9 @@ func DefaultProfile() *Seccomp {
 			Names: []string{
 				"kcmp",
 				"process_madvise",
+				"process_vm_readv",
+				"process_vm_writev",
+				"ptrace",
 			},
 			Action: ActAllow,
 			Args:   []*Arg{},
@@ -734,9 +702,11 @@ func DefaultProfile() *Seccomp {
 			Names: []string{
 				"kcmp",
 				"process_madvise",
+				"process_vm_readv",
+				"process_vm_writev",
+				"ptrace",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -745,8 +715,8 @@ func DefaultProfile() *Seccomp {
 		},
 		{
 			Names: []string{
-				"ioperm",
 				"iopl",
+				"ioperm",
 			},
 			Action: ActAllow,
 			Args:   []*Arg{},
@@ -756,11 +726,10 @@ func DefaultProfile() *Seccomp {
 		},
 		{
 			Names: []string{
-				"ioperm",
 				"iopl",
+				"ioperm",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -769,10 +738,10 @@ func DefaultProfile() *Seccomp {
 		},
 		{
 			Names: []string{
-				"clock_settime",
-				"clock_settime64",
 				"settimeofday",
 				"stime",
+				"clock_settime",
+				"clock_settime64",
 			},
 			Action: ActAllow,
 			Args:   []*Arg{},
@@ -782,13 +751,12 @@ func DefaultProfile() *Seccomp {
 		},
 		{
 			Names: []string{
-				"clock_settime",
-				"clock_settime64",
 				"settimeofday",
 				"stime",
+				"clock_settime",
+				"clock_settime64",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -810,7 +778,6 @@ func DefaultProfile() *Seccomp {
 				"vhangup",
 			},
 			Action:   ActErrno,
-			Errno:    "EPERM",
 			ErrnoRet: &eperm,
 			Args:     []*Arg{},
 			Excludes: Filter{
@@ -822,7 +789,6 @@ func DefaultProfile() *Seccomp {
 				"socket",
 			},
 			Action:   ActErrno,
-			Errno:    "EINVAL",
 			ErrnoRet: &einval,
 			Args: []*Arg{
 				{
@@ -897,55 +863,10 @@ func DefaultProfile() *Seccomp {
 				Caps: []string{"CAP_AUDIT_WRITE"},
 			},
 		},
-		{
-			Names: []string{
-				"bpf",
-			},
-			Action:   ActErrno,
-			Errno:    "EPERM",
-			ErrnoRet: &eperm,
-			Args:     []*Arg{},
-			Excludes: Filter{
-				Caps: []string{"CAP_SYS_ADMIN", "CAP_BPF"},
-			},
-		},
-		{
-			Names: []string{
-				"bpf",
-			},
-			Action: ActAllow,
-			Args:   []*Arg{},
-			Includes: Filter{
-				Caps: []string{"CAP_BPF"},
-			},
-		},
-		{
-			Names: []string{
-				"perf_event_open",
-			},
-			Action:   ActErrno,
-			Errno:    "EPERM",
-			ErrnoRet: &eperm,
-			Args:     []*Arg{},
-			Excludes: Filter{
-				Caps: []string{"CAP_SYS_ADMIN", "CAP_BPF"},
-			},
-		},
-		{
-			Names: []string{
-				"perf_event_open",
-			},
-			Action: ActAllow,
-			Args:   []*Arg{},
-			Includes: Filter{
-				Caps: []string{"CAP_PERFMON"},
-			},
-		},
 	}
 
 	return &Seccomp{
 		DefaultAction:   ActErrno,
-		DefaultErrno:    "ENOSYS",
 		DefaultErrnoRet: &enosys,
 		ArchMap:         arches(),
 		Syscalls:        syscalls,
