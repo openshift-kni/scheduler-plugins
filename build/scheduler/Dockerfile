@@ -14,7 +14,7 @@
 ARG ARCH
 ARG GO_BASE_IMAGE=golang
 ARG ALPINE_BASE_IMAGE=$ARCH/alpine
-FROM $GO_BASE_IMAGE:1.21
+FROM $GO_BASE_IMAGE:1.24
 
 WORKDIR /go/src/sigs.k8s.io/scheduler-plugins
 COPY . .
