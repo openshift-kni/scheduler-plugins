@@ -152,7 +152,7 @@ profiles:
 			registryOptions: []app.Option{app.WithPlugin(noderesourcetopology.Name, noderesourcetopology.New)},
 			wantPlugins: map[string]*config.Plugins{
 				"default-scheduler": {
-					PreEnqueue: config.PluginSet{Enabled: []config.Plugin{{Name: schedulinggates.Name}}},
+					PreEnqueue: config.PluginSet{Enabled: []config.Plugin{{Name: schedulinggates.Name}, {Name: "DefaultPreemption"}}},
 					QueueSort:  defaults.ExpandedPluginsV1.QueueSort,
 					Bind:       defaults.ExpandedPluginsV1.Bind,
 					PreFilter:  defaults.ExpandedPluginsV1.PreFilter,
