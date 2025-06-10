@@ -1,4 +1,4 @@
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:v1.19 AS builder
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_8_golang_1.19@sha256:b0d5d412544dfee8c4a99a27c883114ac703f18cd008bccc9882b9644232c9d6 as builder
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN GOOS=linux CGO_ENABLED=0 go build -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
-FROM registry.redhat.io/ubi8/ubi-minimal:8.10
+FROM registry.redhat.io/ubi8/ubi-minimal:8.10-1295@sha256:73064ec359dcd71e56677f8173a134809c885484ba89e6a137d33521ad29dd4c
 
 COPY --from=builder /app/bin/noderesourcetopology-plugin /bin/kube-scheduler
 WORKDIR /bin
