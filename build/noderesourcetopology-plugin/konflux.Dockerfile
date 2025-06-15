@@ -2,11 +2,15 @@ ARG RHEL_VERSION=9.4
 
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:v1.23 AS builder
 
+ARG COMMIT_SHA
+ARG OCP_MAJOR_VERSION=4
+ARG OCP_MINOR_VERSION=20
+
 WORKDIR /app
 
 COPY . .
 
-RUN GOEXPERIMENT=strictfipsruntime GOOS=linux CGO_ENABLED=1 go build -tags strictfipsruntime -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
+RUN GOEXPERIMENT=strictfipsruntime GOOS=linux CGO_ENABLED=1 go build -ldflags "-X k8s.io/component-base/version.gitMajor=${OCP_MAJOR_VERSION} -X k8s.io/component-base/version.gitMinor=${OCP_MINOR_VERSION} -X k8s.io/component-base/version.gitCommit=${COMMIT_SHA}  -w" -tags strictfipsruntime -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
 FROM registry.redhat.io/rhel9-4-els/rhel-minimal:${RHEL_VERSION}
 
