@@ -113,6 +113,17 @@ We can't rewrite history, so we will need to carry that. Using `cherry-pick -x` 
 to enable us to track the origin of each change given enough effort, effort which the current
 process strive to minimize.
 
+#### Cascading changes
+
+When backporting fixes in a cascade way (main -> release-X.Y -> release-X.Y-1 -> release-X.Y-2...) the
+most straightforward way is to cherry pick from one branch to the other, so the `(cherry picked from commit...)`
+references will get appended creating a potentially long list.
+While this is not a problem per se, and acceptable, is also unnecessary, The cherry-picked commits can be either
+1. amended to remove all but the reference pointing back to the main branch commit or
+2. cherry-picked always from main branch (**note this is just and only for KNI-SPECIFIC CHANGES, which are usually few
+and clearly self contained, mostly affecting CI or infra in general, not production code**)
+3. last resort: kept as-is. This is tedious, but not wrong.
+
 ### Branch-specific changes
 
 Even if we strive to minimize the chances of this occurrence, sometimes it is possible that only a subset
