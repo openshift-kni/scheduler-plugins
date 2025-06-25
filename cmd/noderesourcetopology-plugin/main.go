@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"os"
 	"time"
@@ -97,5 +98,5 @@ func main() {
 
 func printVersion(logh logr.Logger) {
 	ver := version.Get()
-	logh.Info("starting noderesourcetopology scheduler", "version", ver.GitVersion, "goversion", ver.GoVersion, "platform", ver.Platform)
+	logh.Info("starting noderesourcetopology scheduler", "version", fmt.Sprintf("%s.%s", ver.Major, ver.Minor), "gitcommit", ver.GitCommit, "goversion", ver.GoVersion, "platform", ver.Platform)
 }
