@@ -96,22 +96,54 @@ Signed-off-by: Francesco Romani <fromani@redhat.com>
 (cherry picked from commit abcdef123456)
 ```
 
-### Cherry-picking KNI-specific fixes to older branches: aka backporting KNI-specific changes
-
-Should we need to backport fixes to release branches, e.g. build system/CI changes, we would
-just omit the `[upstream]` tag and proceed as outlined in the previous section.
-
-Note that there is a fair amount of mess in our history we did before to fully specify the flow.
-We can't rewrite history, so we will need to carry that. Using `cheryr-pick -x` should be sufficient
-to enable us to track the origin of each change given enough effort, effort which the current
-process strive to minimize.
-
 ### Justification for the `[KNI]` tag
 
 The presence of *both* the `[KNI]` tag and the original commit reference added by `-x` flag unambiguously
 enable us to identify a cherry picked commit.
 The presence of the `[KNI]` tag is justified by the fact that that specific commit backported in a branch
 is a KNI-specific change, thus should be marked as such.
+
+### Cherry-picking KNI-specific fixes to older branches: aka backporting KNI-specific changes
+
+Should we need to backport fixes to release branches, e.g. build system/CI changes, we would
+just omit the `[upstream]` tag and proceed as outlined in the previous section.
+
+Note that there is a fair amount of mess in our history we did before to fully specify the flow.
+We can't rewrite history, so we will need to carry that. Using `cherry-pick -x` should be sufficient
+to enable us to track the origin of each change given enough effort, effort which the current
+process strive to minimize.
+
+#### Cascading changes
+
+When backporting fixes in a cascade way (main -> release-X.Y -> release-X.Y-1 -> release-X.Y-2...) the
+most straightforward way is to cherry pick from one branch to the other, so the `(cherry picked from commit...)`
+references will get appended creating a potentially long list.
+While this is not a problem per se, and acceptable, is also unnecessary, The cherry-picked commits can be either
+1. amended to remove all but the reference pointing back to the main branch commit or
+2. cherry-picked always from main branch (**note this is just and only for KNI-SPECIFIC CHANGES, which are usually few
+and clearly self contained, mostly affecting CI or infra in general, not production code**)
+3. last resort: kept as-is. This is tedious, but not wrong.
+
+### Branch-specific changes
+
+Even if we strive to minimize the chances of this occurrence, sometimes it is possible that only a subset
+of stable branches will need a fix. Examples are fixing CI failures, or updating metadata, or CI configuration.
+In this case all the provisions apply, but the commit message subject line should include the `[release-X.Y]` tag.
+
+Example (note completely made up bogus commits):
+
+```
+commit 65ab43de21ef
+Author: Francesco Romani <fromani@redhat.com>
+Date:   Wed Dec 13 13:46:27 2023 +0100
+
+[KNI][release-4.15] ci: fix: update images for CI tests
+
+The base image v1.23 is out of support.
+Bump to 1.42, like we did for version 4.16 a while ago.
+
+Signed-off-by: Francesco Romani <fromani@redhat.com>
+```
 
 ## Patching openshift-kni specific commits which don't exist upstream
 
