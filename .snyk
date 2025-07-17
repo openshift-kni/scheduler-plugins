@@ -21,4 +21,5 @@ exclude:
     - vendor/golang.org/x/tools/go/analysis/unitchecker/unitchecker.go
     - vendor/golang.org/x/tools/internal/**
     - vendor/go.etcd.io/etcd/client/pkg/v3/transport/listener.go
+    - vendor/github.com/fsnotify/fsnotify/**
     - vendor/github.com/godbus/dbus/v5/auth_sha1.go
