@@ -26,6 +26,10 @@ jobs:
           echo ${{ env.SOURCE_BRANCH_NAME }}
           echo ${{ env.TARGET_BRANCH_NAME }}
 
+      - name: Build verification tool
+        run: |
+          make -f Makefile.kni build-tools
+
       - name: Verify commits
         run: |
           TRIGGER_BRANCH=${{ env.SOURCE_BRANCH_NAME }} \
