@@ -65,11 +65,11 @@ func (cm commitMessage) CherryPickOrigin() string {
 		if !ok { // we don't have the prefix, so we don't care
 			continue
 		}
-		cmHash, ok = strings.CutSuffix(chHash, cherryPickLineSuffix)
+		cmHash, ok = strings.CutSuffix(cmHash, cherryPickLineSuffix)
 		if !ok { // we don't have the suffix, so we don't care
 			continue
 		}
-		return chMash
+		return cmHash
 	}
 	return "" // nothing found
 }
