@@ -13,6 +13,7 @@ exclude:
     - vendor/sigs.k8s.io/controller-runtime/pkg/envtest/webhook.go
     - vendor/sigs.k8s.io/controller-runtime/pkg/internal/testing/process/process.go
     - vendor/sigs.k8s.io/controller-runtime/pkg/webhook/server.go
+    - vendor/github.com/fsnotify/fsnotify/**
     - vendor/github.com/google/uuid/hash.go
     - vendor/github.com/paypal/load-watcher/pkg/watcher/internal/metricsprovider/prometheus.go
     - vendor/github.com/spf13/cobra/command.go
