@@ -54,6 +54,13 @@ echo "---"
 # list commits
 for commitish in $( git log --oneline --no-merges "$latest_upstream_commit"..HEAD | cut -d' ' -f 1); do
   echo "CHECK: $commitish"
+
+  author_name=$( git log --pretty=format:"%an" -n 1 "$commitish" )
+  if [[ "$author_name" == red-hat-konflux* ]]; then
+    echo "Skip verifying commit from Konflux bot"
+    continue
+  fi
+
   .github/hooks/commit-msg $( git log --format=%s -n 1 "$commitish" )
   if [[ "$?" != "0" ]]; then
     echo "-> FAIL: $commitish"
