@@ -25,6 +25,9 @@ const (
 	signedOffByPrefix = "Signed-off-by: "
 
 	konfluxUsername = "red-hat-konflux"
+
+	envVarRemoteName    = "REMOTE_NAME"
+	referenceBranchName = "master"
 )
 
 var (
@@ -38,40 +41,42 @@ type commitMessage struct {
 	lines []string
 }
 
+var remoteName string
+
 func newCommitMessageFromString(text string) commitMessage {
 	var cm commitMessage
 	scanner := bufio.NewScanner(strings.NewReader(text))
 	for scanner.Scan() {
 		cm.lines = append(cm.lines, scanner.Text())
 	}
-	log.Printf("commit message has %d lines", cm.NumLines())
+	log.Printf("commit message has %d lines", cm.numLines())
 	return cm
 }
 
-func (cm commitMessage) NumLines() int {
+func (cm commitMessage) numLines() int {
 	return len(cm.lines)
 }
 
-func (cm commitMessage) IsEmpty() bool {
-	return cm.NumLines() == 0
+func (cm commitMessage) isEmpty() bool {
+	return cm.numLines() == 0
 }
 
-func (cm commitMessage) Summary() string {
+func (cm commitMessage) summary() string {
 	return cm.lines[0]
 }
 
-func (cm commitMessage) IsKNISpecific() bool {
-	return strings.Contains(cm.Summary(), tagKNI)
+func (cm commitMessage) isKNISpecific() bool {
+	return strings.Contains(cm.summary(), tagKNI)
 }
 
-func (cm commitMessage) IsUpstream() bool {
-	return strings.Contains(cm.Summary(), tagUpstream)
+func (cm commitMessage) isUpstream() bool {
+	return strings.Contains(cm.summary(), tagUpstream)
 }
 
-// CherryPickOrigin returns the commit hash this commit was cherry-picked
+// cherryPickOrigin returns the commit hash this commit was cherry-picked
 // from if this commit has cherry-pick reference; otherwise returns empty string.
-func (cm commitMessage) CherryPickOrigin() string {
-	for idx := cm.NumLines() - 1; idx > 0; idx-- {
+func (cm commitMessage) cherryPickOrigin() string {
+	for idx := cm.numLines() - 1; idx > 0; idx-- {
 		line := cm.lines[idx] // shortcut
 		cmHash, ok := strings.CutPrefix(line, cherryPickLinePrefix)
 		if !ok { // we don't have the prefix, so we don't care
@@ -86,8 +91,8 @@ func (cm commitMessage) CherryPickOrigin() string {
 	return "" // nothing found
 }
 
-func (cm commitMessage) IsKonflux() bool {
-	for idx := cm.NumLines() - 1; idx > 0; idx-- {
+func (cm commitMessage) isKonflux() bool {
+	for idx := cm.numLines() - 1; idx > 0; idx-- {
 		line := cm.lines[idx] // shortcut
 		signedOff, ok := strings.CutPrefix(line, signedOffByPrefix)
 		if !ok {
@@ -101,22 +106,22 @@ func (cm commitMessage) IsKonflux() bool {
 }
 func verifyCommitMessage(commitMessage string) error {
 	cm := newCommitMessageFromString(commitMessage)
-	if cm.IsEmpty() {
+	if cm.isEmpty() {
 		return errEmptyCommitMessage
 	}
-	if cm.IsKonflux() {
+	if cm.isKonflux() {
 		return nil
 	}
 
-	if !cm.IsKNISpecific() {
+	if !cm.isKNISpecific() {
 		return errMissingTagKNI
 	}
 
-	cpOrigin := cm.CherryPickOrigin()
-	upstream := cm.IsUpstream()
+	cpOrigin := cm.cherryPickOrigin()
+	upstream := cm.isUpstream()
 
 	if cpOrigin != "" {
-		err := IsCommitInBranch(cpOrigin)
+		err := isCommitInBranch(cpOrigin)
 		if err != nil {
 			return err
 		}
@@ -130,14 +135,15 @@ func verifyCommitMessage(commitMessage string) error {
 
 }
 
-func IsCommitInBranch(cpOrigin string) error {
+func isCommitInBranch(cpOrigin string) error {
 	cmd := exec.Command("git", "branch", "-r", "--contains", cpOrigin)
 	out, err := cmd.Output()
 	if err != nil {
 		return err
 	}
 	outStr := string(out)
-	if !strings.Contains(outStr, "upstream/master") { // TODO: Fix me; should be able to fetch the remote name
+
+	if !strings.Contains(outStr, remoteName+"/"+referenceBranchName) {
 		return errWrongCherryPickReference
 	}
 	return nil
@@ -148,6 +154,12 @@ func main() {
 		programName := os.Args[0]
 		log.Printf("usage: %s wrong number of arguments expects: %s <commit-message>", programName, programName)
 		os.Exit(exitCodeErrorWrongArguments)
+	}
+
+	var ok bool
+	remoteName, ok = os.LookupEnv(envVarRemoteName)
+	if !ok {
+		remoteName = "origin"
 	}
 
 	err := verifyCommitMessage(os.Args[1])

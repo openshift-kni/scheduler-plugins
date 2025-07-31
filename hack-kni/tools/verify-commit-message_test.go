@@ -115,6 +115,45 @@ func TestRunWithoutArguments(t *testing.T) {
 
 }
 
+func TestVerifyCommitMessage(t *testing.T) {
+	testcases := []struct {
+		description string
+		commitMsg   string
+		expectedErr error
+	}{
+		{
+			description: "only KNI in local fork",
+			commitMsg: `[KNI] hack-kni: skip commit verification for konflux commits
+    
+    Skip validating konflux commits structure. Usually konflux bot commits
+    signed off by either "red-hat-konflux" or "red-hat-konflux[bot]".
+    
+    Signed-off-by: Shereen Haj <shajmakh@redhat.com>`,
+		},
+	}
+	for _, tc := range testcases {
+		t.Run(tc.description, func(t *testing.T) {
+			got := verifyCommitMessage(tc.commitMsg)
+
+			if got == nil && tc.expectedErr == nil {
+				return
+			}
+
+			if tc.expectedErr != nil && got == nil {
+				t.Fatalf("expected error %v but recieved nil", tc.expectedErr)
+			}
+
+			if tc.expectedErr == nil && got != nil {
+				t.Fatalf("unexpected error %v", got)
+			}
+
+			if got.Error() != tc.expectedErr.Error() {
+				t.Fatalf("mismatching error strings: expected %s, got %s", tc.expectedErr.Error(), got.Error())
+			}
+		})
+	}
+}
+
 // runCommand returns stdout as string, stderr as string, error value
 func runCommand(t *testing.T, args ...string) (string, string, error) {
 	bin, err := getBinPath()
