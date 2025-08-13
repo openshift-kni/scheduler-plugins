@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"log"
 	"os"
@@ -26,7 +27,8 @@ const (
 
 	konfluxUsername = "red-hat-konflux"
 
-	envVarRemoteName    = "REMOTE_NAME"
+	defaultOriginName   = "origin"
+	defaultUpstreamName = "upstream"
 	referenceBranchName = "master"
 )
 
@@ -41,7 +43,17 @@ type commitMessage struct {
 	lines []string
 }
 
-var remoteName string
+type config struct {
+	// originName is the git remote that points to the clone of this repo
+	originName string
+	// upstreamName is the git remote that points kubernetes-sigs/scheduler-plugins repo
+	upstreamName string
+}
+
+var conf = config{
+	originName:   defaultOriginName,
+	upstreamName: defaultUpstreamName,
+}
 
 func newCommitMessageFromString(text string) commitMessage {
 	var cm commitMessage
@@ -121,21 +133,26 @@ func verifyCommitMessage(commitMessage string) error {
 	upstream := cm.isUpstream()
 
 	if cpOrigin != "" {
-		err := isCommitInBranch(cpOrigin)
+		remoteName := conf.originName
+		if upstream {
+			remoteName = conf.upstreamName
+		}
+
+		err := isCommitInBranch(remoteName, cpOrigin)
 		if err != nil {
 			return err
 		}
-	}
 
-	if upstream {
-		return errMissingCherryPickReference
+		if upstream {
+
+		}
 	}
 
 	return nil
 
 }
 
-func isCommitInBranch(cpOrigin string) error {
+func isCommitInBranch(remoteName, cpOrigin string) error {
 	cmd := exec.Command("git", "branch", "-r", "--contains", cpOrigin)
 	out, err := cmd.Output()
 	if err != nil {
@@ -156,13 +173,18 @@ func main() {
 		os.Exit(exitCodeErrorWrongArguments)
 	}
 
-	var ok bool
-	remoteName, ok = os.LookupEnv(envVarRemoteName)
-	if !ok {
-		remoteName = "origin"
+	data, err := os.ReadFile("config.json") // TODO make it configurable
+	if err != nil {
+		log.Printf("error reading config.json: %v", err)
+		os.Exit(exitCodeErrorWrongArguments)
+	}
+	err = json.Unmarshal(data, &conf)
+	if err != nil {
+		log.Printf("error parsing config.json: %v", err)
+		os.Exit(exitCodeErrorWrongArguments)
 	}
 
-	err := verifyCommitMessage(os.Args[1])
+	err = verifyCommitMessage(os.Args[1])
 	if err != nil {
 		log.Printf("verification failed: %v", err)
 		os.Exit(exitCodeErrorVerificationFailed)
