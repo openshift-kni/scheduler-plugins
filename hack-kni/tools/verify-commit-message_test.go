@@ -130,6 +130,17 @@ func TestVerifyCommitMessage(t *testing.T) {
     
     Signed-off-by: Shereen Haj <shajmakh@redhat.com>`,
 		},
+		{
+			description: "KNI & upstream tags",
+			commitMsg: `[KNI][upstream] nrt: test: ensure generation is updated correctly
+Add a unit test mainly for GetCachedNRTCopy() to verify the returned
+generation. To help with the verification, make FlushNodes not only
+report about the new generation (which only updated there) but also
+return it so we'd be able to compare the values.
+
+Signed-off-by: Shereen Haj <shajmakh@redhat.com>
+(cherry picked from commit ffe2ce2)`,
+		},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.description, func(t *testing.T) {
