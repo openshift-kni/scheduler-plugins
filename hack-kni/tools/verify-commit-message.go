@@ -118,11 +118,16 @@ func (cm commitMessage) isKonflux() bool {
 }
 func verifyCommitMessage(commitMessage string) error {
 	cm := newCommitMessageFromString(commitMessage)
-	if cm.isEmpty() {
-		return errEmptyCommitMessage
-	}
+
 	if cm.isKonflux() {
 		return nil
+	}
+	return verifyHumanCommitMessage(cm)
+}
+
+func verifyHumanCommitMessage(cm commitMessage) error {
+	if cm.isEmpty() {
+		return errEmptyCommitMessage
 	}
 
 	if !cm.isKNISpecific() {
@@ -131,6 +136,12 @@ func verifyCommitMessage(commitMessage string) error {
 
 	cpOrigin := cm.cherryPickOrigin()
 	upstream := cm.isUpstream()
+
+	if cpOrigin == "" {
+		if upstream {
+			return errMissingCherryPickReference
+		}
+	}
 
 	if cpOrigin != "" {
 		remoteName := conf.originName
@@ -142,14 +153,9 @@ func verifyCommitMessage(commitMessage string) error {
 		if err != nil {
 			return err
 		}
-
-		if upstream {
-
-		}
 	}
 
 	return nil
-
 }
 
 func isCommitInBranch(remoteName, cpOrigin string) error {
