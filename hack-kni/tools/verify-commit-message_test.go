@@ -141,6 +141,61 @@ return it so we'd be able to compare the values.
 Signed-off-by: Shereen Haj <shajmakh@redhat.com>
 (cherry picked from commit ffe2ce2)`,
 		},
+		{
+			// this test depends on the local setup. The expected setup should be that the forked project remote
+			// name is called "origin" and the main project from which this project is forked called "upstream"
+			description: "KNI and local cherrypick",
+			commitMsg: `[KNI][release-4.18] ci: ghactions: ensure golang version in vendor check
+make sure we run the vendor check in a controlled environment,
+and also make sure to emit the golang version we use.
+
+Signed-off-by: Francesco Romani <fromani@redhat.com>
+(cherry picked from commit 2f4974a)`,
+		},
+		{
+			description: "Konflux signed - github email",
+			commitMsg: `Update Konflux references to 252e5c9
+Signed-off-by: red-hat-konflux <126015336+red-hat-konflux[bot]@users.noreply.github.com>`,
+		},
+		{
+			description: "Konflux signed - ci email",
+			commitMsg: `Update Konflux references
+Signed-off-by: red-hat-konflux <konflux@no-reply.konflux-ci.dev>`,
+		},
+		{
+			description: "Negative - no KNI tag and not konflux signed",
+			commitMsg: `nrt: test: ensure generation is updated correctly
+Add a unit test
+
+    Signed-off-by: Shereen Haj <shajmakh@redhat.com>`,
+			expectedErr: errMissingTagKNI,
+		},
+		{
+			description: "Negative - no KNI tag but with upstream tag",
+			commitMsg: `[upstream] nrt: test: ensure generation is updated correctly
+Add a unit test 
+
+Signed-off-by: Shereen Haj <shajmakh@redhat.com>
+(cherry picked from commit ffe2ce2)`,
+			expectedErr: errMissingTagKNI,
+		},
+		{
+			description: "Negative - KNI & upstream tags without cherrypick hash",
+			commitMsg: `[KNI][upstream] nrt: test: ensure generation is updated correctly
+Add a unit test
+
+Signed-off-by: Shereen Haj <shajmakh@redhat.com>`,
+			expectedErr: errMissingCherryPickReference,
+		},
+		{
+			description: "Negative - Konflux generated without signature",
+			commitMsg: `Update Konflux references to 252e5c9
+
+
+`,
+			expectedErr: errMissingTagKNI,
+		},
+		{},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.description, func(t *testing.T) {
