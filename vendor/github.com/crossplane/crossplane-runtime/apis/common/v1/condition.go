@@ -34,6 +34,17 @@ const (
 	// TypeSynced resources are believed to be in sync with the
 	// Kubernetes resources that manage their lifecycle.
 	TypeSynced ConditionType = "Synced"
+
+	// TypeHealthy resources are believed to be in a healthy state and to have all
+	// of their child resources in a healthy state. For example, a claim is
+	// healthy when the claim is synced and the underlying composite resource is
+	// both synced and healthy. A composite resource is healthy when the composite
+	// resource is synced and all composed resources are synced and, if
+	// applicable, healthy (e.g., the composed resource is a composite resource).
+	// TODO: This condition is not yet implemented. It is currently just reserved
+	// as a system condition. See the tracking issue for more details
+	// https://github.com/crossplane/crossplane/issues/5643.
+	TypeHealthy ConditionType = "Healthy"
 )
 
 // A ConditionReason represents the reason a resource is in a condition.
@@ -51,7 +62,10 @@ const (
 const (
 	ReasonReconcileSuccess ConditionReason = "ReconcileSuccess"
 	ReasonReconcileError   ConditionReason = "ReconcileError"
+	ReasonReconcilePaused  ConditionReason = "ReconcilePaused"
 )
+
+// See https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
 
 // A Condition that may apply to a resource.
 type Condition struct {
@@ -73,6 +87,12 @@ type Condition struct {
 	// one status to another, if any.
 	// +optional
 	Message string `json:"message,omitempty"`
+
+	// ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+	// For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+	// with respect to the current state of the instance.
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 // Equal returns true if the condition is identical to the supplied condition,
@@ -81,7 +101,8 @@ func (c Condition) Equal(other Condition) bool {
 	return c.Type == other.Type &&
 		c.Status == other.Status &&
 		c.Reason == other.Reason &&
-		c.Message == other.Message
+		c.Message == other.Message &&
+		c.ObservedGeneration == other.ObservedGeneration
 }
 
 // WithMessage returns a condition by adding the provided message to existing
@@ -89,6 +110,23 @@ func (c Condition) Equal(other Condition) bool {
 func (c Condition) WithMessage(msg string) Condition {
 	c.Message = msg
 	return c
+}
+
+// WithObservedGeneration returns a condition by adding the provided observed generation
+// to existing condition.
+func (c Condition) WithObservedGeneration(gen int64) Condition {
+	c.ObservedGeneration = gen
+	return c
+}
+
+// IsSystemConditionType returns true if the condition is owned by the
+// Crossplane system (e.g, Ready, Synced, Healthy).
+func IsSystemConditionType(t ConditionType) bool {
+	switch t {
+	case TypeReady, TypeSynced, TypeHealthy:
+		return true
+	}
+	return false
 }
 
 // NOTE(negz): Conditions are implemented as a slice rather than a map to comply
@@ -102,6 +140,8 @@ func (c Condition) WithMessage(msg string) Condition {
 // one condition of each type may exist.
 type ConditionedStatus struct {
 	// Conditions of the resource.
+	// +listType=map
+	// +listMapKey=type
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`
 }
@@ -114,7 +154,7 @@ func NewConditionedStatus(c ...Condition) *ConditionedStatus {
 }
 
 // GetCondition returns the condition for the given ConditionType if exists,
-// otherwise returns nil
+// otherwise returns nil.
 func (s *ConditionedStatus) GetCondition(ct ConditionType) Condition {
 	for _, c := range s.Conditions {
 		if c.Type == ct {
@@ -129,23 +169,23 @@ func (s *ConditionedStatus) GetCondition(ct ConditionType) Condition {
 // of the same type. This is a no-op if all supplied conditions are identical,
 // ignoring the last transition time, to those already set.
 func (s *ConditionedStatus) SetConditions(c ...Condition) {
-	for _, new := range c {
+	for _, cond := range c {
 		exists := false
 		for i, existing := range s.Conditions {
-			if existing.Type != new.Type {
+			if existing.Type != cond.Type {
 				continue
 			}
 
-			if existing.Equal(new) {
+			if existing.Equal(cond) {
 				exists = true
 				continue
 			}
 
-			s.Conditions[i] = new
+			s.Conditions[i] = cond
 			exists = true
 		}
 		if !exists {
-			s.Conditions = append(s.Conditions, new)
+			s.Conditions = append(s.Conditions, cond)
 		}
 	}
 }
@@ -248,5 +288,16 @@ func ReconcileError(err error) Condition {
 		LastTransitionTime: metav1.Now(),
 		Reason:             ReasonReconcileError,
 		Message:            err.Error(),
+	}
+}
+
+// ReconcilePaused returns a condition that indicates reconciliation on
+// the managed resource is paused via the pause annotation.
+func ReconcilePaused() Condition {
+	return Condition{
+		Type:               TypeSynced,
+		Status:             corev1.ConditionFalse,
+		LastTransitionTime: metav1.Now(),
+		Reason:             ReasonReconcilePaused,
 	}
 }
