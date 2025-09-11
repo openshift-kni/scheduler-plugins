@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -162,14 +163,27 @@ func isCommitInBranch(remoteName, cpOrigin string) error {
 	cmd := exec.Command("git", "branch", "-r", "--contains", cpOrigin)
 	out, err := cmd.Output()
 	if err != nil {
+		if isMalformedObjectErr(err, cpOrigin) {
+			return errWrongCherryPickReference
+		}
 		return err
 	}
+
 	outStr := string(out)
 
 	if !strings.Contains(outStr, remoteName+"/"+referenceBranchName) {
 		return errWrongCherryPickReference
 	}
 	return nil
+}
+
+func isMalformedObjectErr(err error, objHash string) bool {
+	if exitErr, ok := err.(*exec.ExitError); ok {
+		if string(exitErr.Stderr) == fmt.Sprintf("error: malformed object name %s\n", objHash) && exitErr.ExitCode() == 129 {
+			return true
+		}
+	}
+	return false
 }
 
 func main() {

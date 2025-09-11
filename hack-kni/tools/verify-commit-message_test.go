@@ -195,7 +195,24 @@ Signed-off-by: Shereen Haj <shajmakh@redhat.com>`,
 `,
 			expectedErr: errMissingTagKNI,
 		},
-		{},
+		{
+			description: "Negative - invalid cherry-pick reference",
+			commitMsg: `[KNI][upstream] nrt: test: ensure generation is updated correctly
+Add a unit test 
+
+Signed-off-by: Shereen Haj <shajmakh@redhat.com>
+(cherry picked from commit 123a)`,
+			expectedErr: errWrongCherryPickReference,
+		},
+		{
+			description: "Negative - empty cherry-pick reference",
+			commitMsg: `[KNI][upstream] nrt: test: ensure generation is updated correctly
+Add a unit test 
+
+Signed-off-by: Shereen Haj <shajmakh@redhat.com>
+(cherry picked from commit )`,
+			expectedErr: errMissingCherryPickReference,
+		},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.description, func(t *testing.T) {
