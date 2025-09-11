@@ -11,10 +11,10 @@ metadata:
       == "master"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: noderesourcetopology-scheduler-4-20
-    appstudio.openshift.io/component: noderesourcetopology-scheduler-4-20
+    appstudio.openshift.io/application: noderesourcetopology-scheduler-4-21
+    appstudio.openshift.io/component: noderesourcetopology-scheduler-4-21
     pipelines.appstudio.openshift.io/type: build
-  name: noderesourcetopology-scheduler-4-20-on-push
+  name: noderesourcetopology-scheduler-4-21-on-push
   namespace: telco-5g-tenant
 spec:
   params:
@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/telco-5g-tenant/noderesourcetopology-scheduler-4-20:{{revision}}
+    value: quay.io/redhat-user-workloads/telco-5g-tenant/noderesourcetopology-scheduler-4-21:{{revision}}
   - name: build-platforms
     value:
     - linux/x86_64
@@ -36,7 +36,7 @@ spec:
   pipelineRef:
     name: build-pipeline
   taskRunTemplate:
-    serviceAccountName: build-pipeline-noderesourcetopology-scheduler-4-20
+    serviceAccountName: build-pipeline-noderesourcetopology-scheduler-4-21
   workspaces:
   - name: git-auth
     secret:
