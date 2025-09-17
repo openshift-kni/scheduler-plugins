@@ -21,6 +21,7 @@ ARG RELEASE_VERSION
 RUN RELEASE_VERSION=${RELEASE_VERSION} make -f Makefile.kni build-noderesourcetopology-plugin
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal
+RUN microdnf install -y net-tools procps-ng && microdnf clean -y all
 COPY --from=builder /go/src/sigs.k8s.io/scheduler-plugins/bin/noderesourcetopology-plugin /bin/kube-scheduler
 USER 65532:65532
 WORKDIR /bin

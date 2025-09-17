@@ -178,9 +178,10 @@ github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/attribute
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/numanode
-# github.com/k8stopologyawareschedwg/podfingerprint v0.2.2
-## explicit; go 1.17
+# github.com/k8stopologyawareschedwg/podfingerprint v0.2.3-0.20250917082921-b1753a88551b => github.com/k8stopologyawareschedwg/podfingerprint v0.2.3-0.20250917082921-b1753a88551b
+## explicit; go 1.22
 github.com/k8stopologyawareschedwg/podfingerprint
+github.com/k8stopologyawareschedwg/podfingerprint/record
 # github.com/kylelemons/godebug v1.1.0
 ## explicit; go 1.11
 github.com/kylelemons/godebug/diff
@@ -1674,3 +1675,4 @@ sigs.k8s.io/yaml/goyaml.v2
 # k8s.io/externaljwt => k8s.io/externaljwt v0.33.3
 # k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.33.3
 # k8s.io/sample-controller => k8s.io/sample-controller v0.33.3
+# github.com/k8stopologyawareschedwg/podfingerprint => github.com/k8stopologyawareschedwg/podfingerprint v0.2.3-0.20250917082921-b1753a88551b

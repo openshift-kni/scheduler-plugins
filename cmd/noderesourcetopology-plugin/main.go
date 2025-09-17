@@ -48,7 +48,9 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
-	knistatus.Setup(logh)
+	params := knistatus.DefaultParams()
+	knistatus.ParamsFromEnv(logh, &params)
+	knistatus.Setup(logh, params)
 
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence

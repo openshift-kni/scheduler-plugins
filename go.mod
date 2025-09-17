@@ -12,7 +12,7 @@ require (
 	github.com/go-logr/logr v1.4.2
 	github.com/google/go-cmp v0.7.0
 	github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.1.2
-	github.com/k8stopologyawareschedwg/podfingerprint v0.2.2
+	github.com/k8stopologyawareschedwg/podfingerprint v0.2.3-0.20250917082921-b1753a88551b
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/paypal/load-watcher v0.2.4
 	github.com/spf13/pflag v1.0.6
@@ -184,3 +184,5 @@ replace k8s.io/externaljwt => k8s.io/externaljwt v0.33.3
 replace k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.33.3
 
 replace k8s.io/sample-controller => k8s.io/sample-controller v0.33.3
+
+replace github.com/k8stopologyawareschedwg/podfingerprint => github.com/k8stopologyawareschedwg/podfingerprint v0.2.3-0.20250917082921-b1753a88551b
