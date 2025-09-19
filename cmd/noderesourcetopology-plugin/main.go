@@ -37,7 +37,9 @@ import (
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 
 	knifeatures "sigs.k8s.io/scheduler-plugins/pkg-kni/features"
-	knistatus "sigs.k8s.io/scheduler-plugins/pkg-kni/pfpstatus"
+
+	"github.com/openshift-kni/debug-tools/pkg/k8sclient"
+	"github.com/openshift-kni/debug-tools/pkg/pfpstatus"
 )
 
 func main() {
@@ -48,7 +50,10 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
-	knistatus.Setup(logh)
+	if err := setupPFPStatus(logh); err != nil {
+		logh.Error(err, "failed to setup PFP Status repoorting")
+		os.Exit(1)
+	}
 
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence
@@ -66,6 +71,7 @@ func main() {
 	defer logs.FlushLogs()
 
 	if err := command.Execute(); err != nil {
+		logh.Error(err, "failed to execute the scheduler command")
 		os.Exit(1)
 	}
 }
@@ -73,4 +79,23 @@ func main() {
 func printVersion(logh logr.Logger) {
 	ver := version.Get()
 	logh.Info("starting noderesourcetopology scheduler", "version", fmt.Sprintf("%s.%s", ver.Major, ver.Minor), "gitcommit", ver.GitCommit, "goversion", ver.GoVersion, "platform", ver.Platform)
+}
+
+func setupPFPStatus(logh logr.Logger) error {
+	params := pfpstatus.DefaultParams()
+	// TODO: uncomment once ready
+	// pfpstatus.ParamsFromEnv(logh, &params)
+	if params.HTTP.Enabled {
+		cs, err := k8sclient.Create()
+		if err != nil {
+			return err
+		}
+		tba := pfpstatus.NewTokenBearerAuth(cs, logh)
+		params.HTTP.Middlewares = append(params.HTTP.Middlewares, pfpstatus.Middleware{
+			Name: "TokenAuth",
+			Link: tba.Link,
+		})
+	}
+	pfpstatus.Setup(logh, params)
+	return nil
 }
