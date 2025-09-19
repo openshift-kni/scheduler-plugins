@@ -178,8 +178,8 @@ github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/attribute
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/numanode
-# github.com/k8stopologyawareschedwg/podfingerprint v0.2.2
-## explicit; go 1.17
+# github.com/k8stopologyawareschedwg/podfingerprint v0.2.3
+## explicit; go 1.18
 github.com/k8stopologyawareschedwg/podfingerprint
 # github.com/kylelemons/godebug v1.1.0
 ## explicit; go 1.11
@@ -211,6 +211,11 @@ github.com/opencontainers/go-digest
 # github.com/opencontainers/runtime-spec v1.2.0
 ## explicit
 github.com/opencontainers/runtime-spec/specs-go
+# github.com/openshift-kni/debug-tools v0.2.4-0.20250919112633-472503656ad5
+## explicit; go 1.23.0
+github.com/openshift-kni/debug-tools/pkg/k8sclient
+github.com/openshift-kni/debug-tools/pkg/pfpstatus
+github.com/openshift-kni/debug-tools/pkg/pfpstatus/record
 # github.com/patrickmn/go-cache v2.1.0+incompatible
 ## explicit
 github.com/patrickmn/go-cache
