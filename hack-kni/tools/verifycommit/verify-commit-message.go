@@ -15,8 +15,8 @@ import (
 const (
 	exitCodeSuccess                 = 0
 	exitCodeErrorWrongArguments     = 1
-	exitCodeErrorVerificationFailed = 2
-	exitCodeErrorProcessingFile     = 3
+	exitCodeErrorProcessingFile     = 2
+	exitCodeErrorVerificationFailed = 3
 )
 
 const (
