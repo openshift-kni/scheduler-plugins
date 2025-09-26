@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up golang
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v6
         with:
-          go-version: 1.23
+          go-version: 1.24
 
       - name: Get branch names (pull request)
         shell: bash
@@ -51,14 +51,14 @@ jobs:
       GOPATH: "/home/runner/go"
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5 
         with:
           fetch-depth: 0
 
       - name: Set up golang
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v6
         with:
-          go-version: 1.23
+          go-version: 1.24
 
       - name: Run integration test
         run:
@@ -68,14 +68,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up golang
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v6
         with:
-          go-version: 1.23
+          go-version: 1.24
 
       - name: Verify vendoring
         run: ./hack-kni/verify-vendoring.sh
