@@ -15,75 +15,67 @@ const (
 )
 
 func TestRunCommand(t *testing.T) {
-	validCommit := `[KNI] doc about cascading **KNI SPECIFIC** cherry-picks
-
-We can avoid long chains of cherry-picked from commit
-references JUST AND ONLY for KNI-specific changes.
-
-Signed-off-by: Francesco Romani <fromani@redhat.com>`
-
 	testcases := []struct {
 		description      string
 		args             []string
 		expectedExitCode int
 	}{
 		{
-			description:      "pattern 1: program-name <commit-message>",
-			args:             []string{validCommit},
+			description:      "valid call",
+			args:             []string{"-n", "5", "-b", "release-4.19"},
 			expectedExitCode: exitCodeSuccess,
 		},
 		{
-			description:      "pattern 2: program-name -f <config-file> <commit-message>",
-			args:             []string{"-f", "config.json", validCommit},
+			description:      "valid call with config file",
+			args:             []string{"-f", "config.json", "-n", "5", "-b", "release-4.19"},
 			expectedExitCode: exitCodeSuccess,
 		},
 		{
-			description:      "pattern 3: missing config data should default to default values",
-			args:             []string{"-f", "test-config-missing-origin.json", validCommit},
+			description:      "valid:missing config data should default to default values",
+			args:             []string{"-f", "test-config-missing.json", "-n", "5", "-b", "resync-docs"},
 			expectedExitCode: exitCodeSuccess,
 		},
 		{
-			description:      "invalid: too many non-flag arguments",
-			args:             []string{validCommit, "extra-arg"},
-			expectedExitCode: exitCodeErrorWrongArguments,
+			description:      "valid: too many non-flag arguments should be ignored",
+			args:             []string{"-n", "5", "-b", "release-4.19", "extra-arg"},
+			expectedExitCode: exitCodeSuccess,
 		},
 		{
-			description:      "invalid: no commit message",
-			args:             []string{"-f", "config.json"},
-			expectedExitCode: exitCodeErrorWrongArguments,
+			description:      "valid: missing number of commits defaults to 0",
+			args:             []string{"-b", "release-4.19"},
+			expectedExitCode: exitCodeSuccess,
 		},
 		{
-			description:      "invalid: no arguments at all",
+			description:      "valid: missing source branch",
+			args:             []string{"-n", "5"},
+			expectedExitCode: exitCodeSuccess,
+		},
+		{
+			description:      "valid: no arguments at all",
 			args:             []string{},
-			expectedExitCode: exitCodeErrorWrongArguments,
-		},
-		{
-			description: "invalid: empty lines commit message",
-			args: []string{`
-
-
-`},
-			expectedExitCode: exitCodeErrorVerificationFailed,
-		},
-		{
-			description:      "invalid: empty commit message",
-			args:             []string{""},
-			expectedExitCode: exitCodeErrorVerificationFailed,
+			expectedExitCode: exitCodeSuccess,
 		},
 		{
 			description:      "invalid: not-found config file",
-			args:             []string{"-f", "not-found.json", validCommit},
+			args:             []string{"-f", "not-found.json", "-n", "5", "-b", "release-4.17"},
 			expectedExitCode: exitCodeErrorProcessingFile,
+		},
+		{
+			description:      "invalid: not-found branch name",
+			args:             []string{"-n", "5", "-b", "branch-not-found"},
+			expectedExitCode: exitCodeErrorVerificationFailed,
 		},
 	}
 
 	for _, tc := range testcases {
 		t.Run(tc.description, func(t *testing.T) {
-			_, errBuf, err := runCommand(t, tc.args...)
+			out, errBuf, err := runCommand(t, tc.args...)
 
-			if tc.expectedExitCode == exitCodeSuccess && err == nil {
-				// everything is as expected
-				return
+			if err == nil {
+				if tc.expectedExitCode == exitCodeSuccess { // everything is as expected
+					return
+				}
+				t.Fatalf("Received unexpected success %s", out)
 			}
 
 			if tc.expectedExitCode == exitCodeSuccess && err != nil {
@@ -103,7 +95,7 @@ Signed-off-by: Francesco Romani <fromani@redhat.com>`
 	}
 }
 
-func TestVerifyCommitMessage(t *testing.T) {
+func TestValidateCommitMessage(t *testing.T) {
 	testcases := []struct {
 		description string
 		commitMsg   string
@@ -143,12 +135,17 @@ Signed-off-by: Francesco Romani <fromani@redhat.com>
 		{
 			description: "Konflux signed - github email",
 			commitMsg: `Update Konflux references to 252e5c9
-Signed-off-by: red-hat-konflux <126015336+red-hat-konflux[bot]@users.noreply.github.com>`,
+			Signed-off-by: red-hat-konflux <126015336+red-hat-konflux[bot]@users.noreply.github.com>`,
 		},
 		{
 			description: "Konflux signed - ci email",
 			commitMsg: `Update Konflux references
 Signed-off-by: red-hat-konflux <konflux@no-reply.konflux-ci.dev>`,
+		},
+		{
+			description: "Konflux signed - github email",
+			commitMsg: `chore(deps): update konflux references to 2c32152
+			Signed-off-by: red-hat-konflux <126015336+red-hat-konflux[bot]@users.noreply.github.com>`,
 		},
 		{
 			description: "Negative - no KNI tag and not konflux signed",
@@ -204,7 +201,7 @@ Signed-off-by: Shereen Haj <shajmakh@redhat.com>
 	}
 	for _, tc := range testcases {
 		t.Run(tc.description, func(t *testing.T) {
-			got := verifyCommitMessage(tc.commitMsg)
+			got := validateCommitMessage(tc.commitMsg)
 
 			if got == nil && tc.expectedErr == nil {
 				return

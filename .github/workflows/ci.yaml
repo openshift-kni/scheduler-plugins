@@ -15,6 +15,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.23
+
       - name: Get branch names (pull request)
         shell: bash
         run: |
@@ -26,16 +31,18 @@ jobs:
           echo ${{ env.SOURCE_BRANCH_NAME }}
           echo ${{ env.TARGET_BRANCH_NAME }}
 
+      - name: Setup git remotes
+        run:
+          git remote add upstream https://github.com/kubernetes-sigs/scheduler-plugins.git
+
       - name: Build verification tool
         run: |
           make -f Makefile.kni build-tools
 
       - name: Verify commits
         run: |
-          TRIGGER_BRANCH=${{ env.SOURCE_BRANCH_NAME }} \
-          UPSTREAM_BRANCH=${{ env.TARGET_BRANCH_NAME }} \
-          COMMITS=${{ github.event.pull_request.commits }} \
-          ./hack-kni/verify-commits.sh
+          cd bin
+          ./verify-commit-message -n ${{ github.event.pull_request.commits }} 
 
   integration-test:
     runs-on: ubuntu-latest
