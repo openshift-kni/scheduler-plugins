@@ -6,9 +6,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -37,6 +39,10 @@ const (
 	defaultOriginName   = "origin"
 	defaultUpstreamName = "upstream"
 	referenceBranchName = "master"
+
+	resyncBranchPrefix = "resync-"
+
+	headBranchName = "HEAD"
 )
 
 var (
@@ -55,12 +61,16 @@ type config struct {
 	OriginName string `json:"originName"`
 	// UpstreamName is the git remote that points kubernetes-sigs/scheduler-plugins repo
 	UpstreamName string `json:"upstreamName"`
+	// TriggerBranch is the branch name that triggers the verification
+	TriggerBranch string `json:"triggerBranch"`
 }
 
 var conf = config{
 	OriginName:   defaultOriginName,
 	UpstreamName: defaultUpstreamName,
 }
+
+var sourceBranch *string
 
 func newCommitMessageFromString(text string) commitMessage {
 	var cm commitMessage
@@ -92,6 +102,25 @@ func (cm commitMessage) isUpstream() bool {
 	return strings.Contains(cm.summary(), tagUpstream)
 }
 
+func (cm commitMessage) isKonflux() bool {
+	for idx := cm.numLines() - 1; idx > 0; idx-- {
+		line := cm.lines[idx] // shortcut
+		line = strings.TrimSpace(line)
+		signedOff, ok := strings.CutPrefix(line, signedOffByPrefix)
+		if !ok {
+			continue
+		}
+		if strings.HasPrefix(signedOff, konfluxUsername) {
+			return true
+		}
+	}
+	return false // nothing found
+}
+
+func isResyncBranch(branch string) bool {
+	return strings.HasPrefix(branch, resyncBranchPrefix)
+}
+
 // cherryPickOrigin returns the commit hash this commit was cherry-picked
 // from if this commit has cherry-pick reference; otherwise returns empty string.
 func (cm commitMessage) cherryPickOrigin() string {
@@ -110,26 +139,56 @@ func (cm commitMessage) cherryPickOrigin() string {
 	return "" // nothing found
 }
 
-func (cm commitMessage) isKonflux() bool {
-	for idx := cm.numLines() - 1; idx > 0; idx-- {
-		line := cm.lines[idx] // shortcut
-		signedOff, ok := strings.CutPrefix(line, signedOffByPrefix)
-		if !ok {
-			continue
-		}
-		if strings.HasPrefix(signedOff, konfluxUsername) {
-			return true
-		}
-	}
-	return false // nothing found
-}
-func verifyCommitMessage(commitMessage string) error {
+func validateCommitMessage(commitMessage string) error {
 	cm := newCommitMessageFromString(commitMessage)
 
 	if cm.isKonflux() {
 		return nil
 	}
 	return verifyHumanCommitMessage(cm)
+}
+
+func getCommitMessageByHash(commitHash string) (string, error) {
+	cmd := exec.Command("git", "show", "--format=%B", commitHash)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get commit message for %s: %v", commitHash, err)
+	}
+	return string(out), nil
+}
+
+func verifyLastNCommits(numCommits int) error {
+	log.Printf("considering %d commits in PR whose head is %s:\n", numCommits, *sourceBranch)
+
+	// Get the list of commits
+	cmd := exec.Command("git", "log", *sourceBranch, "--oneline", "--no-merges", "-n", fmt.Sprintf("%d", numCommits))
+	out, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("failed to get commit list: %v", err)
+	}
+	log.Println(string(out))
+
+	commitLines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	for _, line := range commitLines {
+		log.Printf("examining %q", line)
+
+		fields := strings.Fields(line)
+		if len(fields) == 0 {
+			continue
+		}
+		commitHash := fields[0]
+
+		commit, err := getCommitMessageByHash(commitHash)
+		if err != nil {
+			return err
+		}
+		log.Printf("verifying message:\n%q\n", commit)
+		if err = validateCommitMessage(commit); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func verifyHumanCommitMessage(cm commitMessage) error {
@@ -194,30 +253,76 @@ func isMalformedObjectErr(err error, objHash string) bool {
 
 func main() {
 	var configFileName = flag.String("f", "config.json", "config file path")
+	var numCommits = flag.Int("n", 0, "number of last commits to verify (defaults to 0)")
+	sourceBranch = flag.String("b", "", "source branch name")
 	flag.Parse()
 
-	if flag.NArg() != 1 {
+	if *numCommits < 0 {
 		programName := os.Args[0]
-		log.Printf("usage: %s [-f config-file] <commit-message>", programName)
+		log.Printf("usage: %s -b <branch-name> -n <number-of-commits> [-f config-file]", programName)
+		log.Printf("  -b: source branch name (if empty, the tool will use the current branch)")
+		log.Printf("  -n: number of last commits to verify (if not provided it defaults to 0)")
+		log.Printf("  -f: config file path (optional, remote defaults are origin and upstream)")
 		os.Exit(exitCodeErrorWrongArguments)
 	}
 
-	data, err := os.ReadFile(*configFileName)
-	if err != nil {
-		fmt.Printf("error reading %s: %v", *configFileName, err)
-		os.Exit(exitCodeErrorProcessingFile)
+	if *numCommits == 0 {
+		log.Printf("number of commits to verify is 0, skipping verification")
+		os.Exit(exitCodeSuccess)
 	}
-	err = json.Unmarshal(data, &conf) // keep it flexible
+
+	if strings.TrimSpace(*sourceBranch) == "" {
+		*sourceBranch = headBranchName
+		log.Printf("using branch: %s", *sourceBranch)
+	}
+
+	if isResyncBranch(*sourceBranch) {
+		log.Printf("WARN: resync branch no commit enforcement will be triggered\n")
+		os.Exit(exitCodeSuccess)
+	}
+
+	err := processConfigFile(*configFileName)
 	if err != nil {
-		log.Printf("error parsing %s: %v", *configFileName, err)
+		log.Printf("error processing config file: %v", err)
 		os.Exit(exitCodeErrorProcessingFile)
 	}
 
-	err = verifyCommitMessage(flag.Arg(0))
+	err = verifyLastNCommits(*numCommits)
 	if err != nil {
 		log.Printf("verification failed: %v", err)
 		os.Exit(exitCodeErrorVerificationFailed)
 	}
 
 	os.Exit(exitCodeSuccess) // all good! redundant but let's be explicit about our success
+}
+
+func processConfigFile(filePath string) error {
+	// Use os.OpenRoot to prevent directory traversal attacks
+	// This ensures file access is scoped to the validated absolute path
+	root, err := os.OpenRoot(filepath.Dir(filePath))
+	if err != nil {
+		return fmt.Errorf("error opening root directory for %s: %v", filePath, err)
+	}
+	defer func() {
+		_ = root.Close()
+	}()
+
+	file, err := root.Open(filepath.Base(filePath))
+	if err != nil {
+		return fmt.Errorf("error opening file %s: %v", filePath, err)
+	}
+	defer func() {
+		_ = file.Close()
+	}()
+
+	fileContent, err := io.ReadAll(file)
+	if err != nil {
+		return fmt.Errorf("error reading content from %s: %v", filePath, err)
+	}
+
+	err = json.Unmarshal(fileContent, &conf) // keep it flexible
+	if err != nil {
+		return fmt.Errorf("error parsing %s: %v", filePath, err)
+	}
+	return nil
 }
