@@ -37,7 +37,8 @@ import (
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 
 	knifeatures "sigs.k8s.io/scheduler-plugins/pkg-kni/features"
-	knistatus "sigs.k8s.io/scheduler-plugins/pkg-kni/pfpstatus"
+
+	knistatus "github.com/openshift-kni/debug-tools/pkg/pfpstatus"
 )
 
 func main() {
@@ -48,7 +49,9 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
-	knistatus.Setup(logh)
+	pfpStatusParams := knistatus.DefaultParams()
+	knistatus.ParamsFromEnv(logh, &pfpStatusParams)
+	knistatus.Setup(logh, pfpStatusParams)
 
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence
