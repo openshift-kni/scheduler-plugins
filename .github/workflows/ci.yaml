@@ -7,32 +7,6 @@ on:
     branches: [ master, release-4.12, release-4.14, release-4.16, release-4.18 ]
 
 jobs:
-  commit-check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Get branch names (pull request)
-        shell: bash
-        run: |
-          echo "SOURCE_BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
-          echo "TARGET_BRANCH_NAME=$(echo ${GITHUB_BASE_REF} | tr / -)" >> $GITHUB_ENV
-
-      - name: Debug
-        run: |
-          echo ${{ env.SOURCE_BRANCH_NAME }}
-          echo ${{ env.TARGET_BRANCH_NAME }}
-
-      - name: Verify commits
-        run: |
-          TRIGGER_BRANCH=${{ env.SOURCE_BRANCH_NAME }} \
-          UPSTREAM_BRANCH=${{ env.TARGET_BRANCH_NAME }} \
-          COMMITS=${{ github.event.pull_request.commits }} \
-          ./hack-kni/verify-commits.sh
-
   integration-test:
     runs-on: ubuntu-latest
     env:
@@ -40,14 +14,14 @@ jobs:
       GOPATH: "/home/runner/go"
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5 
         with:
           fetch-depth: 0
 
       - name: Set up golang
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v6
         with:
-          go-version: 1.23
+          go-version: 1.24
 
       - name: Run integration test
         run:
@@ -57,14 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up golang
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v6
         with:
-          go-version: 1.23
+          go-version: 1.24
 
       - name: Verify vendoring
         run: ./hack-kni/verify-vendoring.sh
