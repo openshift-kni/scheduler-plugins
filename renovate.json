@@ -11,7 +11,11 @@
             "enabled": false
         },
         {
-            "addLabels": ["approved", "lgtm"],
+            "addLabels": [
+                "approved", 
+                "lgtm",
+                "auto-merge"
+            ],
             "autoApprove": true,
             "automerge": true,
             "enabled": true,
@@ -43,7 +47,8 @@
             {
                 "addLabels": [
                     "approved",
-                    "lgtm"
+                    "lgtm",
+                    "auto-merge"
                 ],
                 "automerge": true,
                 "matchUpdateTypes": [
