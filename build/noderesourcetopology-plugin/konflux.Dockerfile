@@ -10,7 +10,7 @@ COPY . .
 
 RUN GOEXPERIMENT=strictfipsruntime GOOS=linux CGO_ENABLED=1 go build -ldflags "-X k8s.io/component-base/version.gitMajor=${OCP_MAJOR_VERSION} -X k8s.io/component-base/version.gitMinor=${OCP_MINOR_VERSION} -X k8s.io/component-base/version.gitCommit=${COMMIT_SHA}  -w" -tags strictfipsruntime -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
-FROM registry.redhat.io/rhel9-4-els/rhel-minimal:9.4@sha256:1ce44cc2d48598fa6d0fc2eae245e912ef38736b47c4227714c985f5c74dc807
+FROM registry.redhat.io/rhel9-4-els/rhel-minimal:9.4@sha256:3ec231a1d4250f74eb91d0d83d3af0f98d611495a682ec6a18ef9bf8a91b9e12
 
 COPY --from=builder /app/bin/noderesourcetopology-plugin /bin/kube-scheduler
 WORKDIR /bin
