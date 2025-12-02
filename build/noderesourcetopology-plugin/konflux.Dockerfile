@@ -17,7 +17,7 @@ WORKDIR /bin
 CMD ["kube-scheduler"]
 
 LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
-      name="openshift4/noderesourcetopology-scheduler" \
+      name="openshift4/noderesourcetopology-scheduler-rhel9" \
       summary="node resource topology aware scheduler" \
       io.openshift.expose-services="" \
       io.openshift.tags="numa,topology,scheduler" \
@@ -26,5 +26,6 @@ LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
       maintainer="openshift-operators@redhat.com" \
       io.openshift.maintainer.component="Node Resource Topology aware Scheduler" \
       io.openshift.maintainer.product="OpenShift Container Platform" \
-      io.k8s.description="Node Resource Topology aware Scheduler"
+      io.k8s.description="Node Resource Topology aware Scheduler" \
+      cpe="cpe:/a:redhat:openshift:4.19::el9"
 
