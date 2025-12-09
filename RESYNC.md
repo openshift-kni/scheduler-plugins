@@ -30,9 +30,22 @@ Branch the target openshift-kni/scheduler master branch to a new resync local br
 
 `git merge upstream/master`
 
-fix conflicts introduced by kni-local changes and send PR for review
+Fix conflicts introduced by kni-local changes and send PR for review.
+After fixing the conflicts, add all the updated files:
 
-Note: following RH internal agreement that resulted in https://github.com/openshift-kni/scheduler-plugins/pull/285/commits/4d80e29f16036cf8a75890785d4bf3c3fb914022,
+`git add .`
+
+Then complete the merge by committing:
+
+`git commit`
+
+This would create a merge commit with a title like:  `Merge remote-tracking branch 'upstream/master' into resync-...`
+
+**Notes:
+
+* We want to preserve the original commits hashes from upstream. Hence at the end of the resync we should see that commit hash of an upstream commit is the same one in the resync PR commit. Thus avoid having the case of "<us-username> authored and <or-username> committed <time> ago" which will override the original hash and create a new one.
+
+* following RH internal agreement that resulted in https://github.com/openshift-kni/scheduler-plugins/pull/285/commits/4d80e29f16036cf8a75890785d4bf3c3fb914022,
 future resyncs that pull `go.mod` updates from u/s will require to run ` make -f Makefile.kni update-vendor` in order to update the vendor resources.
 
 ### Patching openshift-kni specific commits
