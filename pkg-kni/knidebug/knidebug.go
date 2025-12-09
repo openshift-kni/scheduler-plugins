@@ -28,6 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog/v2"
+	fwk "k8s.io/kube-scheduler/framework"
 	resourcehelper "k8s.io/kubernetes/pkg/api/v1/resource"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
@@ -56,21 +57,21 @@ func New(_ context.Context, args runtime.Object, handle framework.Handle) (frame
 	return &KNIDebug{}, nil
 }
 
-func (kd *KNIDebug) EventsToRegister() []framework.ClusterEvent {
+func (kd *KNIDebug) EventsToRegister() []fwk.ClusterEvent {
 	// this can actually be empty - this plugin never fails, but we keep the same
 	// (simple and safe) events noderesourcesfit registered
-	return []framework.ClusterEvent{
-		{Resource: framework.Pod, ActionType: framework.Delete},
-		{Resource: framework.Node, ActionType: framework.Add | framework.UpdateNodeAllocatable},
+	return []fwk.ClusterEvent{
+		{Resource: fwk.Pod, ActionType: fwk.Delete},
+		{Resource: fwk.Node, ActionType: fwk.Add | fwk.UpdateNodeAllocatable},
 	}
 }
 
-func (kd *KNIDebug) Filter(ctx context.Context, cycleState *framework.CycleState, pod *corev1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
+func (kd *KNIDebug) Filter(ctx context.Context, cycleState fwk.CycleState, pod *corev1.Pod, nodeInfo fwk.NodeInfo) *fwk.Status {
 	lh := klog.FromContext(ctx)
 	node := nodeInfo.Node()
 	if node == nil {
 		// should never happen
-		return framework.NewStatus(framework.Error, "node not found")
+		return fwk.NewStatus(fwk.Error, "node not found")
 	}
 
 	// note the fit.go plugin computes this in the prefilter stage. Does this make any practical difference in our context?
@@ -172,7 +173,7 @@ func computePodResourceRequest(pod *corev1.Pod) *framework.Resource {
 }
 
 // see again fit.go for the skeleton code. Here we intentionally only log
-func checkRequest(lh logr.Logger, pod *corev1.Pod, nodeInfo *framework.NodeInfo) {
+func checkRequest(lh logr.Logger, pod *corev1.Pod, nodeInfo fwk.NodeInfo) {
 	lh = lh.WithValues("pod", klog.KObj(pod), "podUID", podGetUID(pod), "node", nodeInfo.Node().Name)
 	req := computePodResourceRequest(pod)
 
@@ -183,16 +184,16 @@ func checkRequest(lh logr.Logger, pod *corev1.Pod, nodeInfo *framework.NodeInfo)
 	lh.Info("target resource requests", frameworkResourceToLoggable(req)...)
 
 	violations := 0
-	if availCPU := (nodeInfo.Allocatable.MilliCPU - nodeInfo.Requested.MilliCPU); req.MilliCPU > availCPU {
+	if availCPU := (nodeInfo.GetAllocatable().GetMilliCPU() - nodeInfo.GetRequested().GetMilliCPU()); req.MilliCPU > availCPU {
 		lh.Info("insufficient node resources", "resource", "cpu", "request", humanCPU(req.MilliCPU), "available", humanCPU(availCPU))
 		violations++
 	}
-	if availMemory := (nodeInfo.Allocatable.Memory - nodeInfo.Requested.Memory); req.Memory > availMemory {
+	if availMemory := (nodeInfo.GetAllocatable().GetMemory() - nodeInfo.GetRequested().GetMemory()); req.Memory > availMemory {
 		lh.Info("insufficient node resources", "resource", "memory", "request", humanMemory(req.Memory), "available", humanMemory(availMemory))
 		violations++
 	}
 	for rName, rQuant := range req.ScalarResources {
-		if availQuant := (nodeInfo.Allocatable.ScalarResources[rName] - nodeInfo.Requested.ScalarResources[rName]); rQuant > availQuant {
+		if availQuant := (nodeInfo.GetAllocatable().GetScalarResources()[rName] - nodeInfo.GetRequested().GetScalarResources()[rName]); rQuant > availQuant {
 			lh.Info("insufficient node resources", "resource", rName, "request", rQuant, "available", availQuant)
 			violations++
 		}
