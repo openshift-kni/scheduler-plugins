@@ -29,6 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
+	fwk "k8s.io/kube-scheduler/framework"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 )
 
@@ -146,7 +147,7 @@ func TestCheckRequest(t *testing.T) {
 	tests := []struct {
 		name     string
 		pod      *corev1.Pod
-		nodeInfo *framework.NodeInfo
+		nodeInfo fwk.NodeInfo
 		expected []string
 	}{
 		{
@@ -255,8 +256,8 @@ func TestCheckRequest(t *testing.T) {
 	}
 
 }
-func newNodeInfo(node *corev1.Node) *framework.NodeInfo {
-	ninfo := framework.NewNodeInfo()
+func newNodeInfo(node *corev1.Node) fwk.NodeInfo {
+	ninfo := fwk.NodeInfo(framework.NewNodeInfo())
 	ninfo.SetNode(node)
 	return ninfo
 }
