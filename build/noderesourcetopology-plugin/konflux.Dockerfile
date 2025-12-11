@@ -3,7 +3,7 @@ FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_golang_1.24
 
 ARG COMMIT_SHA
 ARG OCP_MAJOR_VERSION=4
-ARG OCP_MINOR_VERSION=20
+ARG OCP_MINOR_VERSION=21
 
 WORKDIR /app
 
