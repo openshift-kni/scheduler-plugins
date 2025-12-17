@@ -92,6 +92,10 @@ spec:
     default: 'false'
     description: Enable cache proxy configuration
     type: string
+  - default: 'false'
+    description: Skip the sast coverity check
+    name: skip-sast-coverity
+    type: string
   results:
   - description: ""
     name: IMAGE_URL
@@ -467,6 +471,10 @@ spec:
       operator: in
       values:
       - "false"
+    - input: $(params.skip-sast-coverity)
+      operator: in
+      values:
+      - "false"
     - input: $(tasks.coverity-availability-check.results.STATUS)
       operator: in
       values:
@@ -485,6 +493,10 @@ spec:
       resolver: bundles
     when:
     - input: $(params.skip-checks)
+      operator: in
+      values:
+      - "false"
+    - input: $(params.skip-sast-coverity)
       operator: in
       values:
       - "false"
