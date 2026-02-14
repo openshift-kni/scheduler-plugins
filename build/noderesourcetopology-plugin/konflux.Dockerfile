@@ -6,14 +6,14 @@ COPY . .
 
 RUN GOOS=linux CGO_ENABLED=0 go build -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
-FROM registry.redhat.io/ubi8/ubi-minimal:8.10-1295@sha256:73064ec359dcd71e56677f8173a134809c885484ba89e6a137d33521ad29dd4c
+FROM registry.redhat.io/ubi8/ubi-minimal:latest@sha256:48adecc91f276734fa51987bc2203a31db9ba87a512c436c0a3fcac53135378d
 
 COPY --from=builder /app/bin/noderesourcetopology-plugin /bin/kube-scheduler
 WORKDIR /bin
 CMD ["kube-scheduler"]
 
 LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
-      name="openshift4/noderesourcetopology-scheduler" \
+      name="openshift4/noderesourcetopology-scheduler-container-rhel8" \
       summary="node resource topology aware scheduler" \
       io.openshift.expose-services="" \
       io.openshift.tags="numa,topology,scheduler" \
@@ -22,5 +22,5 @@ LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
       maintainer="openshift-operators@redhat.com" \
       io.openshift.maintainer.component="Node Resource Topology aware Scheduler" \
       io.openshift.maintainer.product="OpenShift Container Platform" \
-      io.k8s.description="Node Resource Topology aware Scheduler"
-
+      io.k8s.description="Node Resource Topology aware Scheduler" \
+      cpe="cpe:/a:redhat:openshift:4.12::el8"
