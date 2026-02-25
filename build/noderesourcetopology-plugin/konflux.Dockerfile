@@ -23,4 +23,5 @@ LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
       io.openshift.maintainer.component="Node Resource Topology aware Scheduler" \
       io.openshift.maintainer.product="OpenShift Container Platform" \
       io.k8s.description="Node Resource Topology aware Scheduler" \
+      url="https://github.com/konflux-io/noderesourcetopology-plugin" \
       cpe="cpe:/a:redhat:openshift:4.12::el8"
