@@ -32,7 +32,9 @@ version=$(cat ${SCRIPT_ROOT}/go.mod | grep 'k8s.io/kubernetes' | grep -v '=>' | 
 
 GOPATH=$(go env GOPATH)
 TEMP_DIR=${TMPDIR-/tmp}
-# this is the last version before the bump golang 1.20 -> 1.22. We want to avoid the go.mod version format changes - for now.
-go install sigs.k8s.io/controller-runtime/tools/setup-envtest@v0.0.0-20230927023946-553bd00cfec5
+# release-0.19 is required to download envtest binaries from the new location
+# (controller-tools releases) since the old GCS bucket is deprecated.
+# NOTE: release-0.19's go.mod uses "go 1.22.0" (three-part format), so Go >= 1.21 is needed.
+go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.19
 "${GOPATH}"/bin/setup-envtest use -p env "${version}" > "${TEMP_DIR}/setup-envtest"
 
