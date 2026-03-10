@@ -23,3 +23,4 @@ exclude:
     - vendor/go.etcd.io/etcd/client/pkg/v3/transport/listener.go
     - vendor/github.com/fsnotify/fsnotify/**
     - vendor/github.com/godbus/dbus/v5/auth_sha1.go
+    - vendor/github.com/openshift/**
