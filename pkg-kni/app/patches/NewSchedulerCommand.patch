@@ -1,0 +1,8 @@
+--- upstream/NewSchedulerCommand (vendor/k8s.io/kubernetes/cmd/kube-scheduler/app/server.go)
++++ local/NewSchedulerCommand (pkg-kni/app/sched_command.go)
+@@ -1,4 +1,4 @@
+-func NewSchedulerCommand(registryOptions ...Option) *cobra.Command {
++func NewSchedulerCommand(registryOptions ...app.Option) *cobra.Command {
+ 	opts := options.NewOptions()
+ 
+ 	cmd := &cobra.Command{
