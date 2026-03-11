@@ -1,0 +1,34 @@
+--- upstream/SecureServingInfo.Serve (vendor/k8s.io/apiserver/pkg/server/secure_serving.go)
++++ local/customServe (pkg-kni/app/serve.go)
+@@ -1,15 +1,21 @@
+-func (s *SecureServingInfo) Serve(handler http.Handler, shutdownTimeout time.Duration, stopCh <-chan struct{}) (<-chan struct{}, <-chan struct{}, error) {
++func customServe(
++	s *apiserver.SecureServingInfo,
++	configClient configclientset.Interface,
++	handler http.Handler,
++	shutdownTimeout time.Duration,
++	stopCh <-chan struct{},
++) (<-chan struct{}, <-chan struct{}, error) {
+ 	if s.Listener == nil {
+ 		return nil, nil, fmt.Errorf("listener must not be nil")
+ 	}
+ 
+-	tlsConfig, err := s.tlsConfig(stopCh)
++	tlsConfig, err := buildCustomTLSConfig(configClient)
+ 	if err != nil {
+ 		return nil, nil, err
+ 	}
+ 
+ 	secureServer := &http.Server{
+-		Addr:           s.Listener.Addr().String(),
++		Addr:           ":8443", //s.Listener.Addr().String(),
+ 		Handler:        handler,
+ 		MaxHeaderBytes: 1 << 20,
+ 		TLSConfig:      tlsConfig,
+@@ -55,5 +61,5 @@
+ 	secureServer.ErrorLog = tlsErrorLogger
+ 
+ 	klog.Infof("Serving securely on %s", secureServer.Addr)
+-	return RunServer(secureServer, s.Listener, shutdownTimeout, stopCh)
++	return apiserver.RunServer(secureServer, s.Listener, shutdownTimeout, stopCh)
+ }

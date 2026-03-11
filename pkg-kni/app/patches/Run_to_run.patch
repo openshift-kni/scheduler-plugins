@@ -1,0 +1,22 @@
+--- upstream/Run (vendor/k8s.io/kubernetes/cmd/kube-scheduler/app/server.go)
++++ local/run (pkg-kni/app/sched_run.go)
+@@ -1,4 +1,4 @@
+-func Run(ctx context.Context, cc *schedulerserverconfig.CompletedConfig, sched *scheduler.Scheduler) error {
++func run(ctx context.Context, cc *schedulerserverconfig.CompletedConfig, sched *scheduler.Scheduler, serveFn serveFunc) error {
+ 	logger := klog.FromContext(ctx)
+ 
+ 	// To help debugging, immediately log version
+@@ -81,7 +81,12 @@
+ 		handler := buildHandlerChain(newEndpointsHandler(&cc.ComponentConfig, cc.InformerFactory, isLeader, checks, readyzChecks, cc.Flagz), cc.Authentication.Authenticator, cc.Authorization.Authorizer)
+ 		internalStopCh := make(chan struct{})
+ 		shutdownTimeout := 5 * time.Second
+-		stoppedCh, listenerStoppedCh, err := cc.SecureServing.Serve(handler, shutdownTimeout, internalStopCh)
++		configClient, err := configclientset.NewForConfig(cc.KubeConfig)
++		if err != nil {
++			return fmt.Errorf("failed to create OpenShift config client: %v", err)
++		}
++
++		stoppedCh, listenerStoppedCh, err := serveFn(cc.SecureServing, configClient, handler, shutdownTimeout, internalStopCh)
+ 		if err != nil {
+ 			// fail early for secure handlers, removing the old error loop from above
+ 			close(internalStopCh)
