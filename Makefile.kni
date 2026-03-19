@@ -92,7 +92,7 @@ verify-upstream-sync:
 	hack-kni/verify-upstream-sync.sh
 
 .PHONY: update-upstream-patches
-update-upstream-patches:
+update-upstream-patches: build-extract-func
 	hack-kni/update-upstream-patches.sh
 
 .PHONY: update-upstream-checksums
@@ -102,6 +102,10 @@ update-upstream-checksums:
 		vendor/k8s.io/apiserver/pkg/server/secure_serving.go \
 		> pkg-kni/app/upstream_checksums.sha256
 	@echo "Checksums updated in pkg-kni/app/upstream_checksums.sha256"
+
+.PHONY: build-extract-func
+build-extract-func:
+	CGO_ENABLED=0 go build -o bin/extract-func hack-kni/extract-func/main.go
 
 .PHONY: clean
 clean:
