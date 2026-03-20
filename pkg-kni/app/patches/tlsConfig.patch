@@ -1,8 +1,0 @@
---- upstream/SecureServingInfo.tlsConfig (vendor/k8s.io/apiserver/pkg/server/secure_serving.go)
-+++ local/tlsConfig (pkg-kni/app/serve.go)
-@@ -1,4 +1,4 @@
--func (s *SecureServingInfo) tlsConfig(stopCh <-chan struct{}) (*tls.Config, error) {
-+func tlsConfig(s *apiserver.SecureServingInfo, stopCh <-chan struct{}) (*tls.Config, error) {
- 	tlsConfig := &tls.Config{
- 		// Can't use SSLv3 because of POODLE and BEAST
- 		// Can't use TLSv1.0 because of POODLE and BEAST using CBC cipher

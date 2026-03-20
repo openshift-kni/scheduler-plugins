@@ -8,8 +8,5 @@ import "golang.org/x/tools/go/analysis"
 
 // This function is set by the checker package to provide
 // backdoor access to the private Pass field
-// of the *checker.Action type, for use by analysistest.
-//
-// It may return nil, for example if the action was not
-// executed because of a failed dependent.
-var ActionPass func(action any) *analysis.Pass
+// of the checker.Action type, for use by analysistest.
+var Pass func(interface{}) *analysis.Pass
