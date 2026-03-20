@@ -33,7 +33,7 @@ SECURE_SERVING_GO="vendor/k8s.io/apiserver/pkg/server/secure_serving.go"
 # everything up to and including the closing brace at column 0.
 extract_func() {
     local file="$1" pattern="$2"
-    awk -v pat="$pattern" 'index($0, pat)==1{found=1} found{print} found && /^\}/{exit}' "$file"
+    ${SCRIPT_ROOT}/bin/extract-func "$file" "$pattern"
 }
 
 mkdir -p "${PATCHES_DIR}"
@@ -66,36 +66,36 @@ generate_patch() {
 echo "Regenerating upstream patches..."
 
 generate_patch \
-    "${SERVER_GO}" "func NewSchedulerCommand(" \
-    "pkg-kni/app/sched_command.go" "func NewSchedulerCommand(" \
+    "${SERVER_GO}" "NewSchedulerCommand" \
+    "pkg-kni/app/sched_command.go" "NewSchedulerCommand" \
     "upstream/NewSchedulerCommand (${SERVER_GO})" \
     "local/NewSchedulerCommand (pkg-kni/app/sched_command.go)" \
     "NewSchedulerCommand.patch"
 
 generate_patch \
-    "${SERVER_GO}" "func runCommand(" \
-    "pkg-kni/app/sched_command.go" "func runCommand(" \
+    "${SERVER_GO}" "runCommand" \
+    "pkg-kni/app/sched_command.go" "runCommand" \
     "upstream/runCommand (${SERVER_GO})" \
     "local/runCommand (pkg-kni/app/sched_command.go)" \
     "runCommand.patch"
 
 generate_patch \
-    "${SERVER_GO}" "func Run(" \
-    "pkg-kni/app/sched_run.go" "func run(" \
+    "${SERVER_GO}" "Run" \
+    "pkg-kni/app/sched_run.go" "run" \
     "upstream/Run (${SERVER_GO})" \
     "local/run (pkg-kni/app/sched_run.go)" \
     "Run_to_run.patch"
 
 generate_patch \
-    "${SECURE_SERVING_GO}" "func (s *SecureServingInfo) Serve(" \
-    "pkg-kni/app/serve.go" "func customServe(" \
+    "${SECURE_SERVING_GO}" "Serve" \
+    "pkg-kni/app/serve.go" "customServe" \
     "upstream/SecureServingInfo.Serve (${SECURE_SERVING_GO})" \
     "local/customServe (pkg-kni/app/serve.go)" \
     "Serve_to_customServe.patch"
 
 generate_patch \
-    "${SECURE_SERVING_GO}" "func (s *SecureServingInfo) tlsConfig(" \
-    "pkg-kni/app/serve.go" "func tlsConfig(" \
+    "${SECURE_SERVING_GO}" "tlsConfig" \
+    "pkg-kni/app/serve.go" "tlsConfig" \
     "upstream/SecureServingInfo.tlsConfig (${SECURE_SERVING_GO})" \
     "local/tlsConfig (pkg-kni/app/serve.go)" \
     "tlsConfig.patch"
