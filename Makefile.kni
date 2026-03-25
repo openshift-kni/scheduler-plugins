@@ -87,22 +87,6 @@ verify-gofmt:
 verify-crdgen: update-vendor
 	hack/verify-crdgen.sh
 
-.PHONY: verify-upstream-sync
-verify-upstream-sync:
-	hack-kni/verify-upstream-sync.sh
-
-.PHONY: update-upstream-patches
-update-upstream-patches:
-	hack-kni/update-upstream-patches.sh
-
-.PHONY: update-upstream-checksums
-update-upstream-checksums:
-	sha256sum \
-		vendor/k8s.io/kubernetes/cmd/kube-scheduler/app/server.go \
-		vendor/k8s.io/apiserver/pkg/server/secure_serving.go \
-		> pkg-kni/app/upstream_checksums.sha256
-	@echo "Checksums updated in pkg-kni/app/upstream_checksums.sha256"
-
 .PHONY: clean
 clean:
 	rm -rf ./bin

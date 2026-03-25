@@ -53,15 +53,6 @@ jobs:
         run:
           make -f ${MAKEFILE_PATH} integration-test-quick
 
-  upstream-sync-check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v3
-
-      - name: Verify upstream sync
-        run: make -f Makefile.kni verify-upstream-sync
-
   vendor-check:
     runs-on: ubuntu-latest
     steps:

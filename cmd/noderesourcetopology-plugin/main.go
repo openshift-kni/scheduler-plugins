@@ -30,7 +30,6 @@ import (
 	"k8s.io/klog/v2/klogr"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
-	kniapp "sigs.k8s.io/scheduler-plugins/pkg-kni/app"
 	"sigs.k8s.io/scheduler-plugins/pkg-kni/knidebug"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology"
 
@@ -57,7 +56,7 @@ func main() {
 	// Register custom plugins to the scheduler framework.
 	// Later they can consist of scheduler profile(s) and hence
 	// used by various kinds of workloads.
-	command := kniapp.NewSchedulerCommand(
+	command := app.NewSchedulerCommand(
 		app.WithPlugin(noderesourcetopology.Name, noderesourcetopology.New),
 		app.WithPlugin(knidebug.Name, knidebug.New),
 	)
