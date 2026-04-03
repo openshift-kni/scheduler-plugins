@@ -759,18 +759,18 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 		pods          []*corev1.Pod
 		isPodRelevant podprovider.PodFilterFunc
 		err           error
-		expected      map[string][]podData
+		expected      map[string]nodeObjData
 		expectedErr   error
 	}{
 		{
 			description:   "empty pod list - shared",
 			isPodRelevant: podprovider.IsPodRelevantShared,
-			expected:      make(map[string][]podData),
+			expected:      make(map[string]nodeObjData),
 		},
 		{
 			description:   "empty pod list - dedicated",
 			isPodRelevant: podprovider.IsPodRelevantDedicated,
-			expected:      make(map[string][]podData),
+			expected:      make(map[string]nodeObjData),
 		},
 		{
 			description: "single pod NOT running - succeeded (kubernetes jobs) - dedicated",
@@ -789,12 +789,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 				},
 			},
 			isPodRelevant: podprovider.IsPodRelevantDedicated,
-			expected: map[string][]podData{
+			expected: map[string]nodeObjData{
 				"node1": {
-					{
-						Namespace: "namespace1",
-						Name:      "pod1",
-					},
+					Pods: []podData{{Namespace: "namespace1", Name: "pod1"}},
 				},
 			},
 		},
@@ -815,12 +812,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 				},
 			},
 			isPodRelevant: podprovider.IsPodRelevantDedicated,
-			expected: map[string][]podData{
+			expected: map[string]nodeObjData{
 				"node1": {
-					{
-						Namespace: "namespace1",
-						Name:      "pod1",
-					},
+					Pods: []podData{{Namespace: "namespace1", Name: "pod1"}},
 				},
 			},
 		},
@@ -841,7 +835,7 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 				},
 			},
 			isPodRelevant: podprovider.IsPodRelevantShared,
-			expected:      map[string][]podData{},
+			expected:      map[string]nodeObjData{},
 		},
 		{
 			description: "single pod NOT running - failed - shared",
@@ -860,7 +854,7 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 				},
 			},
 			isPodRelevant: podprovider.IsPodRelevantShared,
-			expected:      map[string][]podData{},
+			expected:      map[string]nodeObjData{},
 		},
 		{
 			description: "single pod running - dedicated",
@@ -879,12 +873,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 				},
 			},
 			isPodRelevant: podprovider.IsPodRelevantDedicated,
-			expected: map[string][]podData{
+			expected: map[string]nodeObjData{
 				"node1": {
-					{
-						Namespace: "namespace1",
-						Name:      "pod1",
-					},
+					Pods: []podData{{Namespace: "namespace1", Name: "pod1"}},
 				},
 			},
 		},
@@ -905,12 +896,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 				},
 			},
 			isPodRelevant: podprovider.IsPodRelevantDedicated,
-			expected: map[string][]podData{
+			expected: map[string]nodeObjData{
 				"node1": {
-					{
-						Namespace: "namespace1",
-						Name:      "pod1",
-					},
+					Pods: []podData{{Namespace: "namespace1", Name: "pod1"}},
 				},
 			},
 		},
@@ -955,20 +943,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 				},
 			},
 			isPodRelevant: podprovider.IsPodRelevantDedicated,
-			expected: map[string][]podData{
+			expected: map[string]nodeObjData{
 				"node1": {
-					{
-						Namespace: "namespace1",
-						Name:      "pod1",
-					},
-					{
-						Namespace: "namespace2",
-						Name:      "pod2",
-					},
-					{
-						Namespace: "namespace2",
-						Name:      "pod3",
-					},
+					Pods: []podData{{Namespace: "namespace1", Name: "pod1"}, {Namespace: "namespace2", Name: "pod2"}, {Namespace: "namespace2", Name: "pod3"}},
 				},
 			},
 		},

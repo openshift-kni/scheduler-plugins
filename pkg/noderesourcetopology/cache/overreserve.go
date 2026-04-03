@@ -303,7 +303,26 @@ func (ov *OverReserve) Resync() {
 
 		lh.V(4).Info("trying to sync NodeTopology", "fingerprint", pfpExpected, "onlyExclusiveResources", onlyExclRes)
 
-		err = checkPodFingerprintForNode(lh, objs, nodeName, pfpExpected, onlyExclRes)
+		// construct the conatiner->numa mapping
+		/*
+		   0. construct the hashes sortet list from nodeToObjsMap.Containers
+		   1. fetch busiest zone
+		   2. fetch numa vectors for all other zones and simplify them (remove prefixes)
+		   3. infer the busiest zone's as all containers left in the sorted list
+		   4. decode them
+		   5. construct the container->numa mapping for all other zones
+
+		   then use this data in preemption logic:
+		   1. when it is context flow,fetch the victims' containers numaplacement
+		   (we don't need to account for the rest of the shared-pool-resources conatiners
+		   because they are not reflected in the NRT)
+		   2. then use this data in Add/RemovePod logic that is consumed by postFilter
+
+		   note: on RTE end maybe we cn compute the relevant containers earlier than current version (branch rte-np-att)
+		*/
+		//  fetch zones attribute and
+
+		err := checkPodFingerprintForNode(lh, objs.Pods, nodeName, pfpExpected, onlyExclRes)
 		if errors.Is(err, podfingerprint.ErrSignatureMismatch) {
 			// can happen, not critical
 			lh.V(4).Info("NodeTopology podset fingerprint mismatch")
@@ -344,6 +363,10 @@ func (ov *OverReserve) FlushNodes(lh logr.Logger, nrts ...*topologyv1alpha2.Node
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
 
+	if len(nrts) == 0 {
+		return ov.generation
+	}
+
 	for _, nrt := range nrts {
 		lh.V(2).Info("flushing", logging.KeyNode, nrt.Name)
 		ov.nrts.Update(nrt)
@@ -353,15 +376,10 @@ func (ov *OverReserve) FlushNodes(lh logr.Logger, nrts ...*topologyv1alpha2.Node
 		ov.nodesWithAttrUpdate.Delete(nrt.Name)
 	}
 
-	if len(nrts) == 0 {
-		return ov.generation
-	}
-
 	// increase only if we mutated the internal state
 	ov.generation += 1
 	lh.V(2).Info("generation", "new", ov.generation)
 	return ov.generation
-
 }
 
 // to be used only in tests
@@ -369,8 +387,9 @@ func (ov *OverReserve) Store() *nrtStore {
 	return ov.nrts
 }
 
-func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPodRelevant podprovider.PodFilterFunc) (map[string][]podData, error) {
-	nodeToObjsMap := make(map[string][]podData)
+// TODO add integration tests
+func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPodRelevant podprovider.PodFilterFunc) (map[string]nodeObjData, error) {
+	nodeToObjsMap := make(map[string]nodeObjData)
 	pods, err := podLister.List(labels.Everything())
 	if err != nil {
 		return nodeToObjsMap, err
@@ -379,13 +398,15 @@ func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPod
 		if !isPodRelevant(lh, pod) {
 			continue
 		}
-		nodeObjs := nodeToObjsMap[pod.Spec.NodeName]
-		nodeObjs = append(nodeObjs, podData{
+		cntsWithExclusiveResources := resourcerequests.ExclusiveForPod(pod)
+		nodeObjData := nodeToObjsMap[pod.Spec.NodeName]
+		nodeObjData.Pods = append(nodeObjData.Pods, podData{
 			Namespace:             pod.Namespace,
 			Name:                  pod.Name,
-			HasExclusiveResources: resourcerequests.AreExclusiveForPod(pod),
+			HasExclusiveResources: len(cntsWithExclusiveResources) > 0,
 		})
-		nodeToObjsMap[pod.Spec.NodeName] = nodeObjs
+		nodeObjData.Containers = append(nodeObjData.Containers, cntsWithExclusiveResources...)
+		nodeToObjsMap[pod.Spec.NodeName] = nodeObjData
 	}
 	return nodeToObjsMap, nil
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/go-logr/logr"
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
 	topologyv1alpha2attr "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/attribute"
+	"github.com/k8stopologyawareschedwg/numaplacement"
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 
 	apiconfig "sigs.k8s.io/scheduler-plugins/apis/config"
@@ -36,8 +37,9 @@ import (
 // nrtStore maps the NRT data by node name. It is not thread safe and needs to be protected by a lock.
 // data is intentionally copied each time it enters and exists the store. E.g, no pointer sharing.
 type nrtStore struct {
-	data map[string]*topologyv1alpha2.NodeResourceTopology
-	lh   logr.Logger
+	data                  map[string]*topologyv1alpha2.NodeResourceTopology
+	containerNUMALocality map[string]int // container identification -> NUMAID
+	lh                    logr.Logger
 }
 
 // newNrtStore creates a new nrtStore and initializes it with copies of the provided Node Resource Topology data.
@@ -53,6 +55,12 @@ func newNrtStore(lh logr.Logger, nrts []topologyv1alpha2.NodeResourceTopology) *
 	}
 }
 
+func (nrs *nrtStore) updateContainerNUMALocality(hashes []uint64, nrts []topologyv1alpha2.NodeResourceTopology) {
+	// reconstruct the missing numa vector
+
+	// create the containerNUMALocality map for easier lookup on preemption context
+
+}
 func (nrs nrtStore) Contains(nodeName string) bool {
 	_, ok := nrs.data[nodeName]
 	return ok
@@ -225,6 +233,11 @@ type podData struct {
 	Namespace             string
 	Name                  string
 	HasExclusiveResources bool
+}
+
+type nodeObjData struct {
+	Pods       []podData
+	Containers []numaplacement.ContainerID
 }
 
 // checkPodFingerprintForNode verifies if the given pods fingeprint (usually from NRT update) matches the

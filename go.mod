@@ -12,6 +12,7 @@ require (
 	github.com/go-logr/logr v1.4.2
 	github.com/google/go-cmp v0.7.0
 	github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.1.2
+	github.com/k8stopologyawareschedwg/numaplacement v0.0.0-20260324131405-3aa02090d608
 	github.com/k8stopologyawareschedwg/podfingerprint v0.2.3
 	github.com/openshift-kni/debug-tools v0.2.5
 	github.com/patrickmn/go-cache v2.1.0+incompatible
