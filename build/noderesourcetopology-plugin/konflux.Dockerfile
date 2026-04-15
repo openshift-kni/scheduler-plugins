@@ -2,8 +2,8 @@
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_golang_1.25@sha256:071786da0259b1c8488b05aaa7e8ad3e93d601b578b532bc11f78f5e8926c6d3 as builder
 
 ARG COMMIT_SHA
-ARG OCP_MAJOR_VERSION=4
-ARG OCP_MINOR_VERSION=22
+ARG OCP_MAJOR_VERSION=5
+ARG OCP_MINOR_VERSION=0
 
 WORKDIR /app
 
@@ -28,5 +28,5 @@ LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
       io.openshift.maintainer.component="Node Resource Topology aware Scheduler" \
       io.openshift.maintainer.product="OpenShift Container Platform" \
       io.k8s.description="Node Resource Topology aware Scheduler" \
-      cpe="cpe:/a:redhat:openshift:4.22::el9" \
+      cpe="cpe:/a:redhat:openshift:5.0::el9" \
       url="https://github.com/konflux-io/noderesourcetopology-plugin"
