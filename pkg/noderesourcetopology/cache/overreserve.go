@@ -86,6 +86,17 @@ func NewOverReserve(ctx context.Context, lh logr.Logger, cfg *apiconfig.NodeReso
 		isPodRelevant:          isPodRelevant,
 	}
 
+	nodeToObjsMap, err := makeNodeToPodDataMap(lh, podLister, isPodRelevant)
+	if err != nil {
+		klog.Error(err, "container NUMA locality initialization: failed to make node to pod data map")
+	} else {
+		obj.nrts.updateContainerNUMALocality(nodeToObjsMap)
+		lh.V(6).Info("container NUMA locality initialized")
+		// atm the container NUMA locality map is used to answer queries given a container ID what numa node it belongs to.
+		// we cannot list all containers per NUMA node because the container ID is not stored in the NRTs; for that we need podLister.
+		//  that is not needed for this phase
+	}
+
 	if resyncScope == apiconfig.CacheResyncScopeAll {
 		wt := Watcher{
 			lh:    obj.lh,
@@ -305,7 +316,7 @@ func (ov *OverReserve) Resync() {
 
 		// construct the conatiner->numa mapping
 		/*
-		   0. construct the hashes sortet list from nodeToObjsMap.Containers
+		   0. construct the hashes sorted list from nodeToObjsMap.Containers
 		   1. fetch busiest zone
 		   2. fetch numa vectors for all other zones and simplify them (remove prefixes)
 		   3. infer the busiest zone's as all containers left in the sorted list
@@ -320,7 +331,8 @@ func (ov *OverReserve) Resync() {
 
 		   note: on RTE end maybe we cn compute the relevant containers earlier than current version (branch rte-np-att)
 		*/
-		//  fetch zones attribute and
+		//  fetch zones attribute and compute the container->numa mapping for all zones
+		// pre-fill the mapping for the all
 
 		err := checkPodFingerprintForNode(lh, objs.Pods, nodeName, pfpExpected, onlyExclRes)
 		if errors.Is(err, podfingerprint.ErrSignatureMismatch) {

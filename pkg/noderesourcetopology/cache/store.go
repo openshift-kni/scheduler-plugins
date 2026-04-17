@@ -37,8 +37,10 @@ import (
 // nrtStore maps the NRT data by node name. It is not thread safe and needs to be protected by a lock.
 // data is intentionally copied each time it enters and exists the store. E.g, no pointer sharing.
 type nrtStore struct {
+
+	// TODO combine both data and conatinerNUMALocality into a single map[string]*nodeData
 	data                  map[string]*topologyv1alpha2.NodeResourceTopology
-	containerNUMALocality map[string]int // container identification -> NUMAID
+	containerNUMALocality map[string]numaplacement.Info // node name -> decoded info// container identification -> NUMAID
 	lh                    logr.Logger
 }
 
@@ -50,17 +52,55 @@ func newNrtStore(lh logr.Logger, nrts []topologyv1alpha2.NodeResourceTopology) *
 	}
 	lh.V(6).Info("initialized nrtStore", "objects", len(data))
 	return &nrtStore{
-		data: data,
-		lh:   lh,
+		data:                  data,
+		containerNUMALocality: make(map[string]numaplacement.Info),
+		lh:                    lh,
 	}
 }
 
-func (nrs *nrtStore) updateContainerNUMALocality(hashes []uint64, nrts []topologyv1alpha2.NodeResourceTopology) {
-	// reconstruct the missing numa vector
+func (nrs *nrtStore) updateContainerNUMALocality(nodeToObjsMap map[string]nodeObjData) {
+	for nodeName, nodeObjData := range nodeToObjsMap {
+		// unpack the metadata from the nrtObjs
+		nrt := nrs.GetNRTCopyByNodeName(nodeName)
+		if nrt == nil { // should never happen but still
+			continue
+		}
+		metadata, ok := topologyv1alpha2attr.Get(nrt.Attributes, numaplacement.AttributeMetadata)
+		if !ok {
+			nrs.lh.V(4).Info("missing metadata attribute", "node", nodeName)
+			// ^^ in such case, the preemption context will still be blocked,
+			// IOW there is no data so we can't deccide what is before and after node state
+			continue
+		}
 
-	// create the containerNUMALocality map for easier lookup on preemption context
+		payload := numaplacement.Payload{}
+		err := numaplacement.UnpackMetadataInto(&payload, metadata.Value)
+		if err != nil {
+			nrs.lh.Error(err, "failed to unpack metadata", "node", nodeName)
+			// preemption is locked
+			continue
+		}
 
+		decoder, err := numaplacement.NewDecoder(payload, nodeObjData.Containers...)
+		if err != nil {
+			nrs.lh.Error(err, "failed to create decoder", "node", nodeName)
+			// preemption is locked
+			continue
+		}
+
+		info, err := decoder.Result()
+		if err != nil {
+			nrs.lh.Error(err, "failed to decode node info", "node", nodeName)
+			// preemption is locked
+			continue
+		}
+
+		nrs.containerNUMALocality[nodeName] = info
+	}
 }
+
+// TODO add a func to get the container NUMALocality for a given node name; will be used in FlushNodes on mismatching PFPs
+
 func (nrs nrtStore) Contains(nodeName string) bool {
 	_, ok := nrs.data[nodeName]
 	return ok
