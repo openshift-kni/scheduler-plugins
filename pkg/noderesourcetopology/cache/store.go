@@ -17,6 +17,7 @@ limitations under the License.
 package cache
 
 import (
+	"errors"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -37,11 +38,9 @@ import (
 // nrtStore maps the NRT data by node name. It is not thread safe and needs to be protected by a lock.
 // data is intentionally copied each time it enters and exists the store. E.g, no pointer sharing.
 type nrtStore struct {
-
-	// TODO combine both data and conatinerNUMALocality into a single map[string]*nodeData
-	data                  map[string]*topologyv1alpha2.NodeResourceTopology
-	containerNUMALocality map[string]numaplacement.Info // node name -> decoded info// container identification -> NUMAID
-	lh                    logr.Logger
+	data  map[string]*topologyv1alpha2.NodeResourceTopology
+	query map[string]numaplacement.Info // node name -> numa locality info
+	lh    logr.Logger
 }
 
 // newNrtStore creates a new nrtStore and initializes it with copies of the provided Node Resource Topology data.
@@ -52,54 +51,51 @@ func newNrtStore(lh logr.Logger, nrts []topologyv1alpha2.NodeResourceTopology) *
 	}
 	lh.V(6).Info("initialized nrtStore", "objects", len(data))
 	return &nrtStore{
-		data:                  data,
-		containerNUMALocality: make(map[string]numaplacement.Info),
-		lh:                    lh,
+		data:  data,
+		query: make(map[string]numaplacement.Info),
+		lh:    lh,
 	}
 }
 
-func (nrs *nrtStore) updateContainerNUMALocality(nodeToObjsMap map[string]nodeObjData) {
+func (nrs *nrtStore) UpdateQuery(nodeToObjsMap map[string]nodeObjData) {
 	for nodeName, nodeObjData := range nodeToObjsMap {
-		// unpack the metadata from the nrtObjs
-		nrt := nrs.GetNRTCopyByNodeName(nodeName)
-		if nrt == nil { // should never happen but still
-			continue
-		}
-		metadata, ok := topologyv1alpha2attr.Get(nrt.Attributes, numaplacement.AttributeMetadata)
-		if !ok {
-			nrs.lh.V(4).Info("missing metadata attribute", "node", nodeName)
-			// ^^ in such case, the preemption context will still be blocked,
-			// IOW there is no data so we can't deccide what is before and after node state
-			continue
-		}
-
-		payload := numaplacement.Payload{}
-		err := numaplacement.UnpackMetadataInto(&payload, metadata.Value)
-		if err != nil {
-			nrs.lh.Error(err, "failed to unpack metadata", "node", nodeName)
-			// preemption is locked
-			continue
-		}
-
-		decoder, err := numaplacement.NewDecoder(payload, nodeObjData.Containers...)
-		if err != nil {
-			nrs.lh.Error(err, "failed to create decoder", "node", nodeName)
-			// preemption is locked
-			continue
-		}
-
-		info, err := decoder.Result()
-		if err != nil {
-			nrs.lh.Error(err, "failed to decode node info", "node", nodeName)
-			// preemption is locked
-			continue
-		}
-
-		nrs.containerNUMALocality[nodeName] = info
+		nrs.updateNodeQuery(nodeName, nodeObjData.Containers)
 	}
 }
 
-// TODO add a func to get the container NUMALocality for a given node name; will be used in FlushNodes on mismatching PFPs
+func (nrs *nrtStore) updateNodeQuery(nodeName string, containers []numaplacement.ContainerID) {
+	nrt := nrs.GetNRTCopyByNodeName(nodeName)
+	if nrt == nil { // should never happen but still check it
+		return
+	}
+	metadata, ok := topologyv1alpha2attr.Get(nrt.Attributes, numaplacement.AttributeMetadata)
+	if !ok {
+		nrs.lh.V(4).Error(errors.New("Query update failed"), "missing metadata attribute", "node", nodeName)
+		return
+	}
+
+	payload := numaplacement.Payload{}
+	err := numaplacement.UnpackMetadataInto(&payload, metadata.Value)
+	if err != nil {
+		nrs.lh.Error(err, "failed to unpack metadata", "node", nodeName)
+		return
+	}
+
+	dec, err := numaplacement.NewDecoder(payload, containers...)
+	if err != nil {
+		nrs.lh.Error(err, "failed to create decoder", "node", nodeName)
+		return
+	}
+
+	info, err := dec.Result()
+	if err != nil {
+		nrs.lh.Error(err, "failed to decode node info", "node", nodeName)
+		return
+	}
+
+	nrs.query[nodeName] = info
+	nrs.lh.V(5).Info("updated node query", "node", nodeName)
+}
 
 func (nrs nrtStore) Contains(nodeName string) bool {
 	_, ok := nrs.data[nodeName]
@@ -118,8 +114,9 @@ func (nrs *nrtStore) GetNRTCopyByNodeName(nodeName string) *topologyv1alpha2.Nod
 }
 
 // Update adds or replace the Node Resource Topology associated to a node. Always do a copy.
-func (nrs *nrtStore) Update(nrt *topologyv1alpha2.NodeResourceTopology) {
+func (nrs *nrtStore) Update(nrt *topologyv1alpha2.NodeResourceTopology, nodeObjData nodeObjData) {
 	nrs.data[nrt.Name] = nrt.DeepCopy()
+	nrs.updateNodeQuery(nrt.Name, nodeObjData.Containers)
 	nrs.lh.V(5).Info("updated cached NodeTopology", "node", nrt.Name)
 }
 

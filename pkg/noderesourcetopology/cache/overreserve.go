@@ -89,12 +89,10 @@ func NewOverReserve(ctx context.Context, lh logr.Logger, cfg *apiconfig.NodeReso
 	nodeToObjsMap, err := makeNodeToPodDataMap(lh, podLister, isPodRelevant)
 	if err != nil {
 		klog.Error(err, "container NUMA locality initialization: failed to make node to pod data map")
+		// need to continue even if this fails; it will be blocking preemption but we can still continue with the rest of scheduling logic
 	} else {
-		obj.nrts.updateContainerNUMALocality(nodeToObjsMap)
+		obj.nrts.UpdateQuery(nodeToObjsMap)
 		lh.V(6).Info("container NUMA locality initialized")
-		// atm the container NUMA locality map is used to answer queries given a container ID what numa node it belongs to.
-		// we cannot list all containers per NUMA node because the container ID is not stored in the NRTs; for that we need podLister.
-		//  that is not needed for this phase
 	}
 
 	if resyncScope == apiconfig.CacheResyncScopeAll {
@@ -112,7 +110,10 @@ func NewOverReserve(ctx context.Context, lh logr.Logger, cfg *apiconfig.NodeReso
 func (ov *OverReserve) GetCachedNRTCopy(ctx context.Context, nodeName string, pod *corev1.Pod) (*topologyv1alpha2.NodeResourceTopology, CachedNRTInfo) {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
-	info := CachedNRTInfo{Generation: ov.generation}
+	info := CachedNRTInfo{
+		Generation:        ov.generation,
+		NUMAAffinityQuery: ov.nrts.query,
+	}
 	if ov.nodesWithForeignPods.IsSet(nodeName) {
 		return nil, info
 	}
@@ -132,6 +133,7 @@ func (ov *OverReserve) GetCachedNRTCopy(ctx context.Context, nodeName string, po
 
 	lh.V(6).Info("NRT", "fromcache", stringify.NodeResourceTopologyResources(nrt))
 	nodeAssumedResources.UpdateNRT(nrt, logging.KeyPod, logID)
+	// numa locality info is not updated pessimistically here nor it is needed.
 
 	lh.V(5).Info("NRT", "withassumed", stringify.NodeResourceTopologyResources(nrt))
 	return nrt, info
@@ -313,27 +315,6 @@ func (ov *OverReserve) Resync() {
 		}
 
 		lh.V(4).Info("trying to sync NodeTopology", "fingerprint", pfpExpected, "onlyExclusiveResources", onlyExclRes)
-
-		// construct the conatiner->numa mapping
-		/*
-		   0. construct the hashes sorted list from nodeToObjsMap.Containers
-		   1. fetch busiest zone
-		   2. fetch numa vectors for all other zones and simplify them (remove prefixes)
-		   3. infer the busiest zone's as all containers left in the sorted list
-		   4. decode them
-		   5. construct the container->numa mapping for all other zones
-
-		   then use this data in preemption logic:
-		   1. when it is context flow,fetch the victims' containers numaplacement
-		   (we don't need to account for the rest of the shared-pool-resources conatiners
-		   because they are not reflected in the NRT)
-		   2. then use this data in Add/RemovePod logic that is consumed by postFilter
-
-		   note: on RTE end maybe we cn compute the relevant containers earlier than current version (branch rte-np-att)
-		*/
-		//  fetch zones attribute and compute the container->numa mapping for all zones
-		// pre-fill the mapping for the all
-
 		err := checkPodFingerprintForNode(lh, objs.Pods, nodeName, pfpExpected, onlyExclRes)
 		if errors.Is(err, podfingerprint.ErrSignatureMismatch) {
 			// can happen, not critical
@@ -367,11 +348,11 @@ func (ov *OverReserve) Resync() {
 		nrtUpdates = append(nrtUpdates, nrtCandidate)
 	}
 
-	ov.FlushNodes(lh_, nrtUpdates...)
+	ov.FlushNodes(lh_, nodeToObjsMap, nrtUpdates...)
 }
 
 // FlushNodes drops all the cached information about a given node, resetting its state clean.
-func (ov *OverReserve) FlushNodes(lh logr.Logger, nrts ...*topologyv1alpha2.NodeResourceTopology) uint64 {
+func (ov *OverReserve) FlushNodes(lh logr.Logger, nodeToObjsMap map[string]nodeObjData, nrts ...*topologyv1alpha2.NodeResourceTopology) uint64 {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
 
@@ -381,7 +362,7 @@ func (ov *OverReserve) FlushNodes(lh logr.Logger, nrts ...*topologyv1alpha2.Node
 
 	for _, nrt := range nrts {
 		lh.V(2).Info("flushing", logging.KeyNode, nrt.Name)
-		ov.nrts.Update(nrt)
+		ov.nrts.Update(nrt, nodeToObjsMap[nrt.Name])
 		delete(ov.assumedResources, nrt.Name)
 		ov.nodesMaybeOverreserved.Delete(nrt.Name)
 		ov.nodesWithForeignPods.Delete(nrt.Name)

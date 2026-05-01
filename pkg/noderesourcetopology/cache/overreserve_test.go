@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
+	"github.com/k8stopologyawareschedwg/numaplacement"
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 
 	corev1 "k8s.io/api/core/v1"
@@ -742,6 +743,75 @@ func TestNodeWithForeignPods(t *testing.T) {
 	_, info := nrtCache.GetCachedNRTCopy(context.Background(), target, &corev1.Pod{})
 	if info.Fresh {
 		t.Errorf("succesfully got node with foreign pods!")
+	}
+}
+
+func TestNewOverReserveInitializesNRTStoreQuery(t *testing.T) {
+	nodeName := "node-with-query"
+	cid := numaplacement.ContainerID{Namespace: "tns", PodName: "tpod", ContainerName: "main"}
+	enc, err := numaplacement.NewEncoder(1, numaplacement.ContainerAffinity{ID: cid, NUMANode: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	pl, err := enc.Result()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nrt := &topologyv1alpha2.NodeResourceTopology{
+		ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+		Attributes: []topologyv1alpha2.AttributeInfo{
+			{Name: numaplacement.AttributeMetadata, Value: pl.PackMetadata()},
+		},
+	}
+
+	fakeClient, err := tu.NewFakeClient(nrt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pod := &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "tns",
+			Name:      "tpod",
+		},
+		Spec: corev1.PodSpec{
+			NodeName: nodeName,
+			Containers: []corev1.Container{
+				{
+					Name: "main",
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("2"),
+							corev1.ResourceMemory: resource.MustParse("1Gi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("2"),
+							corev1.ResourceMemory: resource.MustParse("1Gi"),
+						},
+					},
+				},
+			},
+		},
+		Status: corev1.PodStatus{Phase: corev1.PodRunning},
+	}
+	fakePodLister := &fakePodLister{pods: []*corev1.Pod{pod}}
+
+	ov, err := NewOverReserve(context.Background(), klog.Background(), nil, fakeClient, fakePodLister, podprovider.IsPodRelevantAlways)
+	if err != nil {
+		t.Fatalf("NewOverReserve: %v", err)
+	}
+
+	info, ok := ov.Store().query[nodeName]
+	if !ok {
+		t.Fatal("expected nrtStore.query to be populated after NewOverReserve")
+	}
+	numa, err := info.NUMAAffinityContainer("tns", "tpod", "main")
+	if err != nil {
+		t.Fatalf("NUMAAffinityContainer: %v", err)
+	}
+	if numa != 0 {
+		t.Errorf("NUMA affinity from query: got %d want 0", numa)
 	}
 }
 

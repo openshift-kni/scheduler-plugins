@@ -22,6 +22,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
+	"github.com/k8stopologyawareschedwg/numaplacement"
 )
 
 type CachedNRTInfo struct {
@@ -36,6 +37,9 @@ type CachedNRTInfo struct {
 	// If true, the data is fresh and ready to be consumed.
 	// If false, the data is stale and the caller need to wait for a future refresh.
 	Fresh bool
+
+	//TODO: describe to keep the consistency
+	NUMAAffinityQuery map[string]numaplacement.Info // node name -> numa locality info
 }
 
 type Interface interface {
