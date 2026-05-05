@@ -17,6 +17,7 @@ limitations under the License.
 package resourcerequests
 
 import (
+	"github.com/k8stopologyawareschedwg/numaplacement"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	v1helper "k8s.io/kubernetes/pkg/apis/core/v1/helper"
@@ -40,22 +41,31 @@ func IncludeNonNative(pod *corev1.Pod) bool {
 	}
 	return false
 }
-func AreExclusiveForPod(pod *corev1.Pod) bool {
+
+func ExclusiveForPod(pod *corev1.Pod) []numaplacement.ContainerID {
+	result := []numaplacement.ContainerID{}
 	qos := v1qos.GetPodQOS(pod)
-	return areExclusiveForAnyContainer(qos, append(pod.Spec.InitContainers, pod.Spec.Containers...))
+	allCnts := append(pod.Spec.InitContainers, pod.Spec.Containers...)
+	for _, ctr := range allCnts {
+		if AreExclusiveForContainer(qos, &ctr) {
+			result = append(result, numaplacement.ContainerID{
+				Namespace:     pod.Namespace,
+				PodName:       pod.Name,
+				ContainerName: ctr.Name,
+			})
+		}
+	}
+	return result
 }
 
-func areExclusiveForAnyContainer(qos corev1.PodQOSClass, containers []corev1.Container) bool {
-	for _, ctr := range containers {
-		for resource, quantity := range ctr.Resources.Requests {
-			if ok := IsExclusive(qos, resource, quantity); ok {
-				return true
-			}
+func AreExclusiveForContainer(qos corev1.PodQOSClass, container *corev1.Container) bool {
+	for resource, quantity := range container.Resources.Requests {
+		if ok := IsExclusive(qos, resource, quantity); ok {
+			return true
 		}
 	}
 	return false
 }
-
 func IsExclusive(qos corev1.PodQOSClass, resource corev1.ResourceName, quantity resource.Quantity) bool {
 	// devices accessed via device plugins are non-shareable
 	// note until we reach better clarity we treat extended resources as devices

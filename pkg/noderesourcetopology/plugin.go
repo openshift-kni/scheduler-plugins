@@ -73,8 +73,9 @@ type TopologyMatch struct {
 	logger              klog.Logger
 	resourceToWeightMap resourceToWeightMap
 	nrtCache            nrtcache.Interface
-	scoreStrategyFunc   scoreStrategyFn
-	scoreStrategyType   apiconfig.ScoringStrategyType
+	//preemptionCache     PreemptionStack likely don't need this
+	scoreStrategyFunc scoreStrategyFn
+	scoreStrategyType apiconfig.ScoringStrategyType
 }
 
 var _ framework.FilterPlugin = &TopologyMatch{}
@@ -82,6 +83,7 @@ var _ framework.ReservePlugin = &TopologyMatch{}
 var _ framework.ScorePlugin = &TopologyMatch{}
 var _ framework.EnqueueExtensions = &TopologyMatch{}
 var _ framework.PostBindPlugin = &TopologyMatch{}
+var _ framework.PreFilterPlugin = &TopologyMatch{}
 
 // Name returns name of the plugin. It is used in logs, etc.
 func (tm *TopologyMatch) Name() string {
