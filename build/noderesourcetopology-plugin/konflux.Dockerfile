@@ -1,4 +1,4 @@
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_golang_1.21@sha256:7657e6e400c7d9b70fedf4158f4981974de5f74dda3d706cb40b7871c65b16eb as builder
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_golang_1.21@sha256:7c4235ebc30d6c1eb07cfa826b0de11f84f70281704542e59e82add9385bc99f as builder
 
 ARG COMMIT_SHA
 ARG OCP_MAJOR_VERSION=4
