@@ -50,6 +50,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	pfpStatusParams := knistatus.DefaultParams()
+	pfpStatusParams.Storage.CoalesceLast = true
 	knistatus.ParamsFromEnv(logh, &pfpStatusParams)
 	knistatus.Setup(logh, pfpStatusParams)
 
