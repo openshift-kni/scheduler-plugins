@@ -32,6 +32,7 @@ import (
 	"k8s.io/klog/v2"
 	apiconfig "sigs.k8s.io/scheduler-plugins/apis/config"
 
+	"github.com/k8stopologyawareschedwg/numaplacement"
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 )
 
@@ -292,6 +293,112 @@ func TestNRTStoreContains(t *testing.T) {
 	ns = newNrtStore(klog.Background(), nrts)
 	if !ns.Contains("node-0") {
 		t.Errorf("missing node")
+	}
+}
+
+func TestNRTStoreUpdateQueryPopulatesQuery(t *testing.T) {
+	nodeName := "worker-numa-1"
+	cid := numaplacement.ContainerID{Namespace: "ns1", PodName: "pod1", ContainerName: "app"}
+	enc, err := numaplacement.NewEncoder(1, numaplacement.ContainerAffinity{ID: cid, NUMANode: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	pl, err := enc.Result()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nrt := topologyv1alpha2.NodeResourceTopology{
+		ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+		Attributes: []topologyv1alpha2.AttributeInfo{
+			{Name: numaplacement.AttributeMetadata, Value: pl.PackMetadata()},
+		},
+	}
+	ns := newNrtStore(klog.Background(), []topologyv1alpha2.NodeResourceTopology{nrt})
+
+	ns.UpdateQuery(map[string]nodeObjData{
+		nodeName: {Containers: []numaplacement.ContainerID{cid}},
+	})
+
+	info, ok := ns.query[nodeName]
+	if !ok {
+		t.Fatal("expected nrtStore.query entry for node with valid metadata")
+	}
+	numa, err := info.NUMAAffinityContainer("ns1", "pod1", "app")
+	if err != nil {
+		t.Fatalf("NUMAAffinityContainer: %v", err)
+	}
+	if numa != 0 {
+		t.Errorf("NUMA affinity: got %d want 0", numa)
+	}
+}
+
+func TestNRTStoreUpdateQuerySkipsWithoutMetadata(t *testing.T) {
+	nodeName := "no-metadata-node"
+	nrt := topologyv1alpha2.NodeResourceTopology{
+		ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+	}
+	ns := newNrtStore(klog.Background(), []topologyv1alpha2.NodeResourceTopology{nrt})
+
+	ns.UpdateQuery(map[string]nodeObjData{
+		nodeName: {Containers: []numaplacement.ContainerID{{Namespace: "x", PodName: "y", ContainerName: "z"}}},
+	})
+
+	if _, ok := ns.query[nodeName]; ok {
+		t.Errorf("did not expect query entry when NRT lacks %s attribute", numaplacement.AttributeMetadata)
+	}
+}
+
+func TestNRTStoreUpdateQuerySkipsMalformedMetadata(t *testing.T) {
+	nodeName := "bad-meta-node"
+	nrt := topologyv1alpha2.NodeResourceTopology{
+		ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+		Attributes: []topologyv1alpha2.AttributeInfo{
+			{Name: numaplacement.AttributeMetadata, Value: "not-a-valid-numaplacement-metadata"},
+		},
+	}
+	ns := newNrtStore(klog.Background(), []topologyv1alpha2.NodeResourceTopology{nrt})
+
+	ns.UpdateQuery(map[string]nodeObjData{
+		nodeName: {Containers: []numaplacement.ContainerID{{Namespace: "a", PodName: "b", ContainerName: "c"}}},
+	})
+
+	if _, ok := ns.query[nodeName]; ok {
+		t.Error("did not expect query entry when metadata cannot be unpacked")
+	}
+}
+
+func TestNRTStoreUpdateQuerySkipsInconsistentContainerSet(t *testing.T) {
+	nodeName := "mismatch-node"
+	cid0 := numaplacement.ContainerID{Namespace: "n", PodName: "p0", ContainerName: "c0"}
+	cid1 := numaplacement.ContainerID{Namespace: "n", PodName: "p1", ContainerName: "c1"}
+	enc, err := numaplacement.NewEncoder(2,
+		numaplacement.ContainerAffinity{ID: cid0, NUMANode: 0},
+		numaplacement.ContainerAffinity{ID: cid1, NUMANode: 1},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pl, err := enc.Result()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nrt := topologyv1alpha2.NodeResourceTopology{
+		ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+		Attributes: []topologyv1alpha2.AttributeInfo{
+			{Name: numaplacement.AttributeMetadata, Value: pl.PackMetadata()},
+		},
+	}
+	ns := newNrtStore(klog.Background(), []topologyv1alpha2.NodeResourceTopology{nrt})
+
+	// Metadata encodes two containers; nodeObjData lists only one — decoder must reject.
+	ns.UpdateQuery(map[string]nodeObjData{
+		nodeName: {Containers: []numaplacement.ContainerID{cid0}},
+	})
+
+	if _, ok := ns.query[nodeName]; ok {
+		t.Error("did not expect query entry when container set size does not match metadata")
 	}
 }
 

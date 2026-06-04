@@ -17,8 +17,10 @@ limitations under the License.
 package resourcerequests
 
 import (
+	"reflect"
 	"testing"
 
+	"github.com/k8stopologyawareschedwg/numaplacement"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,7 +30,7 @@ type testCase struct {
 	name              string
 	pod               *corev1.Pod
 	expectedNonNative bool
-	expectedExclusive bool
+	expectedExclusive []numaplacement.ContainerID
 }
 
 func TestIncludeNonNative(t *testing.T) {
@@ -47,8 +49,8 @@ func TestAreExclusiveForPod(t *testing.T) {
 	tcases := coreTestCases()
 	for _, tt := range tcases {
 		t.Run(tt.name, func(t *testing.T) {
-			got := AreExclusiveForPod(tt.pod)
-			if got != tt.expectedExclusive {
+			got := ExclusiveForPod(tt.pod)
+			if !reflect.DeepEqual(got, tt.expectedExclusive) {
 				t.Errorf("%s: exclusive resources detected %v expected %v", tt.name, got, tt.expectedExclusive)
 			}
 		})
@@ -66,7 +68,7 @@ func coreTestCases() []testCase {
 				},
 			},
 			expectedNonNative: false,
-			expectedExclusive: false,
+			expectedExclusive: []numaplacement.ContainerID{},
 		},
 		{
 			name: "single-container-gu-no-devs",
@@ -94,7 +96,13 @@ func coreTestCases() []testCase {
 				},
 			},
 			expectedNonNative: false,
-			expectedExclusive: true,
+			expectedExclusive: []numaplacement.ContainerID{
+				{
+					Namespace:     "default",
+					PodName:       "pod",
+					ContainerName: "cnt",
+				},
+			},
 		},
 		{
 			name: "single-initcontainer-gu-no-devs",
@@ -122,7 +130,13 @@ func coreTestCases() []testCase {
 				},
 			},
 			expectedNonNative: false,
-			expectedExclusive: true,
+			expectedExclusive: []numaplacement.ContainerID{
+				{
+					Namespace:     "default",
+					PodName:       "pod",
+					ContainerName: "cnt",
+				},
+			},
 		},
 		{
 			name: "single-container-devs-only",
@@ -148,7 +162,13 @@ func coreTestCases() []testCase {
 				},
 			},
 			expectedNonNative: true,
-			expectedExclusive: true,
+			expectedExclusive: []numaplacement.ContainerID{
+				{
+					Namespace:     "default",
+					PodName:       "pod",
+					ContainerName: "cnt",
+				},
+			},
 		},
 		{
 			name: "single-initcontainer-devs-only",
@@ -174,7 +194,13 @@ func coreTestCases() []testCase {
 				},
 			},
 			expectedNonNative: true,
-			expectedExclusive: true,
+			expectedExclusive: []numaplacement.ContainerID{
+				{
+					Namespace:     "default",
+					PodName:       "pod",
+					ContainerName: "cnt",
+				},
+			},
 		},
 		{
 			name: "single-container-gu-core-and-devs",
@@ -204,7 +230,13 @@ func coreTestCases() []testCase {
 				},
 			},
 			expectedNonNative: true,
-			expectedExclusive: true,
+			expectedExclusive: []numaplacement.ContainerID{
+				{
+					Namespace:     "default",
+					PodName:       "pod",
+					ContainerName: "cnt",
+				},
+			},
 		},
 		{
 			name: "single-container-nongu-cpus-and-devs",
@@ -216,7 +248,18 @@ func coreTestCases() []testCase {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name: "cnt",
+							Name: "not-exclusive",
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU: resource.MustParse("8"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU: resource.MustParse("8"),
+								},
+							},
+						},
+						{
+							Name: "exclusive",
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:                      resource.MustParse("8"),
@@ -232,7 +275,13 @@ func coreTestCases() []testCase {
 				},
 			},
 			expectedNonNative: true,
-			expectedExclusive: true,
+			expectedExclusive: []numaplacement.ContainerID{
+				{
+					Namespace:     "default",
+					PodName:       "pod",
+					ContainerName: "exclusive",
+				},
+			},
 		},
 		{
 			name: "single-container-nongu-cpus-only",
@@ -258,7 +307,7 @@ func coreTestCases() []testCase {
 				},
 			},
 			expectedNonNative: false,
-			expectedExclusive: false,
+			expectedExclusive: []numaplacement.ContainerID{},
 		},
 	}
 }

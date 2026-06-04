@@ -199,6 +199,17 @@ func (tm *TopologyMatch) Filter(ctx context.Context, cycleState fwk.CycleState, 
 		return nil
 	}
 
+	victims, err := getVictimPods(cycleState)
+	if err != nil {
+		lh.V(5).Error(err, "preemption detection failed")
+	}
+	lh.V(4).Info("victims", "count", len(victims))
+	isPreemptionCtx := len(victims) > 0
+	if isPreemptionCtx {
+		lh.V(2).Info("preemption context detected", "victimsCount", len(victims))
+		nodeTopology = updateNRTForPreemption(lh, nodeTopology, info, victims)
+	}
+
 	conf := nodeconfig.TopologyManagerFromNodeResourceTopology(lh, nodeTopology)
 
 	lh.V(4).Info("found nrt data", "object", stringify.NodeResourceTopologyResources(nodeTopology), "conf", conf.String())
@@ -218,7 +229,7 @@ func (tm *TopologyMatch) Filter(ctx context.Context, cycleState fwk.CycleState, 
 		qos:             qos,
 	}
 	status := handler(lh, pod, &fi)
-	if status != nil {
+	if !isPreemptionCtx && status != nil {
 		tm.nrtCache.NodeMaybeOverReserved(nodeName, pod)
 	}
 	return status
@@ -235,4 +246,12 @@ func filterHandlerFromTopologyManager(conf nodeconfig.TopologyManager) (filterFn
 		return singleNUMAContainerLevelHandler, "container"
 	}
 	return nil, "" // cannot happen
+}
+
+func getVictimPods(cycleState fwk.CycleState) ([]v1.Pod, error) {
+	ps, err := readPreemptionStack(cycleState)
+	if err != nil {
+		return nil, err
+	}
+	return ps.PodsToRemove.GetPods(), nil
 }
