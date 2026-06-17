@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
+	"github.com/k8stopologyawareschedwg/numaplacement"
 	fwk "k8s.io/kube-scheduler/framework"
 
 	v1 "k8s.io/api/core/v1"
@@ -1176,6 +1177,378 @@ func TestNodeResourceTopologyMultiContainerContainerScope(t *testing.T) {
 
 			if !quasiEqualStatus(gotStatus, tt.wantStatus) {
 				t.Errorf("status does not match: %v, want: %v", gotStatus, tt.wantStatus)
+			}
+		})
+	}
+}
+
+// fakeNRTCache is a test double for nrtcache.Interface that lets us control
+// NRT data and NUMAAffinityQuery independently of the backing store.
+type fakeNRTCache struct {
+	nrt               *topologyv1alpha2.NodeResourceTopology
+	info              nrtcache.CachedNRTInfo
+	overReservedNodes map[string]bool
+}
+
+func (f *fakeNRTCache) GetCachedNRTCopy(_ context.Context, nodeName string, _ *v1.Pod) (*topologyv1alpha2.NodeResourceTopology, nrtcache.CachedNRTInfo) {
+	if f.nrt == nil || f.nrt.Name != nodeName {
+		return nil, f.info
+	}
+	return f.nrt.DeepCopy(), f.info
+}
+
+func (f *fakeNRTCache) NodeMaybeOverReserved(nodeName string, _ *v1.Pod) {
+	if f.overReservedNodes == nil {
+		f.overReservedNodes = make(map[string]bool)
+	}
+	f.overReservedNodes[nodeName] = true
+}
+
+func (f *fakeNRTCache) NodeHasForeignPods(_ string, _ *v1.Pod)     {}
+func (f *fakeNRTCache) ReserveNodeResources(_ string, _ *v1.Pod)   {}
+func (f *fakeNRTCache) UnreserveNodeResources(_ string, _ *v1.Pod) {}
+func (f *fakeNRTCache) PostBind(_ string, _ *v1.Pod)               {}
+
+type fakeNUMAInfoFilter struct {
+	affinities map[string]int // "ns/pod/container" -> numaID
+}
+
+func (f *fakeNUMAInfoFilter) Containers() int {
+	return len(f.affinities)
+}
+
+func (f *fakeNUMAInfoFilter) NUMAAffinity(id numaplacement.ContainerID) (int, error) {
+	return f.NUMAAffinityContainer(id.Namespace, id.PodName, id.ContainerName)
+}
+
+func (f *fakeNUMAInfoFilter) NUMAAffinityContainer(namespace, podName, containerName string) (int, error) {
+	key := fmt.Sprintf("%s/%s/%s", namespace, podName, containerName)
+	numaID, ok := f.affinities[key]
+	if !ok {
+		return -1, fmt.Errorf("unknown container %s", key)
+	}
+	return numaID, nil
+}
+
+func makeFilterResInfo(name, capacity, allocatable, available string) topologyv1alpha2.ResourceInfo {
+	return topologyv1alpha2.ResourceInfo{
+		Name:        name,
+		Capacity:    resource.MustParse(capacity),
+		Allocatable: resource.MustParse(allocatable),
+		Available:   resource.MustParse(available),
+	}
+}
+
+func makeGuaranteedPodForFilter(namespace, name string, containers ...v1.Container) *v1.Pod {
+	return &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: v1.PodSpec{Containers: containers},
+	}
+}
+
+func makeGuaranteedContainerForFilter(name string, cpu, memory string) v1.Container {
+	rl := v1.ResourceList{
+		v1.ResourceCPU:    resource.MustParse(cpu),
+		v1.ResourceMemory: resource.MustParse(memory),
+	}
+	return v1.Container{
+		Name: name,
+		Resources: v1.ResourceRequirements{
+			Requests: rl,
+			Limits:   rl,
+		},
+	}
+}
+
+func TestFilterPreemptionContext(t *testing.T) {
+	const nodeName = "worker-1"
+
+	// Node has 2 NUMA zones, each with limited available resources.
+	// NUMA 0: CPU 8 capacity / 8 allocatable / 2 available, Memory 16Gi / 16Gi / 4Gi
+	// NUMA 1: CPU 8 capacity / 8 allocatable / 4 available, Memory 16Gi / 16Gi / 4Gi
+	nrt := &topologyv1alpha2.NodeResourceTopology{
+		ObjectMeta:       metav1.ObjectMeta{Name: nodeName},
+		TopologyPolicies: []string{string(topologyv1alpha2.SingleNUMANodeContainerLevel)},
+		Zones: topologyv1alpha2.ZoneList{
+			{
+				Name: "node-0",
+				Type: "Node",
+				Resources: topologyv1alpha2.ResourceInfoList{
+					makeFilterResInfo(cpu, "8", "8", "2"),
+					makeFilterResInfo(memory, "16Gi", "16Gi", "4Gi"),
+				},
+			},
+			{
+				Name: "node-1",
+				Type: "Node",
+				Resources: topologyv1alpha2.ResourceInfoList{
+					makeFilterResInfo(cpu, "8", "8", "4"),
+					makeFilterResInfo(memory, "16Gi", "16Gi", "4Gi"),
+				},
+			},
+		},
+	}
+
+	node := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+		Status: v1.NodeStatus{
+			Capacity:    makeResourceListFromZones(nrt.Zones),
+			Allocatable: makeResourceListFromZones(nrt.Zones),
+		},
+	}
+
+	// Victim: Guaranteed pod using 4 CPUs + 4Gi memory, placed on NUMA 0
+	victim := makeGuaranteedPodForFilter("default", "victim-pod",
+		makeGuaranteedContainerForFilter("app", "4", "4Gi"),
+	)
+
+	affinities := map[string]int{
+		"default/victim-pod/app": 0, // NUMA 0
+	}
+
+	tests := []struct {
+		name           string
+		pod            *v1.Pod
+		setupPreFilter bool
+		victims        []*v1.Pod
+		affinities     map[string]int
+		wantStatus     *fwk.Status
+		wantOverRes    bool // whether NodeMaybeOverReserved should be called
+		skipReason     string
+	}{
+		{
+			name: "no preemption context, pod doesn't fit (needs 5 CPUs, max NUMA has 4)",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("5"),
+				v1.ResourceMemory: resource.MustParse("3Gi"),
+			}),
+			setupPreFilter: false,
+			wantStatus:     fwk.NewStatus(fwk.Unschedulable, "cannot align container"),
+			wantOverRes:    true,
+		},
+		{
+			name: "no preemption context, pod fits (needs 4 CPUs, NUMA 1 has 4)",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("4"),
+				v1.ResourceMemory: resource.MustParse("4Gi"),
+			}),
+			setupPreFilter: false,
+			wantStatus:     nil,
+			wantOverRes:    false,
+		},
+		{
+			name: "preemption with empty victims, pod doesn't fit",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("5"),
+				v1.ResourceMemory: resource.MustParse("3Gi"),
+			}),
+			setupPreFilter: true,
+			victims:        nil,
+			wantStatus:     fwk.NewStatus(fwk.Unschedulable, "cannot align container"),
+			wantOverRes:    true,
+		},
+		{
+			name: "preemption with victim removed, pod should fit after resources freed on NUMA 0",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("5"),
+				v1.ResourceMemory: resource.MustParse("3Gi"),
+			}),
+			setupPreFilter: true,
+			victims:        []*v1.Pod{victim},
+			affinities:     affinities,
+			wantStatus:     nil,
+			wantOverRes:    false,
+		},
+		{
+			name: "preemption with victim removed, pod still doesn't fit (needs more than freed)",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("10"),
+				v1.ResourceMemory: resource.MustParse("3Gi"),
+			}),
+			setupPreFilter: true,
+			victims:        []*v1.Pod{victim},
+			affinities:     affinities,
+			wantStatus:     fwk.NewStatus(fwk.Unschedulable, "cannot align container"),
+			wantOverRes:    false,
+		},
+		{
+			name: "preemption with victim but no NUMAAffinityQuery, preemption adjustment is a no-op",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("5"),
+				v1.ResourceMemory: resource.MustParse("3Gi"),
+			}),
+			setupPreFilter: true,
+			victims:        []*v1.Pod{victim},
+			affinities:     nil, // no affinity query data
+			wantStatus:     fwk.NewStatus(fwk.Unschedulable, "cannot align container"),
+			wantOverRes:    false,
+		},
+		{
+			name: "preemption context: NodeMaybeOverReserved NOT called when filter fails during preemption",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("10"),
+				v1.ResourceMemory: resource.MustParse("3Gi"),
+			}),
+			setupPreFilter: true,
+			victims:        []*v1.Pod{victim},
+			affinities:     affinities,
+			wantStatus:     fwk.NewStatus(fwk.Unschedulable, "cannot align container"),
+			wantOverRes:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.skipReason != "" {
+				t.Skip(tt.skipReason)
+			}
+
+			cache := &fakeNRTCache{
+				nrt: nrt.DeepCopy(),
+				info: nrtcache.CachedNRTInfo{
+					Fresh: true,
+				},
+			}
+			if tt.affinities != nil {
+				cache.info.NUMAAffinityQuery = map[string]numaplacement.Info{
+					nodeName: &fakeNUMAInfoFilter{affinities: tt.affinities},
+				}
+			}
+
+			tm := TopologyMatch{
+				nrtCache: cache,
+			}
+
+			cycleState := framework.NewCycleState()
+			if tt.setupPreFilter {
+				tm.PreFilter(context.Background(), cycleState, tt.pod, nil)
+				for _, v := range tt.victims {
+					pi := makeTestPodInfo(v)
+					tm.RemovePod(context.Background(), cycleState, tt.pod, pi, nil)
+				}
+			}
+
+			nodeInfo := framework.NewNodeInfo()
+			nodeInfo.SetNode(node)
+
+			gotStatus := tm.Filter(context.Background(), cycleState, tt.pod, nodeInfo)
+
+			if !quasiEqualStatus(gotStatus, tt.wantStatus) {
+				t.Errorf("status mismatch: got %v, want %v", gotStatus, tt.wantStatus)
+			}
+
+			gotOverRes := cache.overReservedNodes[nodeName]
+			if gotOverRes != tt.wantOverRes {
+				t.Errorf("NodeMaybeOverReserved mismatch: got %v, want %v", gotOverRes, tt.wantOverRes)
+			}
+		})
+	}
+}
+
+func TestFilterPreemptionPodScope(t *testing.T) {
+	const nodeName = "worker-1"
+
+	// Pod-scope: all containers must fit on a single NUMA zone together
+	nrt := &topologyv1alpha2.NodeResourceTopology{
+		ObjectMeta:       metav1.ObjectMeta{Name: nodeName},
+		TopologyPolicies: []string{string(topologyv1alpha2.SingleNUMANodePodLevel)},
+		Zones: topologyv1alpha2.ZoneList{
+			{
+				Name: "node-0",
+				Type: "Node",
+				Resources: topologyv1alpha2.ResourceInfoList{
+					makeFilterResInfo(cpu, "16", "16", "2"),
+					makeFilterResInfo(memory, "32Gi", "32Gi", "4Gi"),
+				},
+			},
+			{
+				Name: "node-1",
+				Type: "Node",
+				Resources: topologyv1alpha2.ResourceInfoList{
+					makeFilterResInfo(cpu, "16", "16", "3"),
+					makeFilterResInfo(memory, "32Gi", "32Gi", "6Gi"),
+				},
+			},
+		},
+	}
+
+	node := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+		Status: v1.NodeStatus{
+			Capacity:    makeResourceListFromZones(nrt.Zones),
+			Allocatable: makeResourceListFromZones(nrt.Zones),
+		},
+	}
+
+	victim := makeGuaranteedPodForFilter("default", "big-victim",
+		makeGuaranteedContainerForFilter("main", "8", "16Gi"),
+	)
+
+	tests := []struct {
+		name       string
+		pod        *v1.Pod
+		victims    []*v1.Pod
+		affinities map[string]int
+		wantStatus *fwk.Status
+		skipReason string
+	}{
+		{
+			name: "pod-scope: pod doesn't fit without preemption",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("8"),
+				v1.ResourceMemory: resource.MustParse("16Gi"),
+			}),
+			victims:    nil,
+			wantStatus: fwk.NewStatus(fwk.Unschedulable, "cannot align pod"),
+		},
+		{
+			name: "pod-scope: pod should fit after victim freed from NUMA 0",
+			pod: makePodByResourceList(&v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse("8"),
+				v1.ResourceMemory: resource.MustParse("16Gi"),
+			}),
+			victims:    []*v1.Pod{victim},
+			affinities: map[string]int{"default/big-victim/main": 0},
+			wantStatus: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.skipReason != "" {
+				t.Skip(tt.skipReason)
+			}
+
+			cache := &fakeNRTCache{
+				nrt: nrt.DeepCopy(),
+				info: nrtcache.CachedNRTInfo{
+					Fresh: true,
+				},
+			}
+			if tt.affinities != nil {
+				cache.info.NUMAAffinityQuery = map[string]numaplacement.Info{
+					nodeName: &fakeNUMAInfoFilter{affinities: tt.affinities},
+				}
+			}
+
+			tm := TopologyMatch{nrtCache: cache}
+
+			cycleState := framework.NewCycleState()
+			tm.PreFilter(context.Background(), cycleState, tt.pod, nil)
+			for _, v := range tt.victims {
+				pi := makeTestPodInfo(v)
+				tm.RemovePod(context.Background(), cycleState, tt.pod, pi, nil)
+			}
+
+			nodeInfo := framework.NewNodeInfo()
+			nodeInfo.SetNode(node)
+
+			gotStatus := tm.Filter(context.Background(), cycleState, tt.pod, nodeInfo)
+			if !quasiEqualStatus(gotStatus, tt.wantStatus) {
+				t.Errorf("status mismatch: got %v, want %v", gotStatus, tt.wantStatus)
 			}
 		})
 	}

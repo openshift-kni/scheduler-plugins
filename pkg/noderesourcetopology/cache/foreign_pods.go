@@ -90,7 +90,7 @@ func IsForeignPod(pod *corev1.Pod) bool {
 	if !onlyExclusiveResources {
 		return true
 	}
-	return resourcerequests.AreExclusiveForPod(pod)
+	return len(resourcerequests.ExclusiveForPod(pod)) > 0
 }
 
 // for testing only; NOT thread safe

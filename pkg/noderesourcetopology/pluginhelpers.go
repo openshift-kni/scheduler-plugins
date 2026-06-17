@@ -21,8 +21,11 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/wait"
 	k8scache "k8s.io/client-go/tools/cache"
+	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
 	"github.com/go-logr/logr"
@@ -36,6 +39,7 @@ import (
 	nrtcache "sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/cache"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/podprovider"
+	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/resourcerequests"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/stringify"
 )
 
@@ -180,4 +184,98 @@ func getForeignPodsDetectMode(lh logr.Logger, cfg *apiconfig.NodeResourceTopolog
 		lh.Info("foreign pods detection value missing", "fallback", foreignPodsDetect)
 	}
 	return foreignPodsDetect
+}
+
+func updateNRTForPreemption(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTopology, info nrtcache.CachedNRTInfo, victims []corev1.Pod) *topologyv1alpha2.NodeResourceTopology {
+	numaToResourcesToDeduct := accumulateResourcesToDeduct(lh, nrt, info, victims)
+	return addResourcesToNodeResourcesTopology(lh, nrt, numaToResourcesToDeduct)
+}
+
+func accumulateResourcesToDeduct(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTopology, info nrtcache.CachedNRTInfo, victims []corev1.Pod) map[int]corev1.ResourceList {
+	// we don't know how preemption is choosing the victims, but for the NRT scheduler, we only care about what
+	// conatiners are found in the query which are eligable to have their resources reflected in the NRT;
+	// if the container ID is not found we continue to the next.
+	numaToResourcesToDeduct := make(map[int]v1.ResourceList)
+	for _, victim := range victims {
+		// pod level filtering
+		pQos := v1qos.GetPodQOS(&victim)
+		if pQos != v1.PodQOSGuaranteed && !resourcerequests.IncludeNonNative(&victim) {
+			continue
+		}
+
+		for _, container := range victim.Spec.Containers {
+			// container level filtering
+			if !resourcerequests.AreExclusiveForContainer(pQos, &container) {
+				continue
+			}
+
+			query, ok := info.NUMAAffinityQuery[nrt.Name]
+			if !ok {
+				continue
+			}
+
+			numaID, err := query.NUMAAffinityContainer(victim.Namespace, victim.Name, container.Name)
+			if err != nil {
+				lh.V(2).Error(err, "failed to get NUMA affinity for container", "namespace", victim.Namespace, "pod", victim.Name, "container", container.Name)
+				continue
+			}
+
+			if _, ok := numaToResourcesToDeduct[numaID]; !ok {
+				numaToResourcesToDeduct[numaID] = make(v1.ResourceList)
+			}
+
+			for cntRes, cntQty := range container.Resources.Requests {
+				//resource level filtering
+				if !resourcerequests.IsExclusive(pQos, cntRes, cntQty) {
+					continue
+				}
+
+				currentQty, ok := numaToResourcesToDeduct[numaID][cntRes]
+				if !ok {
+					currentQty = resource.Quantity{}
+				}
+				currentQty.Add(cntQty)
+				numaToResourcesToDeduct[numaID][cntRes] = currentQty
+			}
+		}
+	}
+	return numaToResourcesToDeduct
+}
+func addResourcesToNodeResourcesTopology(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTopology, numaToResources map[int]corev1.ResourceList) *topologyv1alpha2.NodeResourceTopology {
+	if nrt == nil || len(numaToResources) == 0 {
+		return nrt
+	}
+	updatedNRT := nrt.DeepCopy()
+	for zoneIdx, zone := range updatedNRT.Zones {
+		numaID, err := numanode.NameToID(zone.Name)
+		if err != nil {
+			lh.V(6).Info("skipping non-NUMA zone", "zone", zone.Name, "error", err)
+			continue
+		}
+		resListToSub, ok := numaToResources[numaID]
+		if !ok {
+			continue
+		}
+
+		for resName, resQty := range resListToSub {
+			for resIdx := range zone.Resources {
+				resource := &updatedNRT.Zones[zoneIdx].Resources[resIdx]
+				if resource.Name != string(resName) {
+					continue
+				}
+
+				tmp := resource.Available.DeepCopy()
+				tmp.Add(resQty)
+				if tmp.Cmp(resource.Allocatable) > 0 {
+					lh.V(2).Error(nil, "resource release request exceeds NUMA allocatable",
+						"zone", zone.Name, "resource", resName,
+						"allocatable", resource.Allocatable.String(), "requestToRelease", resQty.String(), "numaID", numaID)
+					break
+				}
+				resource.Available.Add(resQty)
+				break
+			}
+		}
+	}
+	return updatedNRT
 }

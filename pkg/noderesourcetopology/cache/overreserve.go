@@ -86,6 +86,15 @@ func NewOverReserve(ctx context.Context, lh logr.Logger, cfg *apiconfig.NodeReso
 		isPodRelevant:          isPodRelevant,
 	}
 
+	nodeToObjsMap, err := makeNodeToPodDataMap(lh, podLister, isPodRelevant)
+	if err != nil {
+		klog.Error(err, "container NUMA locality initialization: failed to make node to pod data map")
+		// need to continue even if this fails; it will be blocking preemption but we can still continue with the rest of scheduling logic
+	} else {
+		obj.nrts.UpdateQuery(nodeToObjsMap)
+		lh.V(6).Info("container NUMA locality initialized")
+	}
+
 	if resyncScope == apiconfig.CacheResyncScopeAll {
 		wt := Watcher{
 			lh:    obj.lh,
@@ -101,7 +110,10 @@ func NewOverReserve(ctx context.Context, lh logr.Logger, cfg *apiconfig.NodeReso
 func (ov *OverReserve) GetCachedNRTCopy(ctx context.Context, nodeName string, pod *corev1.Pod) (*topologyv1alpha2.NodeResourceTopology, CachedNRTInfo) {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
-	info := CachedNRTInfo{Generation: ov.generation}
+	info := CachedNRTInfo{
+		Generation:        ov.generation,
+		NUMAAffinityQuery: ov.nrts.query,
+	}
 	if ov.nodesWithForeignPods.IsSet(nodeName) {
 		return nil, info
 	}
@@ -121,6 +133,7 @@ func (ov *OverReserve) GetCachedNRTCopy(ctx context.Context, nodeName string, po
 
 	lh.V(6).Info("NRT", "fromcache", stringify.NodeResourceTopologyResources(nrt))
 	nodeAssumedResources.UpdateNRT(nrt, logging.KeyPod, logID)
+	// numa locality info is not updated pessimistically here nor it is needed.
 
 	lh.V(5).Info("NRT", "withassumed", stringify.NodeResourceTopologyResources(nrt))
 	return nrt, info
@@ -302,8 +315,7 @@ func (ov *OverReserve) Resync() {
 		}
 
 		lh.V(4).Info("trying to sync NodeTopology", "fingerprint", pfpExpected, "onlyExclusiveResources", onlyExclRes)
-
-		err = checkPodFingerprintForNode(lh, objs, nodeName, pfpExpected, onlyExclRes)
+		err := checkPodFingerprintForNode(lh, objs.Pods, nodeName, pfpExpected, onlyExclRes)
 		if errors.Is(err, podfingerprint.ErrSignatureMismatch) {
 			// can happen, not critical
 			lh.V(4).Info("NodeTopology podset fingerprint mismatch")
@@ -336,32 +348,31 @@ func (ov *OverReserve) Resync() {
 		nrtUpdates = append(nrtUpdates, nrtCandidate)
 	}
 
-	ov.FlushNodes(lh_, nrtUpdates...)
+	ov.FlushNodes(lh_, nodeToObjsMap, nrtUpdates...)
 }
 
 // FlushNodes drops all the cached information about a given node, resetting its state clean.
-func (ov *OverReserve) FlushNodes(lh logr.Logger, nrts ...*topologyv1alpha2.NodeResourceTopology) uint64 {
+func (ov *OverReserve) FlushNodes(lh logr.Logger, nodeToObjsMap map[string]nodeObjData, nrts ...*topologyv1alpha2.NodeResourceTopology) uint64 {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
 
+	if len(nrts) == 0 {
+		return ov.generation
+	}
+
 	for _, nrt := range nrts {
 		lh.V(2).Info("flushing", logging.KeyNode, nrt.Name)
-		ov.nrts.Update(nrt)
+		ov.nrts.Update(nrt, nodeToObjsMap[nrt.Name])
 		delete(ov.assumedResources, nrt.Name)
 		ov.nodesMaybeOverreserved.Delete(nrt.Name)
 		ov.nodesWithForeignPods.Delete(nrt.Name)
 		ov.nodesWithAttrUpdate.Delete(nrt.Name)
 	}
 
-	if len(nrts) == 0 {
-		return ov.generation
-	}
-
 	// increase only if we mutated the internal state
 	ov.generation += 1
 	lh.V(2).Info("generation", "new", ov.generation)
 	return ov.generation
-
 }
 
 // to be used only in tests
@@ -369,8 +380,9 @@ func (ov *OverReserve) Store() *nrtStore {
 	return ov.nrts
 }
 
-func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPodRelevant podprovider.PodFilterFunc) (map[string][]podData, error) {
-	nodeToObjsMap := make(map[string][]podData)
+// TODO add integration tests
+func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPodRelevant podprovider.PodFilterFunc) (map[string]nodeObjData, error) {
+	nodeToObjsMap := make(map[string]nodeObjData)
 	pods, err := podLister.List(labels.Everything())
 	if err != nil {
 		return nodeToObjsMap, err
@@ -379,13 +391,15 @@ func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPod
 		if !isPodRelevant(lh, pod) {
 			continue
 		}
-		nodeObjs := nodeToObjsMap[pod.Spec.NodeName]
-		nodeObjs = append(nodeObjs, podData{
+		cntsWithExclusiveResources := resourcerequests.ExclusiveForPod(pod)
+		nodeObjData := nodeToObjsMap[pod.Spec.NodeName]
+		nodeObjData.Pods = append(nodeObjData.Pods, podData{
 			Namespace:             pod.Namespace,
 			Name:                  pod.Name,
-			HasExclusiveResources: resourcerequests.AreExclusiveForPod(pod),
+			HasExclusiveResources: len(cntsWithExclusiveResources) > 0,
 		})
-		nodeToObjsMap[pod.Spec.NodeName] = nodeObjs
+		nodeObjData.Containers = append(nodeObjData.Containers, cntsWithExclusiveResources...)
+		nodeToObjsMap[pod.Spec.NodeName] = nodeObjData
 	}
 	return nodeToObjsMap, nil
 }

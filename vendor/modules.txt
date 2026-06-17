@@ -180,6 +180,10 @@ github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/attribute
 github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/numanode
+# github.com/k8stopologyawareschedwg/numaplacement v0.0.0-20260415075341-05c4e9728963
+## explicit; go 1.21
+github.com/k8stopologyawareschedwg/numaplacement
+github.com/k8stopologyawareschedwg/numaplacement/leb89
 # github.com/k8stopologyawareschedwg/podfingerprint v0.2.3
 ## explicit; go 1.18
 github.com/k8stopologyawareschedwg/podfingerprint
