@@ -37,7 +37,7 @@ import (
 
 type KNIDebug struct{}
 
-var _ framework.FilterPlugin = &KNIDebug{}
+var _ fwk.FilterPlugin = &KNIDebug{}
 
 const (
 	// Name is the name of the plugin used in the plugin registry and configurations.
@@ -51,7 +51,7 @@ func (kd *KNIDebug) Name() string {
 }
 
 // New initializes a new plugin and returns it.
-func New(_ context.Context, args runtime.Object, handle framework.Handle) (framework.Plugin, error) {
+func New(_ context.Context, args runtime.Object, handle fwk.Handle) (fwk.Plugin, error) {
 	klog.V(6).InfoS("Creating new KNIDebug plugin")
 	knifeatures.LogState(Name, 2, knifeatures.Names())
 	return &KNIDebug{}, nil
