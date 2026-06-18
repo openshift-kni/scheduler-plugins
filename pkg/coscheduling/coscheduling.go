@@ -24,7 +24,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	clientscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 	corev1helpers "k8s.io/component-helpers/scheduling/corev1"
 	"k8s.io/klog/v2"
@@ -41,11 +40,12 @@ import (
 
 // Coscheduling is a plugin that schedules pods in a group.
 type Coscheduling struct {
-	logger           klog.Logger
-	frameworkHandler framework.Handle
-	pgMgr            core.Manager
-	scheduleTimeout  *time.Duration
-	pgBackoff        *time.Duration
+	logger            klog.Logger
+	frameworkHandler  framework.Handle
+	pgMgr             core.Manager
+	scheduleTimeout   *time.Duration
+	pgBackoff         *time.Duration
+	pgRejectThreshold float64
 }
 
 var _ framework.QueueSortPlugin = &Coscheduling{}
@@ -77,8 +77,6 @@ func New(ctx context.Context, obj runtime.Object, handle framework.Handle) (fram
 	}
 
 	scheme := runtime.NewScheme()
-	_ = clientscheme.AddToScheme(scheme)
-	_ = v1.AddToScheme(scheme)
 	_ = v1alpha1.AddToScheme(scheme)
 	c, _, err := util.NewClientWithCachedReader(ctx, handle.KubeConfig(), scheme)
 	if err != nil {
@@ -97,10 +95,11 @@ func New(ctx context.Context, obj runtime.Object, handle framework.Handle) (fram
 		handle.SharedInformerFactory().Core().V1().Pods(),
 	)
 	plugin := &Coscheduling{
-		logger:           lh,
-		frameworkHandler: handle,
-		pgMgr:            pgMgr,
-		scheduleTimeout:  &scheduleTimeDuration,
+		logger:            lh,
+		frameworkHandler:  handle,
+		pgMgr:             pgMgr,
+		scheduleTimeout:   &scheduleTimeDuration,
+		pgRejectThreshold: float64(args.PodGroupRejectPercentage) / 100.0,
 	}
 	if args.PodGroupBackoffSeconds < 0 {
 		err := fmt.Errorf("parse arguments failed")
@@ -179,10 +178,10 @@ func (cs *Coscheduling) PostFilter(ctx context.Context, state fwk.CycleState, po
 		return &framework.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable)
 	}
 
-	// If the gap is less than/equal 10%, we may want to try subsequent Pods
+	// If the gap is less than/equal the reject threshold, we may want to try subsequent Pods
 	// to see they can satisfy the PodGroup
-	notAssignedPercentage := float32(int(pg.Spec.MinMember)-assigned) / float32(pg.Spec.MinMember)
-	if notAssignedPercentage <= 0.1 {
+	notAssignedPercentage := float64(int(pg.Spec.MinMember)-assigned) / float64(pg.Spec.MinMember)
+	if notAssignedPercentage <= cs.pgRejectThreshold {
 		lh.V(4).Info("A small gap of pods to reach the quorum", "podGroup", klog.KObj(pg), "percentage", notAssignedPercentage)
 		return &framework.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable)
 	}
@@ -206,6 +205,7 @@ func (cs *Coscheduling) PostFilter(ctx context.Context, state fwk.CycleState, po
 	}
 
 	cs.pgMgr.DeletePermittedPodGroup(ctx, pgName)
+	cs.pgMgr.MarkPodGroupScheduleFailure(pgName)
 	return &framework.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable,
 		fmt.Sprintf("PodGroup %v gets rejected due to Pod %v is unschedulable even after PostFilter", pgName, pod.Name))
 }
@@ -237,6 +237,7 @@ func (cs *Coscheduling) Permit(ctx context.Context, state fwk.CycleState, pod *v
 		cs.pgMgr.ActivateSiblings(ctx, pod, state)
 	case core.Success:
 		pgFullName := util.GetPodGroupFullName(pod)
+		cs.pgMgr.ClearPodGroupScheduleFailure(pgFullName)
 		cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
 			if util.GetPodGroupFullName(waitingPod.GetPod()) == pgFullName {
 				lh.V(3).Info("Permit allows", "pod", klog.KObj(waitingPod.GetPod()))
@@ -271,4 +272,5 @@ func (cs *Coscheduling) Unreserve(ctx context.Context, state fwk.CycleState, pod
 		}
 	})
 	cs.pgMgr.DeletePermittedPodGroup(ctx, pgName)
+	cs.pgMgr.MarkPodGroupScheduleFailure(pgName)
 }
