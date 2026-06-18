@@ -74,6 +74,8 @@ type Manager interface {
 	DeletePermittedPodGroup(context.Context, string)
 	ActivateSiblings(ctx context.Context, pod *corev1.Pod, state fwk.CycleState)
 	BackoffPodGroup(string, time.Duration)
+	MarkPodGroupScheduleFailure(string)
+	ClearPodGroupScheduleFailure(string)
 }
 
 // PodGroupManager defines the scheduling operation called
@@ -81,7 +83,7 @@ type PodGroupManager struct {
 	// client is a generic controller-runtime client to manipulate both core resources and PodGroups.
 	client client.Client
 	// snapshotSharedLister is pod shared list
-	snapshotSharedLister framework.SharedLister
+	snapshotSharedLister fwk.SharedLister
 	// scheduleTimeout is the default timeout for podgroup scheduling.
 	// If podgroup's scheduleTimeoutSeconds is set, it will be used.
 	scheduleTimeout *time.Duration
@@ -89,6 +91,9 @@ type PodGroupManager struct {
 	permittedPG *gocache.Cache
 	// backedOffPG stores the podgorup name which failed scheudling recently.
 	backedOffPG *gocache.Cache
+	// lastFailedSchedulePG stores the last time a PodGroup's scheduling attempt failed.
+	// Used by GetCreationTimestamp to prevent head-of-line blocking.
+	lastFailedSchedulePG sync.Map
 	// podLister is pod lister
 	podLister listerv1.PodLister
 	// assignedPodsByPG stores the pods assumed or bound for podgroups
@@ -120,7 +125,7 @@ func AddPodFactory(pgMgr *PodGroupManager) func(obj interface{}) {
 }
 
 // NewPodGroupManager creates a new operation object.
-func NewPodGroupManager(client client.Client, snapshotSharedLister framework.SharedLister, scheduleTimeout *time.Duration, podInformer informerv1.PodInformer) *PodGroupManager {
+func NewPodGroupManager(client client.Client, snapshotSharedLister fwk.SharedLister, scheduleTimeout *time.Duration, podInformer informerv1.PodInformer) *PodGroupManager {
 	pgMgr := &PodGroupManager{
 		client:               client,
 		snapshotSharedLister: snapshotSharedLister,
@@ -128,7 +133,8 @@ func NewPodGroupManager(client client.Client, snapshotSharedLister framework.Sha
 		podLister:            podInformer.Lister(),
 		permittedPG:          gocache.New(3*time.Second, 3*time.Second),
 		backedOffPG:          gocache.New(10*time.Second, 10*time.Second),
-		assignedPodsByPG:     map[string]sets.Set[string]{},
+		// lastFailedSchedulePG is a sync.Map, zero-value ready.
+		assignedPodsByPG: map[string]sets.Set[string]{},
 	}
 	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: AddPodFactory(pgMgr),
@@ -170,6 +176,19 @@ func (pgMgr *PodGroupManager) BackoffPodGroup(pgName string, backoff time.Durati
 		return
 	}
 	pgMgr.backedOffPG.Add(pgName, nil, backoff)
+}
+
+// MarkPodGroupScheduleFailure records the current time as the last scheduling failure
+// for the given PodGroup. This timestamp is used by GetCreationTimestamp to prevent
+// head-of-line blocking in the scheduling queue.
+func (pgMgr *PodGroupManager) MarkPodGroupScheduleFailure(pgName string) {
+	pgMgr.lastFailedSchedulePG.Store(pgName, time.Now())
+}
+
+// ClearPodGroupScheduleFailure removes the scheduling failure record for the given PodGroup,
+// so it no longer carries a sort penalty in the scheduling queue.
+func (pgMgr *PodGroupManager) ClearPodGroupScheduleFailure(pgName string) {
+	pgMgr.lastFailedSchedulePG.Delete(pgName)
 }
 
 // ActivateSiblings stashes the pods belonging to the same PodGroup of the given pod
@@ -240,9 +259,21 @@ func (pgMgr *PodGroupManager) PreFilter(ctx context.Context, pod *corev1.Pod) er
 		return fmt.Errorf("podLister list pods failed: %w", err)
 	}
 
-	if len(pods) < int(pg.Spec.MinMember) {
+	quorumGap := int(pg.Spec.MinMember) - len(pods)
+	if quorumGap > 0 {
 		return fmt.Errorf("pre-filter pod %v cannot find enough sibling pods, "+
 			"current pods number: %v, minMember of group: %v", pod.Name, len(pods), pg.Spec.MinMember)
+	}
+
+	// Extra check to see how many SchedulingGated Pods can be tolerated.
+	// quorumGap can be negative if a PodGroup's minMember < a workload's replicas.
+	for _, p := range pods {
+		if len(p.Spec.SchedulingGates) > 0 {
+			quorumGap++
+		}
+		if quorumGap > 0 {
+			return fmt.Errorf("pre-filter pod %v cannot proceed due to gated pods in the same PodGroup", pod.Name)
+		}
 	}
 
 	if pg.Spec.MinResources == nil {
@@ -284,8 +315,8 @@ func (pgMgr *PodGroupManager) Permit(ctx context.Context, state fwk.CycleState, 
 		return PodGroupNotFound
 	}
 
-	pgMgr.RWMutex.RLock()
-	defer pgMgr.RWMutex.RUnlock()
+	pgMgr.RWMutex.Lock()
+	defer pgMgr.RWMutex.Unlock()
 	assigned, exist := pgMgr.assignedPodsByPG[pgFullName]
 	if !exist {
 		assigned = sets.Set[string]{}
@@ -332,10 +363,18 @@ func (pgMgr *PodGroupManager) Unreserve(ctx context.Context, pod *corev1.Pod) {
 }
 
 // GetCreationTimestamp returns the creation time of a podGroup or a pod.
+// If the PodGroup has failed scheduling recently, the failure timestamp is returned
+// instead of the immutable CreationTimestamp, to prevent head-of-line blocking.
 func (pgMgr *PodGroupManager) GetCreationTimestamp(ctx context.Context, pod *corev1.Pod, ts time.Time) time.Time {
 	pgName := util.GetPodGroupLabel(pod)
 	if len(pgName) == 0 {
 		return ts
+	}
+	pgFullName := fmt.Sprintf("%v/%v", pod.Namespace, pgName)
+	// If PodGroup has failed scheduling recently, use the failure timestamp
+	// to prevent head-of-line blocking.
+	if lastFailed, exist := pgMgr.lastFailedSchedulePG.Load(pgFullName); exist {
+		return lastFailed.(time.Time)
 	}
 	var pg v1alpha1.PodGroup
 	if err := pgMgr.client.Get(ctx, types.NamespacedName{Namespace: pod.Namespace, Name: pgName}, &pg); err != nil {

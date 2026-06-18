@@ -24,13 +24,11 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	clientscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 	corev1helpers "k8s.io/component-helpers/scheduling/corev1"
 	"k8s.io/klog/v2"
 	fwk "k8s.io/kube-scheduler/framework"
-	"k8s.io/kubernetes/pkg/scheduler/framework"
-
+	schedutil "k8s.io/kubernetes/pkg/scheduler/util"
 	"sigs.k8s.io/scheduler-plugins/apis/config"
 	"sigs.k8s.io/scheduler-plugins/apis/config/validation"
 	"sigs.k8s.io/scheduler-plugins/apis/scheduling"
@@ -41,20 +39,21 @@ import (
 
 // Coscheduling is a plugin that schedules pods in a group.
 type Coscheduling struct {
-	logger           klog.Logger
-	frameworkHandler framework.Handle
-	pgMgr            core.Manager
-	scheduleTimeout  *time.Duration
-	pgBackoff        *time.Duration
+	logger            klog.Logger
+	frameworkHandler  fwk.Handle
+	pgMgr             core.Manager
+	scheduleTimeout   *time.Duration
+	pgBackoff         *time.Duration
+	pgRejectThreshold float64
 }
 
-var _ framework.QueueSortPlugin = &Coscheduling{}
-var _ framework.PreFilterPlugin = &Coscheduling{}
-var _ framework.PostFilterPlugin = &Coscheduling{}
-var _ framework.PermitPlugin = &Coscheduling{}
-var _ framework.ReservePlugin = &Coscheduling{}
+var _ fwk.QueueSortPlugin = &Coscheduling{}
+var _ fwk.PreFilterPlugin = &Coscheduling{}
+var _ fwk.PostFilterPlugin = &Coscheduling{}
+var _ fwk.PermitPlugin = &Coscheduling{}
+var _ fwk.ReservePlugin = &Coscheduling{}
 
-var _ framework.EnqueueExtensions = &Coscheduling{}
+var _ fwk.EnqueueExtensions = &Coscheduling{}
 
 const (
 	// Name is the name of the plugin used in Registry and configurations.
@@ -62,7 +61,7 @@ const (
 )
 
 // New initializes and returns a new Coscheduling plugin.
-func New(ctx context.Context, obj runtime.Object, handle framework.Handle) (framework.Plugin, error) {
+func New(ctx context.Context, obj runtime.Object, handle fwk.Handle) (fwk.Plugin, error) {
 
 	lh := klog.FromContext(ctx).WithValues("plugin", Name)
 	lh.V(5).Info("creating new coscheduling plugin")
@@ -77,8 +76,6 @@ func New(ctx context.Context, obj runtime.Object, handle framework.Handle) (fram
 	}
 
 	scheme := runtime.NewScheme()
-	_ = clientscheme.AddToScheme(scheme)
-	_ = v1.AddToScheme(scheme)
 	_ = v1alpha1.AddToScheme(scheme)
 	c, _, err := util.NewClientWithCachedReader(ctx, handle.KubeConfig(), scheme)
 	if err != nil {
@@ -97,10 +94,11 @@ func New(ctx context.Context, obj runtime.Object, handle framework.Handle) (fram
 		handle.SharedInformerFactory().Core().V1().Pods(),
 	)
 	plugin := &Coscheduling{
-		logger:           lh,
-		frameworkHandler: handle,
-		pgMgr:            pgMgr,
-		scheduleTimeout:  &scheduleTimeDuration,
+		logger:            lh,
+		frameworkHandler:  handle,
+		pgMgr:             pgMgr,
+		scheduleTimeout:   &scheduleTimeDuration,
+		pgRejectThreshold: float64(args.PodGroupRejectPercentage) / 100.0,
 	}
 	if args.PodGroupBackoffSeconds < 0 {
 		err := fmt.Errorf("parse arguments failed")
@@ -114,14 +112,69 @@ func New(ctx context.Context, obj runtime.Object, handle framework.Handle) (fram
 }
 
 func (cs *Coscheduling) EventsToRegister(_ context.Context) ([]fwk.ClusterEventWithHint, error) {
-	// To register a custom event, follow the naming convention at:
-	// https://github.com/kubernetes/kubernetes/pull/101394
-	// Please follow: eventhandlers.go#L403-L410
 	pgGVK := fmt.Sprintf("podgroups.v1alpha1.%v", scheduling.GroupName)
 	return []fwk.ClusterEventWithHint{
-		{Event: fwk.ClusterEvent{Resource: fwk.Pod, ActionType: fwk.Add}},
-		{Event: fwk.ClusterEvent{Resource: fwk.EventResource(pgGVK), ActionType: fwk.Add | fwk.Update}},
+		// A new pod being added might complete the sibling count needed for a PodGroup's minMember.
+		{Event: fwk.ClusterEvent{Resource: fwk.Pod, ActionType: fwk.Add}, QueueingHintFn: cs.isSchedulableAfterPodAdded},
+		// An assigned pod being deleted (or un-assumed after Permit timeout) frees cluster resources,
+		// which may allow a previously resource-blocked PodGroup to schedule.
+		{Event: fwk.ClusterEvent{Resource: fwk.Pod, ActionType: fwk.Delete}, QueueingHintFn: cs.isSchedulableAfterPodDeleted},
+		// A PodGroup being added or updated can make a waiting pod schedulable.
+		{Event: fwk.ClusterEvent{Resource: fwk.EventResource(pgGVK), ActionType: fwk.Add | fwk.Update}, QueueingHintFn: cs.isSchedulableAfterPodGroupChanged},
 	}, nil
+}
+
+func (cs *Coscheduling) isSchedulableAfterPodAdded(logger klog.Logger, pod *v1.Pod, oldObj, newObj interface{}) (fwk.QueueingHint, error) {
+	_, addedPod, err := schedutil.As[*v1.Pod](oldObj, newObj)
+	if err != nil {
+		return fwk.Queue, err
+	}
+
+	pgLabel := util.GetPodGroupLabel(pod)
+	if pgLabel == "" || pod.Namespace != addedPod.Namespace || pgLabel != util.GetPodGroupLabel(addedPod) {
+		logger.V(5).Info("another pod was added but it doesn't belong to the same PodGroup",
+			"pod", klog.KObj(pod), "podGroupLabel", pgLabel, "addedPod", klog.KObj(addedPod))
+		return fwk.QueueSkip, nil
+	}
+
+	logger.V(5).Info("a sibling pod was added, which may make the pod schedulable",
+		"pod", klog.KObj(pod), "podGroupLabel", pgLabel, "addedPod", klog.KObj(addedPod))
+	return fwk.Queue, nil
+}
+
+func (cs *Coscheduling) isSchedulableAfterPodDeleted(logger klog.Logger, pod *v1.Pod, oldObj, newObj interface{}) (fwk.QueueingHint, error) {
+	deletedPod, _, err := schedutil.As[*v1.Pod](oldObj, newObj)
+	if err != nil {
+		return fwk.Queue, err
+	}
+
+	if deletedPod.Spec.NodeName == "" {
+		logger.V(5).Info("the deleted pod was unscheduled and wouldn't free cluster resources",
+			"pod", klog.KObj(pod), "deletedPod", klog.KObj(deletedPod))
+		return fwk.QueueSkip, nil
+	}
+
+	logger.V(5).Info("an assigned pod was deleted, which may free resources and make the pod schedulable",
+		"pod", klog.KObj(pod), "deletedPod", klog.KObj(deletedPod))
+	return fwk.Queue, nil
+}
+
+func (cs *Coscheduling) isSchedulableAfterPodGroupChanged(logger klog.Logger, pod *v1.Pod, oldObj, newObj interface{}) (fwk.QueueingHint, error) {
+	_, pg, err := schedutil.As[*v1alpha1.PodGroup](oldObj, newObj)
+	if err != nil {
+		return fwk.Queue, err
+	}
+
+	pgLabel := util.GetPodGroupLabel(pod)
+	if pgLabel == "" || pod.Namespace != pg.Namespace || pgLabel != pg.Name {
+		logger.V(5).Info("PodGroup was changed but it doesn't match the pod's PodGroup",
+			"pod", klog.KObj(pod), "podGroupLabel", pgLabel, "changedPodGroup", klog.KObj(pg))
+		return fwk.QueueSkip, nil
+	}
+
+	logger.V(5).Info("PodGroup was changed and it matches the pod's PodGroup, which may make the pod schedulable",
+		"pod", klog.KObj(pod), "podGroupLabel", pgLabel, "changedPodGroup", klog.KObj(pg))
+	return fwk.Queue, nil
 }
 
 // Name returns name of the plugin. It is used in logs, etc.
@@ -150,7 +203,7 @@ func (cs *Coscheduling) Less(podInfo1, podInfo2 fwk.QueuedPodInfo) bool {
 // PreFilter performs the following validations.
 // 1. Whether the PodGroup that the Pod belongs to is on the deny list.
 // 2. Whether the total number of pods in a PodGroup is less than its `minMember`.
-func (cs *Coscheduling) PreFilter(ctx context.Context, state fwk.CycleState, pod *v1.Pod, nodes []fwk.NodeInfo) (*framework.PreFilterResult, *fwk.Status) {
+func (cs *Coscheduling) PreFilter(ctx context.Context, state fwk.CycleState, pod *v1.Pod, nodes []fwk.NodeInfo) (*fwk.PreFilterResult, *fwk.Status) {
 	lh := klog.FromContext(klog.NewContext(ctx, cs.logger)).WithValues("ExtensionPoint", "PreFilter")
 	// If PreFilter fails, return framework.UnschedulableAndUnresolvable to avoid
 	// any preemption attempts.
@@ -163,12 +216,12 @@ func (cs *Coscheduling) PreFilter(ctx context.Context, state fwk.CycleState, pod
 
 // PostFilter is used to reject a group of pods if a pod does not pass PreFilter or Filter.
 func (cs *Coscheduling) PostFilter(ctx context.Context, state fwk.CycleState, pod *v1.Pod,
-	filteredNodeStatusReader framework.NodeToStatusReader) (*framework.PostFilterResult, *fwk.Status) {
+	filteredNodeStatusReader fwk.NodeToStatusReader) (*fwk.PostFilterResult, *fwk.Status) {
 	lh := klog.FromContext(klog.NewContext(ctx, cs.logger)).WithValues("ExtensionPoint", "PostFilter")
 	pgName, pg := cs.pgMgr.GetPodGroup(ctx, pod)
 	if pg == nil {
 		lh.V(4).Info("Pod does not belong to any group", "pod", klog.KObj(pod))
-		return &framework.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable, "can not find pod group")
+		return &fwk.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable, "can not find pod group")
 	}
 
 	// This indicates there are already enough Pods satisfying the PodGroup,
@@ -176,20 +229,20 @@ func (cs *Coscheduling) PostFilter(ctx context.Context, state fwk.CycleState, po
 	assigned := cs.pgMgr.GetAssignedPodCount(pgName)
 	if assigned >= int(pg.Spec.MinMember) {
 		lh.V(4).Info("Assigned pods", "podGroup", klog.KObj(pg), "assigned", assigned)
-		return &framework.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable)
+		return &fwk.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable)
 	}
 
-	// If the gap is less than/equal 10%, we may want to try subsequent Pods
+	// If the gap is less than/equal the reject threshold, we may want to try subsequent Pods
 	// to see they can satisfy the PodGroup
-	notAssignedPercentage := float32(int(pg.Spec.MinMember)-assigned) / float32(pg.Spec.MinMember)
-	if notAssignedPercentage <= 0.1 {
+	notAssignedPercentage := float64(int(pg.Spec.MinMember)-assigned) / float64(pg.Spec.MinMember)
+	if notAssignedPercentage <= cs.pgRejectThreshold {
 		lh.V(4).Info("A small gap of pods to reach the quorum", "podGroup", klog.KObj(pg), "percentage", notAssignedPercentage)
-		return &framework.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable)
+		return &fwk.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable)
 	}
 
 	// It's based on an implicit assumption: if the nth Pod failed,
 	// it's inferrable other Pods belonging to the same PodGroup would be very likely to fail.
-	cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
+	cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod fwk.WaitingPod) {
 		if waitingPod.GetPod().Namespace == pod.Namespace && util.GetPodGroupLabel(waitingPod.GetPod()) == pg.Name {
 			lh.V(3).Info("PostFilter rejects the pod", "podGroup", klog.KObj(pg), "pod", klog.KObj(waitingPod.GetPod()))
 			waitingPod.Reject(cs.Name(), "optimistic rejection in PostFilter")
@@ -206,12 +259,13 @@ func (cs *Coscheduling) PostFilter(ctx context.Context, state fwk.CycleState, po
 	}
 
 	cs.pgMgr.DeletePermittedPodGroup(ctx, pgName)
-	return &framework.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable,
+	cs.pgMgr.MarkPodGroupScheduleFailure(pgName)
+	return &fwk.PostFilterResult{}, fwk.NewStatus(fwk.Unschedulable,
 		fmt.Sprintf("PodGroup %v gets rejected due to Pod %v is unschedulable even after PostFilter", pgName, pod.Name))
 }
 
 // PreFilterExtensions returns a PreFilterExtensions interface if the plugin implements one.
-func (cs *Coscheduling) PreFilterExtensions() framework.PreFilterExtensions {
+func (cs *Coscheduling) PreFilterExtensions() fwk.PreFilterExtensions {
 	return nil
 }
 
@@ -237,7 +291,8 @@ func (cs *Coscheduling) Permit(ctx context.Context, state fwk.CycleState, pod *v
 		cs.pgMgr.ActivateSiblings(ctx, pod, state)
 	case core.Success:
 		pgFullName := util.GetPodGroupFullName(pod)
-		cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
+		cs.pgMgr.ClearPodGroupScheduleFailure(pgFullName)
+		cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod fwk.WaitingPod) {
 			if util.GetPodGroupFullName(waitingPod.GetPod()) == pgFullName {
 				lh.V(3).Info("Permit allows", "pod", klog.KObj(waitingPod.GetPod()))
 				waitingPod.Allow(cs.Name())
@@ -264,11 +319,12 @@ func (cs *Coscheduling) Unreserve(ctx context.Context, state fwk.CycleState, pod
 		return
 	}
 	cs.pgMgr.Unreserve(ctx, pod)
-	cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
+	cs.frameworkHandler.IterateOverWaitingPods(func(waitingPod fwk.WaitingPod) {
 		if waitingPod.GetPod().Namespace == pod.Namespace && util.GetPodGroupLabel(waitingPod.GetPod()) == pg.Name {
 			lh.V(3).Info("Unreserve rejects", "pod", klog.KObj(waitingPod.GetPod()), "podGroup", klog.KObj(pg))
 			waitingPod.Reject(cs.Name(), "rejection in Unreserve")
 		}
 	})
 	cs.pgMgr.DeletePermittedPodGroup(ctx, pgName)
+	cs.pgMgr.MarkPodGroupScheduleFailure(pgName)
 }
