@@ -28,12 +28,89 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/util/sets"
 	podlisterv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/klog/v2"
 	apiconfig "sigs.k8s.io/scheduler-plugins/apis/config"
 
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 )
+
+func TestResourceNamesFromNRT(t *testing.T) {
+	tcases := []struct {
+		name     string
+		nrt      *topologyv1alpha2.NodeResourceTopology
+		expected sets.Set[corev1.ResourceName]
+	}{
+		{
+			name:     "nil",
+			nrt:      nil,
+			expected: nil,
+		},
+		{
+			name:     "no zones",
+			nrt:      &topologyv1alpha2.NodeResourceTopology{},
+			expected: sets.New[corev1.ResourceName](),
+		},
+		{
+			name: "single zone",
+			nrt: &topologyv1alpha2.NodeResourceTopology{
+				Zones: topologyv1alpha2.ZoneList{
+					{
+						Resources: topologyv1alpha2.ResourceInfoList{
+							MakeTopologyResInfo(cpu, "4", "4"),
+							MakeTopologyResInfo(memory, "8Gi", "8Gi"),
+						},
+					},
+				},
+			},
+			expected: sets.New(
+				corev1.ResourceCPU,
+				corev1.ResourceMemory,
+			),
+		},
+		{
+			name: "multiple zones deduplicates resource names",
+			nrt:  makeTestNRT("node-1"),
+			expected: sets.New(
+				corev1.ResourceCPU,
+				corev1.ResourceMemory,
+				corev1.ResourceName(nicResourceName),
+			),
+		},
+		{
+			name: "extended resource in zone",
+			nrt: &topologyv1alpha2.NodeResourceTopology{
+				Zones: topologyv1alpha2.ZoneList{
+					{
+						Resources: topologyv1alpha2.ResourceInfoList{
+							MakeTopologyResInfo("slow.io/accelerator", "1", "1"),
+						},
+					},
+				},
+			},
+			expected: sets.New(corev1.ResourceName("slow.io/accelerator")),
+		},
+	}
+
+	for _, tt := range tcases {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ResourceNamesFromNRT(tt.nrt)
+			if tt.expected == nil {
+				if got != nil {
+					t.Fatalf("expected nil set, got %v", got.UnsortedList())
+				}
+				return
+			}
+			if got == nil {
+				t.Fatalf("expected %v, got nil", tt.expected.UnsortedList())
+			}
+			if !got.Equal(tt.expected) {
+				t.Fatalf("expected %v, got %v", tt.expected.UnsortedList(), got.UnsortedList())
+			}
+		})
+	}
+}
 
 func TestFingerprintFromNRT(t *testing.T) {
 	nrt := &topologyv1alpha2.NodeResourceTopology{
