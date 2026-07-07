@@ -112,6 +112,59 @@ func TestResourceNamesFromNRT(t *testing.T) {
 	}
 }
 
+func TestNrtResourcesStoreGetUpdateDelete(t *testing.T) {
+	nrts := []topologyv1alpha2.NodeResourceTopology{
+		{
+			ObjectMeta: metav1.ObjectMeta{Name: "node-0"},
+			Zones: topologyv1alpha2.ZoneList{
+				{
+					Resources: topologyv1alpha2.ResourceInfoList{
+						MakeTopologyResInfo(cpu, "4", "4"),
+						MakeTopologyResInfo(nicResourceName, "2", "2"),
+					},
+				},
+			},
+		},
+	}
+
+	rs := newNrtResourcesStore(nrts)
+
+	got := rs.Get("node-0")
+	expected := sets.New(corev1.ResourceCPU, corev1.ResourceName(nicResourceName))
+	if !got.Equal(expected) {
+		t.Errorf("Get after init: got %v expected %v", got.UnsortedList(), expected.UnsortedList())
+	}
+
+	if got := rs.Get("node-missing"); got != nil {
+		t.Errorf("Get missing node: got %v expected nil", got.UnsortedList())
+	}
+
+	updatedNRT := &topologyv1alpha2.NodeResourceTopology{
+		ObjectMeta: metav1.ObjectMeta{Name: "node-0"},
+		Zones: topologyv1alpha2.ZoneList{
+			{
+				Resources: topologyv1alpha2.ResourceInfoList{
+					MakeTopologyResInfo(cpu, "4", "4"),
+					MakeTopologyResInfo(nicResourceName, "2", "2"),
+					MakeTopologyResInfo("newdevice.io/gpu", "1", "1"),
+				},
+			},
+		},
+	}
+	rs.Update(updatedNRT)
+
+	got = rs.Get("node-0")
+	expected = sets.New(corev1.ResourceCPU, corev1.ResourceName(nicResourceName), corev1.ResourceName("newdevice.io/gpu"))
+	if !got.Equal(expected) {
+		t.Errorf("Get after Update: got %v expected %v", got.UnsortedList(), expected.UnsortedList())
+	}
+
+	rs.Delete("node-0")
+	if got := rs.Get("node-0"); got != nil {
+		t.Errorf("Get after Delete: got %v expected nil", got.UnsortedList())
+	}
+}
+
 func TestFingerprintFromNRT(t *testing.T) {
 	nrt := &topologyv1alpha2.NodeResourceTopology{
 		ObjectMeta: metav1.ObjectMeta{
