@@ -21,6 +21,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/go-logr/logr"
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
@@ -67,6 +68,20 @@ func (nrs *nrtStore) GetNRTCopyByNodeName(nodeName string) *topologyv1alpha2.Nod
 		return nil
 	}
 	return obj.DeepCopy()
+}
+
+// ResourceNamesFromNRT returns the set of resource names listed in the given NRT zones.
+func ResourceNamesFromNRT(nrt *topologyv1alpha2.NodeResourceTopology) sets.Set[corev1.ResourceName] {
+	if nrt == nil {
+		return nil
+	}
+	res := sets.New[corev1.ResourceName]()
+	for _, zone := range nrt.Zones {
+		for _, resInfo := range zone.Resources {
+			res.Insert(corev1.ResourceName(resInfo.Name))
+		}
+	}
+	return res
 }
 
 // Update adds or replace the Node Resource Topology associated to a node. Always do a copy.
