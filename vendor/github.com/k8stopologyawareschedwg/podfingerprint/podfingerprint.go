@@ -34,7 +34,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/OneOfOne/xxhash"
+	"github.com/cespare/xxhash/v2"
 )
 
 const (
@@ -93,13 +93,16 @@ type PodIdentifier interface {
 // Fingerprint represent the fingerprint of a set of pods
 type Fingerprint struct {
 	hashes []uint64
+	hasher *xxhash.Digest
 }
 
 // NewFingerprint creates a empty Fingerprint.
 // The size parameter is a hint for the expected size of the pod set. Use 0 if you don't know.
 // Values of size < 0 are ignored.
 func NewFingerprint(size int) *Fingerprint {
-	fp := &Fingerprint{}
+	fp := &Fingerprint{
+		hasher: xxhash.New(),
+	}
 	fp.Reset(size)
 	return fp
 }
@@ -116,6 +119,9 @@ func (fp *Fingerprint) Reset(size int) {
 		data = make([]uint64, 0, size)
 	}
 	fp.hashes = data
+	if fp.hasher == nil {
+		fp.hasher = xxhash.New()
+	}
 }
 
 // AddPod adds a pod to the pod set.
@@ -136,12 +142,12 @@ func (fp *Fingerprint) Add(namespace, name string) error {
 // content of the pod set is stable.
 func (fp *Fingerprint) Sum() []byte {
 	sort.Sort(uvec64(fp.hashes))
-	h := xxhash.New64()
+	fp.hasher.Reset()
 	b := make([]byte, 8)
 	for _, hash := range fp.hashes {
-		h.Write(putUint64(b, hash))
+		fp.hasher.Write(putUint64(b, hash))
 	}
-	return h.Sum(nil)
+	return fp.hasher.Sum(nil)
 }
 
 // Sign computes the pod set fingerprint as string.
@@ -199,12 +205,9 @@ func (fp *Fingerprint) Check(sign string) error {
 //    > the answer is intertwined with the previous point. Doing like this yield overall lower total execution time, because
 //      this speeds up the sorting stage in Sum(), which we need to ensure repeatable and consistent results.
 func (fp *Fingerprint) addHash(namespace, name string) {
-	fp.hashes = append(fp.hashes,
-		xxhash.ChecksumString64S(
-			name,
-			xxhash.ChecksumString64(namespace),
-		),
-	)
+	fp.hasher.ResetWithSeed(xxhash.Sum64String(namespace))
+	fp.hasher.WriteString(name)
+	fp.hashes = append(fp.hashes, fp.hasher.Sum64())
 }
 
 type uvec64 []uint64
