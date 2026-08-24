@@ -24,13 +24,16 @@ import (
 
 	"github.com/go-logr/logr"
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
+	"github.com/k8stopologyawareschedwg/numaplacement"
 	"github.com/k8stopologyawareschedwg/podfingerprint"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/sets"
 	podlisterv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/klog/v2"
+	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
 
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -39,6 +42,14 @@ import (
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/podprovider"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/resourcerequests"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/stringify"
+	"sigs.k8s.io/scheduler-plugins/pkg/util"
+)
+
+const (
+	// defaultMaxNRTUpdates is the watcher update channel size initial heuristic, no hard data.
+	// we used a bounded channel to prevent excessive event accumulation. The watcher code
+	// is now in charge to detect and handle overflow using retries.
+	defaultMaxNRTUpdates = 128
 )
 
 type OverReserve struct {
@@ -58,9 +69,22 @@ type OverReserve struct {
 	resyncMethod           apiconfig.CacheResyncMethod
 	resyncScope            apiconfig.CacheResyncScope
 	isPodRelevant          podprovider.PodFilterFunc
+	preemptionMode         apiconfig.PreemptionMode
+	nrtUpdateCh            chan NRTEvent
+	watchCancel            context.CancelFunc
+	nrtWatcher             *Watcher
+	closeOnce              sync.Once
 }
 
-func NewOverReserve(ctx context.Context, lh logr.Logger, cfg *apiconfig.NodeResourceTopologyCache, client ctrlclient.WithWatch, podLister podlisterv1.PodLister, isPodRelevant podprovider.PodFilterFunc) (*OverReserve, error) {
+func NewOverReserve(
+	ctx context.Context,
+	lh logr.Logger,
+	cfg *apiconfig.NodeResourceTopologyCache,
+	client ctrlclient.WithWatch,
+	podLister podlisterv1.PodLister,
+	isPodRelevant podprovider.PodFilterFunc,
+	preemptionMode apiconfig.PreemptionMode,
+) (*OverReserve, error) {
 	if client == nil || podLister == nil {
 		return nil, fmt.Errorf("received nil references")
 	}
@@ -74,6 +98,7 @@ func NewOverReserve(ctx context.Context, lh logr.Logger, cfg *apiconfig.NodeReso
 	resyncScope := getCacheResyncScope(lh, cfg)
 
 	lh.V(2).Info("initializing", "noderesourcetopologies", len(nrtObjs.Items), "method", resyncMethod, "scope", resyncScope)
+	watcherCtx, watchCancel := context.WithCancel(ctx)
 	obj := &OverReserve{
 		lh:                     lh,
 		client:                 client,
@@ -83,18 +108,19 @@ func NewOverReserve(ctx context.Context, lh logr.Logger, cfg *apiconfig.NodeReso
 		nodesMaybeOverreserved: newCounter(),
 		nodesWithForeignPods:   newCounter(),
 		nodesWithAttrUpdate:    newCounter(),
+		nrtUpdateCh:            make(chan NRTEvent, defaultMaxNRTUpdates),
 		podLister:              podLister,
 		resyncMethod:           resyncMethod,
 		isPodRelevant:          isPodRelevant,
+		preemptionMode:         preemptionMode,
+		watchCancel:            watchCancel,
 	}
 
 	if resyncScope == apiconfig.CacheResyncScopeAll {
-		wt := Watcher{
-			lh:    obj.lh,
-			nrts:  obj.nrts,
-			nodes: obj.nodesWithAttrUpdate,
-		}
-		go wt.NodeResourceTopologies(ctx, client)
+		obj.nrtWatcher = NewWatcher(obj.lh, obj.nrtUpdateCh, nrtObjs.Items)
+		go obj.nrtWatcher.NodeResourceTopologies(watcherCtx, client)
+	} else {
+		obj.nrtWatcher = &Watcher{}
 	}
 
 	return obj, nil
@@ -126,6 +152,12 @@ func (ov *OverReserve) GetCachedNRTCopy(ctx context.Context, nodeName string, po
 
 	lh.V(5).Info("NRT", "withassumed", stringify.NodeResourceTopologyResources(nrt))
 	return nrt, info
+}
+
+func (ov *OverReserve) GetCachedNUMAPlacementInfo(nodeName string) *numaplacement.EncodedInfo {
+	ov.lock.Lock()
+	defer ov.lock.Unlock()
+	return ov.nrts.GetNUMAPlacementInfoByNodeName(nodeName)
 }
 
 func (ov *OverReserve) NodeMaybeOverReserved(nodeName string, pod *corev1.Pod) {
@@ -179,6 +211,20 @@ func (ov *OverReserve) UnreserveNodeResources(nodeName string, pod *corev1.Pod) 
 
 	nodeAssumedResources.DeletePod(pod)
 	lh.V(2).Info("post unreserve", logging.KeyNode, nodeName, "assumedResources", nodeAssumedResources.String())
+}
+
+func (ov *OverReserve) PostBind(nodeName string, pod *corev1.Pod) {}
+
+// Close is safe to call multiple times and concurrently: sync.Once
+// guarantees the shutdown sequence runs exactly once and it is then idempotent
+func (ov *OverReserve) Close() {
+	ov.closeOnce.Do(ov.closeCache)
+}
+
+// closeCache is not just close to avoid clashes with builtins
+func (ov *OverReserve) closeCache() {
+	ov.watchCancel()
+	ov.nrtWatcher.Wait()
 }
 
 type DesyncedNodes struct {
@@ -260,6 +306,8 @@ func (ov *OverReserve) Resync() {
 	lh_.V(4).Info(logging.FlowBegin)
 	defer lh_.V(4).Info(logging.FlowEnd)
 
+	ov.drainNRTEvents(lh_)
+
 	nodes := ov.GetDesyncedNodes(lh_)
 	// we start without because chicken/egg problem. This is the earliest we can use the generation value.
 	lh_ = lh_.WithValues(logging.KeyGeneration, nodes.Generation)
@@ -270,102 +318,125 @@ func (ov *OverReserve) Resync() {
 		return
 	}
 
-	nrtUpdates := ov.MakeNRTUpdatesForNodes(context.Background(), lh_, nodes)
+	nrtUpdates := ov.MakeNRTUpdates(context.Background(), lh_, nodes)
 
 	ov.FlushNodes(lh_, nrtUpdates...)
 }
 
-func (ov *OverReserve) MakeNRTUpdatesForNodes(ctx context.Context, lh_ logr.Logger, nodes DesyncedNodes) []*topologyv1alpha2.NodeResourceTopology {
-	var nrtUpdates []*topologyv1alpha2.NodeResourceTopology
+func (ov *OverReserve) MakeNRTUpdates(ctx context.Context, lh_ logr.Logger, nodes DesyncedNodes) []nrtUpdate {
+	var nrtUpdates []nrtUpdate
 
 	// node -> pod identifier (namespace, name)
-	nodeToObjsMap, err := makeNodeToPodDataMap(lh_, ov.podLister, ov.isPodRelevant, ov.nrtResNames.Get)
+	nodeToObjsMap, err := makeNodeToPodDataMap(lh_, ov.podLister, ov.isPodRelevant, ov.nrtResNames.Get, ov.preemptionMode)
 	if err != nil {
 		lh_.Error(err, "cannot find the mapping between running pods and nodes")
 		return nrtUpdates
 	}
 
-	for _, nodeName := range nodes.MaybeOverReserved {
-		lh := lh_.WithValues(logging.KeyNode, nodeName)
-
-		nrtCandidate := &topologyv1alpha2.NodeResourceTopology{}
-		if err := ov.client.Get(ctx, types.NamespacedName{Name: nodeName}, nrtCandidate); err != nil {
-			lh.V(2).Info("failed to get NodeTopology", "error", err)
-			continue
-		}
-		if nrtCandidate == nil {
-			lh.V(2).Info("missing NodeTopology")
-			continue
-		}
-
-		objs, ok := nodeToObjsMap[nodeName]
+	isNRTFresher := func(lh logr.Logger, nrtCandidate *topologyv1alpha2.NodeResourceTopology) error {
+		objs, ok := nodeToObjsMap[nrtCandidate.Name]
 		if !ok {
 			// this really should never happen
-			lh.Info("cannot find any pod for node")
-			continue
+			return errors.New("cannot find any pod for node")
 		}
 
 		pfpExpected, onlyExclRes := podFingerprintForNodeTopology(nrtCandidate, ov.resyncMethod)
 		if pfpExpected == "" {
-			lh.V(2).Info("missing NodeTopology podset fingerprint data")
-			continue
+			return errors.New("missing NodeTopology podset fingerprint data")
 		}
 
 		lh.V(4).Info("trying to sync NodeTopology", "fingerprint", pfpExpected, "onlyExclusiveResources", onlyExclRes)
 
-		err = checkPodFingerprintForNode(lh, objs, nodeName, pfpExpected, onlyExclRes)
+		err = checkPodFingerprintForNode(lh, objs, nrtCandidate.Name, pfpExpected, onlyExclRes)
 		if errors.Is(err, podfingerprint.ErrSignatureMismatch) {
 			// can happen, not critical
-			lh.V(4).Info("NodeTopology podset fingerprint mismatch")
-			continue
+			return errors.New("NodeTopology podset fingerprint mismatch")
 		}
 		if err != nil {
 			// should never happen, let's be vocal
-			lh.Error(err, "checking NodeTopology podset fingerprint")
-			continue
+			return fmt.Errorf("checking NodeTopology podset fingerprint: %w", err)
 		}
 
-		lh.V(4).Info("overriding cached info", "reason", "resynced")
-		nrtUpdates = append(nrtUpdates, nrtCandidate)
+		return nil
 	}
 
-	for _, nodeName := range nodes.ConfigChanged {
-		lh := lh_.WithValues(logging.KeyNode, nodeName)
+	if part := ov.makeNRTUpdatesForNodes(ctx, lh_, ov.client, nodeUpdatePool{
+		NodeToObjsMap: nodeToObjsMap,
+		Names:         nodes.MaybeOverReserved,
+		Reason:        "resynced",
+		GateCheck:     isNRTFresher,
+	}); len(part) > 0 {
+		nrtUpdates = append(nrtUpdates, part...)
+	}
 
-		nrtCandidate := &topologyv1alpha2.NodeResourceTopology{}
-		if err := ov.client.Get(ctx, types.NamespacedName{Name: nodeName}, nrtCandidate); err != nil {
-			lh.V(2).Info("failed to get NodeTopology", "error", err)
-			continue
-		}
-		if nrtCandidate == nil {
-			lh.V(2).Info("missing NodeTopology")
-			continue
-		}
-
-		lh.V(4).Info("overriding cached info", "reason", "configChanged")
-		nrtUpdates = append(nrtUpdates, nrtCandidate)
+	if part := ov.makeNRTUpdatesForNodes(ctx, lh_, ov.client, nodeUpdatePool{
+		NodeToObjsMap: nodeToObjsMap,
+		Names:         nodes.ConfigChanged,
+		Reason:        "configChanged",
+		GateCheck:     nullGate,
+	}); len(part) > 0 {
+		nrtUpdates = append(nrtUpdates, part...)
 	}
 
 	return nrtUpdates
 }
 
+type nodeUpdatePool struct {
+	NodeToObjsMap map[string][]podData
+	Names         []string
+	Reason        string
+	GateCheck     func(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTopology) error
+}
+
+func (ov *OverReserve) makeNRTUpdatesForNodes(ctx context.Context, lh_ logr.Logger, rd ctrlclient.Reader, nodePool nodeUpdatePool) []nrtUpdate {
+	var nrtUpdates []nrtUpdate
+	for _, nodeName := range nodePool.Names {
+		lh := lh_.WithValues(logging.KeyNode, nodeName)
+
+		nrtCandidate := &topologyv1alpha2.NodeResourceTopology{}
+		if err := rd.Get(ctx, types.NamespacedName{Name: nodeName}, nrtCandidate); err != nil {
+			lh.V(2).Info("failed to get NodeTopology", "error", err)
+			continue
+		}
+		if nrtCandidate == nil {
+			lh.V(2).Info("missing NodeTopology")
+			continue
+		}
+
+		if err := nodePool.GateCheck(lh, nrtCandidate); err != nil {
+			lh.V(2).Info("failed gate", "reason", err.Error())
+			continue
+		}
+
+		lh.V(4).Info("overriding cached info", "reason", nodePool.Reason)
+		nrtUpdate := nrtUpdate{
+			nrt: nrtCandidate,
+		}
+		if ov.preemptionMode == apiconfig.PreemptionEnabled {
+			nrtUpdate.pods = nodePool.NodeToObjsMap[nodeName]
+		}
+		nrtUpdates = append(nrtUpdates, nrtUpdate)
+	}
+	return nrtUpdates
+}
+
 // FlushNodes drops all the cached information about a given node, resetting its state clean.
-func (ov *OverReserve) FlushNodes(lh logr.Logger, nrts ...*topologyv1alpha2.NodeResourceTopology) uint64 {
+func (ov *OverReserve) FlushNodes(lh logr.Logger, nrtUpdates ...nrtUpdate) uint64 {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
 
-	for _, nrt := range nrts {
-		lh.V(2).Info("flushing", logging.KeyNode, nrt.Name)
-		ov.nrts.Update(nrt)
-		ov.nrtResNames.Update(nrt)
-		delete(ov.assumedResources, nrt.Name)
-		ov.nodesMaybeOverreserved.Delete(nrt.Name)
-		ov.nodesWithForeignPods.Delete(nrt.Name)
-		ov.nodesWithAttrUpdate.Delete(nrt.Name)
+	if len(nrtUpdates) == 0 {
+		return ov.generation
 	}
 
-	if len(nrts) == 0 {
-		return ov.generation
+	for _, nrtUpdate := range nrtUpdates {
+		lh.V(2).Info("flushing", logging.KeyNode, nrtUpdate.nrt.Name)
+		ov.nrts.Update(nrtUpdate)
+		ov.nrtResNames.Update(nrtUpdate.nrt)
+		delete(ov.assumedResources, nrtUpdate.nrt.Name)
+		ov.nodesMaybeOverreserved.Delete(nrtUpdate.nrt.Name)
+		ov.nodesWithForeignPods.Delete(nrtUpdate.nrt.Name)
+		ov.nodesWithAttrUpdate.Delete(nrtUpdate.nrt.Name)
 	}
 
 	// increase only if we mutated the internal state
@@ -379,10 +450,59 @@ func (ov *OverReserve) FlushNodes(lh logr.Logger, nrts ...*topologyv1alpha2.Node
 func (ov *OverReserve) TestOnlyUpdateNRT(nrt *topologyv1alpha2.NodeResourceTopology) {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()
-	ov.nrts.Update(nrt)
+	ov.nrts.Update(nrtUpdate{
+		nrt: nrt,
+	})
 }
 
-func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPodRelevant podprovider.PodFilterFunc, nrtResourcesLookup NRTResourcesLookupFunc) (map[string][]podData, error) {
+// TestOnlyWatcherStatus reports the lifecycle status of the underlying NRT watcher.
+// to be used only in tests.
+func (ov *OverReserve) TestOnlyWatcherStatus() WatcherStatus {
+	return ov.nrtWatcher.TestOnlyWatcherStatus()
+}
+
+func categorizePod(pod *corev1.Pod, nrtResources sets.Set[corev1.ResourceName]) podData {
+	pd := podData{
+		Namespace: pod.Namespace,
+		Name:      pod.Name,
+	}
+	if resourcerequests.AreExclusiveForPod(pod, nrtResources) {
+		pd.ExclusiveResources = ExclusiveResourceAlloc
+	} else {
+		pd.ExclusiveResources = ExclusiveResourceNone
+	}
+	return pd
+}
+
+func categorizePodForPreemption(pod *corev1.Pod, nrtResources sets.Set[corev1.ResourceName]) podData {
+	qos := v1qos.GetPodQOS(pod)
+	ret := podData{
+		Namespace: pod.Namespace,
+		Name:      pod.Name,
+	}
+
+	for _, ctr := range pod.Spec.InitContainers {
+		// filter out init containers with restart policy other than Always because these are *supposed* to
+		// run fast and finish, hence not consuming exclusive resources in a steady state while the pod is Running.
+		if !util.IsSidecarInitContainer(&ctr) {
+			continue
+		}
+		if !resourcerequests.IsExclusiveForContainer(qos, ctr, nrtResources) {
+			continue
+		}
+		ret.PinnedContainers = append(ret.PinnedContainers, ctr.Name)
+	}
+
+	for _, ctr := range pod.Spec.Containers {
+		if !resourcerequests.IsExclusiveForContainer(qos, ctr, nrtResources) {
+			continue
+		}
+		ret.PinnedContainers = append(ret.PinnedContainers, ctr.Name)
+	}
+	return ret
+}
+
+func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPodRelevant podprovider.PodFilterFunc, nrtResourcesLookup NRTResourcesLookupFunc, preemptionMode apiconfig.PreemptionMode) (map[string][]podData, error) {
 	nodeToObjsMap := make(map[string][]podData)
 	pods, err := podLister.List(labels.Everything())
 	if err != nil {
@@ -394,11 +514,13 @@ func makeNodeToPodDataMap(lh logr.Logger, podLister podlisterv1.PodLister, isPod
 		}
 		nrtResources := nrtResourcesLookup(pod.Spec.NodeName)
 		nodeObjs := nodeToObjsMap[pod.Spec.NodeName]
-		nodeObjs = append(nodeObjs, podData{
-			Namespace:             pod.Namespace,
-			Name:                  pod.Name,
-			HasExclusiveResources: resourcerequests.AreExclusiveForPod(pod, nrtResources),
-		})
+		var pd podData
+		if preemptionMode == apiconfig.PreemptionEnabled {
+			pd = categorizePodForPreemption(pod, nrtResources)
+		} else {
+			pd = categorizePod(pod, nrtResources)
+		}
+		nodeObjs = append(nodeObjs, pd)
 		nodeToObjsMap[pod.Spec.NodeName] = nodeObjs
 	}
 	return nodeToObjsMap, nil
@@ -426,4 +548,33 @@ func getCacheResyncScope(lh logr.Logger, cfg *apiconfig.NodeResourceTopologyCach
 	return resyncScope
 }
 
-func (ov *OverReserve) PostBind(nodeName string, pod *corev1.Pod) {}
+// drainNRTEvents processes nodes received from the watcher goroutine via
+// the nrtUpdateCh channel.
+func (ov *OverReserve) drainNRTEvents(lh logr.Logger) {
+	ov.lock.Lock()
+	defer ov.lock.Unlock()
+	queued := 0
+	for {
+		select {
+		case nrtEv := <-ov.nrtUpdateCh:
+			queued += ov.processNRTEvent(nrtEv, lh)
+		default:
+			if queued > 0 {
+				lh.V(4).Info("drained NRT events", "queued", queued)
+			}
+			return
+		}
+	}
+}
+
+func (ov *OverReserve) processNRTEvent(nrtEv NRTEvent, lh logr.Logger) int {
+	switch nrtEv.Reason {
+	case WatchReasonAttrChanged:
+		ov.nodesWithAttrUpdate.Incr(nrtEv.NodeName)
+		return 1
+	}
+	lh.V(2).Info("unsupported NRT event", "reason", nrtEv.Reason.String(), logging.KeyNode, nrtEv.NodeName)
+	return 0
+}
+
+func nullGate(_ logr.Logger, _ *topologyv1alpha2.NodeResourceTopology) error { return nil }

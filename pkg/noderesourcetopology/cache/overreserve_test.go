@@ -21,7 +21,9 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/google/go-cmp/cmp"
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
 	"github.com/k8stopologyawareschedwg/podfingerprint"
@@ -33,7 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	podlisterv1 "k8s.io/client-go/listers/core/v1"
-	"k8s.io/klog/v2"
+	"k8s.io/utils/ptr"
 
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -92,7 +94,7 @@ func TestGetCacheResyncMethod(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.description, func(t *testing.T) {
-			got := getCacheResyncMethod(klog.Background(), testCase.cfg)
+			got := getCacheResyncMethod(testr.New(t), testCase.cfg)
 			if got != testCase.expected {
 				t.Errorf("cache resync method got %v expected %v", got, testCase.expected)
 			}
@@ -107,12 +109,12 @@ func TestInitEmptyLister(t *testing.T) {
 
 	fakePodLister := &fakePodLister{}
 	ctx := context.Background()
-	_, err = NewOverReserve(ctx, klog.Background(), nil, nil, fakePodLister, podprovider.IsPodRelevantAlways)
+	_, err = NewOverReserve(ctx, testr.New(t), nil, nil, fakePodLister, podprovider.IsPodRelevantAlways, apiconfig.PreemptionDisabled)
 	if err == nil {
 		t.Fatalf("accepted nil lister")
 	}
 
-	_, err = NewOverReserve(ctx, klog.Background(), nil, fakeClient, nil, podprovider.IsPodRelevantAlways)
+	_, err = NewOverReserve(ctx, testr.New(t), nil, fakeClient, nil, podprovider.IsPodRelevantAlways, apiconfig.PreemptionDisabled)
 	if err == nil {
 		t.Fatalf("accepted nil indexer")
 	}
@@ -127,7 +129,7 @@ func TestGetDesyncedNodesCount(t *testing.T) {
 	fakePodLister := &fakePodLister{}
 
 	nrtCache := mustOverReserve(t, fakeClient, fakePodLister)
-	dirtyNodes := nrtCache.GetDesyncedNodes(klog.Background())
+	dirtyNodes := nrtCache.GetDesyncedNodes(testr.New(t))
 	if dirtyNodes.DirtyCount() != 0 {
 		t.Errorf("dirty nodes from pristine cache: %v", dirtyNodes)
 	}
@@ -152,7 +154,7 @@ func TestDirtyNodesMarkDiscarded(t *testing.T) {
 		nrtCache.ReserveNodeResources(nodeName, &corev1.Pod{})
 	}
 
-	dirtyNodes := nrtCache.GetDesyncedNodes(klog.Background())
+	dirtyNodes := nrtCache.GetDesyncedNodes(testr.New(t))
 	if dirtyNodes.Len() != 0 {
 		t.Errorf("dirty nodes from pristine cache: %v", dirtyNodes)
 	}
@@ -161,7 +163,7 @@ func TestDirtyNodesMarkDiscarded(t *testing.T) {
 		nrtCache.NodeMaybeOverReserved(nodeName, &corev1.Pod{})
 	}
 
-	dirtyNodes = nrtCache.GetDesyncedNodes(klog.Background())
+	dirtyNodes = nrtCache.GetDesyncedNodes(testr.New(t))
 	sort.Strings(dirtyNodes.MaybeOverReserved)
 
 	if !reflect.DeepEqual(dirtyNodes.MaybeOverReserved, expectedNodes) {
@@ -193,7 +195,7 @@ func TestDirtyNodesNotUnmarkedOnReserve(t *testing.T) {
 		nrtCache.ReserveNodeResources(nodeName, &corev1.Pod{})
 	}
 
-	dirtyNodes := nrtCache.GetDesyncedNodes(klog.Background())
+	dirtyNodes := nrtCache.GetDesyncedNodes(testr.New(t))
 	if dirtyNodes.Len() != 0 {
 		t.Errorf("dirty nodes from pristine cache: %v", dirtyNodes)
 	}
@@ -205,7 +207,7 @@ func TestDirtyNodesNotUnmarkedOnReserve(t *testing.T) {
 	// Reserve does NOT clear the dirty flag; only FlushNodes does.
 	nrtCache.ReserveNodeResources("node-4", &corev1.Pod{})
 
-	dirtyNodes = nrtCache.GetDesyncedNodes(klog.Background())
+	dirtyNodes = nrtCache.GetDesyncedNodes(testr.New(t))
 
 	if dirtyNodes.DirtyCount() != 2 {
 		t.Errorf("both nodes should still be dirty after Reserve, got: %v", dirtyNodes.MaybeOverReserved)
@@ -282,7 +284,7 @@ func TestOverreserveGetCachedNRTCopy(t *testing.T) {
 	checkGetCachedNRTCopy(
 		t,
 		func(client ctrlclient.WithWatch, podLister podlisterv1.PodLister) (Interface, error) {
-			return NewOverReserve(context.Background(), klog.Background(), nil, client, podLister, podprovider.IsPodRelevantAlways)
+			return NewOverReserve(context.Background(), testr.New(t), nil, client, podLister, podprovider.IsPodRelevantAlways, apiconfig.PreemptionDisabled)
 		},
 		testCases...,
 	)
@@ -485,10 +487,12 @@ func TestFlush(t *testing.T) {
 		},
 	}
 
-	lh := klog.Background()
+	lh := testr.New(t)
 
 	expectedGen := nrtCache.generation + 1
-	gen1 := nrtCache.FlushNodes(lh, expectedNodeTopology.DeepCopy())
+	gen1 := nrtCache.FlushNodes(lh, nrtUpdate{
+		nrt: expectedNodeTopology.DeepCopy(),
+	})
 	if gen1 != expectedGen {
 		t.Fatalf("generation is expected to increase once after flushing a dirty node\ngot %d expected %d", gen1, expectedGen)
 	}
@@ -589,7 +593,7 @@ func TestResyncNoPodFingerprint(t *testing.T) {
 
 	nrtCache.Resync()
 
-	dirtyNodes := nrtCache.GetDesyncedNodes(klog.Background())
+	dirtyNodes := nrtCache.GetDesyncedNodes(testr.New(t))
 
 	if dirtyNodes.Len() != 1 || dirtyNodes.MaybeOverReserved[0] != "node1" {
 		t.Errorf("cleaned nodes after resyncing with bad data: %v", dirtyNodes.MaybeOverReserved)
@@ -683,7 +687,7 @@ func TestResyncMatchFingerprint(t *testing.T) {
 
 	nrtCache.Resync()
 
-	dirtyNodes := nrtCache.GetDesyncedNodes(klog.Background())
+	dirtyNodes := nrtCache.GetDesyncedNodes(testr.New(t))
 	if dirtyNodes.Len() > 0 {
 		t.Errorf("node still dirty after resyncing with good data: %v", dirtyNodes)
 	}
@@ -702,7 +706,12 @@ func isNRTEqual(a, b *topologyv1alpha2.NodeResourceTopology) bool {
 }
 
 func TestResyncFingerprintMismatchKeepsNodeDirty(t *testing.T) {
-	fakeClient, err := tu.NewFakeClient()
+	// Create the NRT in the fake client at init time so the watcher
+	// (started by mustOverReserve) sees it already in the store and
+	// does not queue an Added event that would race with our test.
+	initialNRT := makeTestNRT("node1")
+	objs := []runtime.Object{initialNRT}
+	fakeClient, err := tu.NewFakeClient(objs...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -745,52 +754,33 @@ func TestResyncFingerprintMismatchKeepsNodeDirty(t *testing.T) {
 	// simulate some time after the node is marked overreserved
 	nrtCache.NodeMaybeOverReserved("node1", &corev1.Pod{})
 
-	// NRT on the API server has a fingerprint that does NOT match the pods
-	// in the lister. This forces a ErrSignatureMismatch in Resync().
-	nrtWithBadFingerprint := &topologyv1alpha2.NodeResourceTopology{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "node1",
-		},
-		Attributes: topologyv1alpha2.AttributeList{
-			{
-				Name:  podfingerprint.Attribute,
-				Value: "pfp0vFFFFdeadbeef000000",
-			},
-		},
-		TopologyPolicies: []string{string(topologyv1alpha2.SingleNUMANodeContainerLevel)},
-		Zones: topologyv1alpha2.ZoneList{
-			{
-				Name: "node-0",
-				Type: "Node",
-				Resources: topologyv1alpha2.ResourceInfoList{
-					MakeTopologyResInfo(cpu, "32", "30"),
-					MakeTopologyResInfo(memory, "64Gi", "60Gi"),
-					MakeTopologyResInfo(nicResourceName, "16", "16"),
-				},
-			},
-			{
-				Name: "node-1",
-				Type: "Node",
-				Resources: topologyv1alpha2.ResourceInfoList{
-					MakeTopologyResInfo(cpu, "32", "22"),
-					MakeTopologyResInfo(memory, "64Gi", "44Gi"),
-					MakeTopologyResInfo(nicResourceName, "16", "16"),
-				},
-			},
-		},
+	// Update the NRT on the API server with a fingerprint that does NOT
+	// match the pods in the lister. This forces a fingerprint check
+	// failure in Resync(). Using Update (not Create) so the watcher
+	// sees a Modified event; since the TopologyManager config is unchanged,
+	// areAttrsChanged returns false and no ConfigChanged signal is queued.
+	nrtWithBadFingerprint := initialNRT.DeepCopy()
+	nrtWithBadFingerprint.Annotations = map[string]string{
+		podfingerprint.Annotation: "pfp0vFFFFdeadbeef000000",
 	}
+	nrtWithBadFingerprint.Attributes = append(nrtWithBadFingerprint.Attributes,
+		topologyv1alpha2.AttributeInfo{
+			Name:  podfingerprint.Attribute,
+			Value: "pfp0vFFFFdeadbeef000000",
+		},
+	)
 
 	runningPod := testPod.DeepCopy()
 	runningPod.Status.Phase = corev1.PodRunning
 
-	if err := fakeClient.Create(context.Background(), nrtWithBadFingerprint); err != nil {
+	if err := fakeClient.Update(context.Background(), nrtWithBadFingerprint); err != nil {
 		t.Fatal(err)
 	}
 	fakePodLister.AddPod(runningPod)
 
 	nrtCache.Resync()
 
-	dirtyNodes := nrtCache.GetDesyncedNodes(klog.Background())
+	dirtyNodes := nrtCache.GetDesyncedNodes(testr.New(t))
 	if dirtyNodes.Len() != 1 || dirtyNodes.MaybeOverReserved[0] != "node1" {
 		t.Errorf("node should stay dirty after fingerprint mismatch, got: %v", dirtyNodes.MaybeOverReserved)
 	}
@@ -842,7 +832,7 @@ func TestResyncReserveInterleaved(t *testing.T) {
 
 	// NRT on the API server has a fingerprint that does NOT match
 	// the pods in the lister, forcing a fingerprint mismatch in
-	// MakeNRTUpdatesForNodes (resync cannot flush).
+	// MakeNRTUpdates (resync cannot flush).
 	nrtWithBadFingerprint := &topologyv1alpha2.NodeResourceTopology{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "node1",
@@ -884,18 +874,17 @@ func TestResyncReserveInterleaved(t *testing.T) {
 	}
 	fakePodLister.AddPod(runningPod)
 
-	// Step 2: Resync begins — get dirty nodes, then compute NRT updates.
+	// Step 2: Resync begins: get dirty nodes, then compute NRT updates.
 	// The fingerprint mismatch means nrtUpdates will be empty for node1.
-	lh := klog.Background()
+	lh := testr.New(t)
 	nodes := nrtCache.GetDesyncedNodes(lh)
-	nrtUpdates := nrtCache.MakeNRTUpdatesForNodes(ctx, lh, nodes)
+	nrtUpdates := nrtCache.MakeNRTUpdates(ctx, lh, nodes)
 
 	if len(nrtUpdates) != 0 {
 		t.Fatalf("expected no NRT updates due to fingerprint mismatch, got %d", len(nrtUpdates))
 	}
 
-	// Step 3: concurrent Reserve() arrives between MakeNRTUpdatesForNodes
-	// and FlushNodes — the exact window where the race occurred.
+	// Step 3: concurrent Reserve() arrives between MakeNRTUpdatesForNodes and FlushNodes
 	concurrentPod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "pod2",
@@ -921,11 +910,11 @@ func TestResyncReserveInterleaved(t *testing.T) {
 	}
 	nrtCache.ReserveNodeResources("node1", concurrentPod)
 
-	// Step 4: Resync finishes — FlushNodes with the (empty) update list.
+	// Step 4: FlushNodes with the (empty) update list.
 	nrtCache.FlushNodes(lh, nrtUpdates...)
 
-	// Verify: node1 must still be dirty — the resync failed (fingerprint
-	// mismatch) and Reserve must NOT have cleared the dirty bit.
+	// Verify: node1 must still be dirty, because the resync failed (fingerprint mismatch)
+	// and Reserve must NOT have cleared the dirty bit.
 	dirtyNodes := nrtCache.GetDesyncedNodes(lh)
 	if dirtyNodes.DirtyCount() != 1 {
 		t.Errorf("node should stay dirty after failed resync + concurrent reserve, got dirty count: %d", dirtyNodes.DirtyCount())
@@ -967,7 +956,7 @@ func TestUnknownNodeWithForeignPods(t *testing.T) {
 
 	nrtCache.NodeHasForeignPods("node-bogus", &corev1.Pod{})
 
-	nodes := nrtCache.GetDesyncedNodes(klog.Background())
+	nodes := nrtCache.GetDesyncedNodes(testr.New(t))
 	if nodes.Len() != 0 {
 		t.Errorf("non-existent node has foreign pods!")
 	}
@@ -1040,7 +1029,7 @@ func TestNodeWithForeignPods(t *testing.T) {
 	target := "node2"
 	nrtCache.NodeHasForeignPods(target, &corev1.Pod{})
 
-	nodes := nrtCache.GetDesyncedNodes(klog.Background())
+	nodes := nrtCache.GetDesyncedNodes(testr.New(t))
 	if nodes.Len() != 1 || nodes.MaybeOverReserved[0] != target {
 		t.Errorf("unexpected dirty nodes: %v", nodes.MaybeOverReserved)
 	}
@@ -1053,11 +1042,44 @@ func TestNodeWithForeignPods(t *testing.T) {
 
 func mustOverReserve(t *testing.T, client ctrlclient.WithWatch, podLister podlisterv1.PodLister) *OverReserve {
 	t.Helper()
-	obj, err := NewOverReserve(context.Background(), klog.Background(), nil, client, podLister, podprovider.IsPodRelevantAlways)
+	obj, err := NewOverReserve(context.Background(), testr.New(t), nil, client, podLister, podprovider.IsPodRelevantAlways, apiconfig.PreemptionDisabled)
 	if err != nil {
 		t.Fatalf("unexpected error creating cache: %v", err)
 	}
+	t.Cleanup(obj.Close)
 	return obj
+}
+
+func TestOverReserveCloseStopsWatcher(t *testing.T) {
+	fakeClient, err := tu.NewFakeClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nrtCache := mustOverReserve(t, fakeClient, &fakePodLister{})
+
+	if got := nrtCache.TestOnlyWatcherStatus(); got != WatcherStatusRunning {
+		t.Fatalf("expected watcher running before Close(), got %q", got)
+	}
+
+	closed := make(chan struct{})
+	go func() {
+		nrtCache.Close()
+		close(closed)
+	}()
+
+	select {
+	case <-closed:
+	case <-time.After(5 * time.Second):
+		t.Fatal("Close() did not return in time; the watcher goroutine likely did not stop")
+	}
+
+	// Close() returning only proves our call unblocked; check the watcher's own
+	// status to confirm its goroutine actually exited, not just that Wait()
+	// happened to return.
+	if got := nrtCache.TestOnlyWatcherStatus(); got != WatcherStatusStopped {
+		t.Fatalf("expected watcher stopped after Close(), got %q", got)
+	}
 }
 
 func TestMakeNodeToPodDataMap(t *testing.T) {
@@ -1099,8 +1121,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 			expected: map[string][]podData{
 				"node1": {
 					{
-						Namespace: "namespace1",
-						Name:      "pod1",
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceNone,
 					},
 				},
 			},
@@ -1125,8 +1148,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 			expected: map[string][]podData{
 				"node1": {
 					{
-						Namespace: "namespace1",
-						Name:      "pod1",
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceNone,
 					},
 				},
 			},
@@ -1189,8 +1213,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 			expected: map[string][]podData{
 				"node1": {
 					{
-						Namespace: "namespace1",
-						Name:      "pod1",
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceNone,
 					},
 				},
 			},
@@ -1215,8 +1240,9 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 			expected: map[string][]podData{
 				"node1": {
 					{
-						Namespace: "namespace1",
-						Name:      "pod1",
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceNone,
 					},
 				},
 			},
@@ -1265,16 +1291,19 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 			expected: map[string][]podData{
 				"node1": {
 					{
-						Namespace: "namespace1",
-						Name:      "pod1",
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceNone,
 					},
 					{
-						Namespace: "namespace2",
-						Name:      "pod2",
+						Namespace:          "namespace2",
+						Name:               "pod2",
+						ExclusiveResources: ExclusiveResourceNone,
 					},
 					{
-						Namespace: "namespace2",
-						Name:      "pod3",
+						Namespace:          "namespace2",
+						Name:               "pod3",
+						ExclusiveResources: ExclusiveResourceNone,
 					},
 				},
 			},
@@ -1288,7 +1317,251 @@ func TestMakeNodeToPodDataMap(t *testing.T) {
 				err:  tcase.err,
 			}
 			nrtResourcesLookup := func(nodeName string) sets.Set[corev1.ResourceName] { return nil }
-			got, err := makeNodeToPodDataMap(klog.Background(), podLister, tcase.isPodRelevant, nrtResourcesLookup)
+			got, err := makeNodeToPodDataMap(testr.New(t), podLister, tcase.isPodRelevant, nrtResourcesLookup, apiconfig.PreemptionDisabled)
+			if err != tcase.expectedErr {
+				t.Errorf("error mismatch: got %v expected %v", err, tcase.expectedErr)
+			}
+			if diff := cmp.Diff(got, tcase.expected); diff != "" {
+				t.Errorf("unexpected result: %v", diff)
+			}
+		})
+	}
+}
+
+func TestMakeNodeToPodDataMapWithExclusiveResources(t *testing.T) {
+	podspec := corev1.PodSpec{
+		NodeName: "node1",
+		Containers: []corev1.Container{
+			{
+				Name: "container1",
+				Resources: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+						corev1.ResourceCPU:    resource.MustParse("1"),
+						corev1.ResourceMemory: resource.MustParse("1Gi"),
+					},
+				},
+			},
+		},
+		InitContainers: []corev1.Container{
+			{
+				Name: "initcontainer1",
+				Resources: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+						corev1.ResourceCPU:    resource.MustParse("1"),
+						corev1.ResourceMemory: resource.MustParse("1Gi"),
+					},
+				},
+				RestartPolicy: ptr.To(corev1.ContainerRestartPolicyAlways),
+			},
+		},
+	}
+
+	tcases := []struct {
+		description    string
+		pods           []*corev1.Pod
+		isPodRelevant  podprovider.PodFilterFunc
+		preemptionMode apiconfig.PreemptionMode
+		err            error
+		expected       map[string][]podData
+		expectedErr    error
+	}{
+		{
+			description: "few pods, shared without exclusive resources, preemption is disabled",
+			pods: []*corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "namespace1",
+						Name:      "pod1",
+					},
+					Spec: podspec,
+					Status: corev1.PodStatus{
+						Phase:    corev1.PodRunning,
+						QOSClass: corev1.PodQOSBestEffort,
+					},
+				},
+			},
+			preemptionMode: apiconfig.PreemptionDisabled,
+			isPodRelevant:  podprovider.IsPodRelevantShared,
+			expected: map[string][]podData{
+				"node1": {
+					{
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceNone,
+					},
+				},
+			},
+		},
+		{
+			description: "few pods, shared with exclusive resources, preemption is disabled",
+			pods: []*corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "namespace1",
+						Name:      "pod1",
+					},
+					Spec: podspec,
+					Status: corev1.PodStatus{
+						Phase:    corev1.PodRunning,
+						QOSClass: corev1.PodQOSGuaranteed,
+					},
+				},
+			},
+			preemptionMode: apiconfig.PreemptionDisabled,
+			isPodRelevant:  podprovider.IsPodRelevantShared,
+			expected: map[string][]podData{
+				"node1": {
+					{
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceAlloc,
+					},
+				},
+			},
+		},
+		{
+			description: "few pods, shared with exclusive resources, preemption is enabled",
+			pods: []*corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "namespace1",
+						Name:      "pod1",
+					},
+					Spec: podspec,
+					Status: corev1.PodStatus{
+						Phase:    corev1.PodRunning,
+						QOSClass: corev1.PodQOSGuaranteed,
+					},
+				},
+			},
+			preemptionMode: apiconfig.PreemptionEnabled,
+			isPodRelevant:  podprovider.IsPodRelevantShared,
+			expected: map[string][]podData{
+				"node1": {
+					{
+						Namespace:        "namespace1",
+						Name:             "pod1",
+						PinnedContainers: []string{"initcontainer1", "container1"},
+					},
+				},
+			},
+		},
+		{
+			description: "few pods, dedicated with exclusive resources, preemption is disabled",
+			pods: []*corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "namespace1",
+						Name:      "pod1",
+					},
+					Spec: podspec,
+					Status: corev1.PodStatus{
+						Phase:    corev1.PodRunning,
+						QOSClass: corev1.PodQOSGuaranteed,
+					},
+				},
+			},
+			preemptionMode: apiconfig.PreemptionDisabled,
+			isPodRelevant:  podprovider.IsPodRelevantDedicated,
+			expected: map[string][]podData{
+				"node1": {
+					{
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceAlloc,
+					},
+				},
+			},
+		},
+		{
+			description: "few pods, dedicated with exclusive resources, preemption is enabled",
+			pods: []*corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "namespace1",
+						Name:      "pod1",
+					},
+					Spec: podspec,
+					Status: corev1.PodStatus{
+						Phase:    corev1.PodRunning,
+						QOSClass: corev1.PodQOSGuaranteed,
+					},
+				},
+			},
+			preemptionMode: apiconfig.PreemptionEnabled,
+			isPodRelevant:  podprovider.IsPodRelevantDedicated,
+			expected: map[string][]podData{
+				"node1": {
+					{
+						Namespace:        "namespace1",
+						Name:             "pod1",
+						PinnedContainers: []string{"initcontainer1", "container1"},
+					},
+				},
+			},
+		},
+		{
+			description: "few pods, shared with exclusive resources,preemption is disabled, side car init container should be skipped",
+			pods: []*corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "namespace1",
+						Name:      "pod1",
+					},
+					Spec: corev1.PodSpec{
+						NodeName: "node1",
+						Containers: []corev1.Container{
+							{
+								Name: "container1",
+								Resources: corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("1"),
+										corev1.ResourceMemory: resource.MustParse("1Gi"),
+									},
+								},
+							},
+						},
+						InitContainers: []corev1.Container{
+							{
+								Name: "initcontainer1",
+								Resources: corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("1"),
+										corev1.ResourceMemory: resource.MustParse("1Gi"),
+									},
+								},
+								// default restart policy -> is a sidecar
+							},
+						},
+					},
+					Status: corev1.PodStatus{
+						Phase:    corev1.PodRunning,
+						QOSClass: corev1.PodQOSGuaranteed,
+					},
+				},
+			},
+			preemptionMode: apiconfig.PreemptionDisabled,
+			isPodRelevant:  podprovider.IsPodRelevantShared,
+			expected: map[string][]podData{
+				"node1": {
+					{
+						Namespace:          "namespace1",
+						Name:               "pod1",
+						ExclusiveResources: ExclusiveResourceAlloc,
+					},
+				},
+			},
+		},
+	}
+
+	for _, tcase := range tcases {
+		t.Run(tcase.description, func(t *testing.T) {
+			podLister := &fakePodLister{
+				pods: tcase.pods,
+				err:  tcase.err,
+			}
+			nrtResourcesLookup := func(nodeName string) sets.Set[corev1.ResourceName] { return nil }
+			got, err := makeNodeToPodDataMap(testr.New(t), podLister, tcase.isPodRelevant, nrtResourcesLookup, tcase.preemptionMode)
 			if err != tcase.expectedErr {
 				t.Errorf("error mismatch: got %v expected %v", err, tcase.expectedErr)
 			}
@@ -1312,11 +1585,12 @@ func TestOverresevedGetCachedNRTCopyWithForeignPods(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	lh := klog.Background()
-	nrtCache, err := NewOverReserve(ctx, lh, nil, fakeClient, fakePodLister, podprovider.IsPodRelevantAlways)
+	lh := testr.New(t)
+	nrtCache, err := NewOverReserve(ctx, lh, nil, fakeClient, fakePodLister, podprovider.IsPodRelevantAlways, apiconfig.PreemptionDisabled)
 	if err != nil {
 		t.Fatalf("unexpected error creating cache: %v", err)
 	}
+	t.Cleanup(nrtCache.Close)
 
 	expectedNrtInfo := CachedNRTInfo{
 		Generation: 0,
@@ -1328,7 +1602,9 @@ func TestOverresevedGetCachedNRTCopyWithForeignPods(t *testing.T) {
 	}
 
 	// pointless, but will force a generation increase
-	gen := nrtCache.FlushNodes(lh, nrt)
+	gen := nrtCache.FlushNodes(lh, nrtUpdate{
+		nrt: nrt,
+	})
 	if gen == 0 {
 		t.Fatalf("FlushNodes didn't increase the generation")
 	}
