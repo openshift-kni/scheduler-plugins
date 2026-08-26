@@ -3,7 +3,7 @@ FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_golang_1.25
 
 ARG COMMIT_SHA
 ARG OCP_MAJOR_VERSION=5
-ARG OCP_MINOR_VERSION=0
+ARG OCP_MINOR_VERSION=1
 
 WORKDIR /app
 
@@ -28,5 +28,5 @@ LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
       io.openshift.maintainer.component="Node Resource Topology aware Scheduler" \
       io.openshift.maintainer.product="OpenShift Container Platform" \
       io.k8s.description="Node Resource Topology aware Scheduler" \
-      cpe="cpe:/a:redhat:openshift:5.0::el9" \
+      cpe="cpe:/a:redhat:openshift:5.1::el9" \
       url="https://github.com/openshift-kni/scheduler-plugins"
