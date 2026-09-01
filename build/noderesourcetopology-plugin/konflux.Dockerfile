@@ -6,7 +6,7 @@ COPY . .
 
 RUN GOOS=linux CGO_ENABLED=0 go build -o bin/noderesourcetopology-plugin cmd/noderesourcetopology-plugin/main.go
 
-FROM registry.redhat.io/ubi8/ubi-minimal:latest@sha256:c2483a8f9b141b5b693b0e1482dead0cf52423de3e4158fa18b77dc97cc4454c
+FROM registry.redhat.io/ubi8/ubi-minimal:latest@sha256:aacf6efc45ab0d25e0cf0329ab633d19983b6f6cf7c824fe72dd7c4ac71b1a9c
 
 COPY --from=builder /app/bin/noderesourcetopology-plugin /bin/kube-scheduler
 WORKDIR /bin
