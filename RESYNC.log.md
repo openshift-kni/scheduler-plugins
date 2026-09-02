@@ -1,3 +1,5 @@
+## Upstream Resyncs
+
 | Resync Date | Merge With Upstream Tag/Commit                                                                       | Author      |
 |-------------|------------------------------------------------------------------------------------------------------|-------------|
 | 2026.08.24  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/fabd82678aa59472736aa4c1038f3ff0ff139214 | ffromani    |
