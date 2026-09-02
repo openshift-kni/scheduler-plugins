@@ -55,7 +55,7 @@ at the beginning of the commit message.
 
 ### Document changes
 
-For the sake of transparency, for every resync process we should update the table in `RESYNC.log.md`. The newest resync should appear in the first row. 
+For the sake of transparency, for every resync process we should update the **Upstream Resyncs** table in `RESYNC.log.md`. The newest resync should appear in the first row.
 
 ## Stable Branches Resync Strategy: cherry-pick flow
 
@@ -181,6 +181,18 @@ guidelines like for `merge`s. Nevertheless, **all** the following guidelines app
 - The cherry-picked commits MUST keep **all** the authorship information (see `Cherry Pick changes from PRs` and **always** use `git cherry-pick -x ...`)
 - The `upstream carry` PR MAY include one or more cherry-picked commits
 - The `upstream carry` PR MAY reference on its github cover letter the upstream PRs from which it takes commits
+
+When an upstream carry is performed for a bug fix, update the **Backported Bug Fixes** table
+in `RESYNC.log.md` with the following information:
+
+| Column       | Description                                                        |
+|--------------|--------------------------------------------------------------------|
+| Date         | Date of the backport (YYYY.MM.DD)                                  |
+| Bug          | Link to the OCPBUGS Jira issue (e.g. `[OCPBUGS-XXXXXX](url)`)     |
+| Upstream PR  | Link to the upstream `kubernetes-sigs/scheduler-plugins` PR        |
+| Author       | GitHub handle of the person performing the backport                 |
+
+The newest backport should appear in the first row.
 
 ## Appendix B: notes about the merge process vs the cherry-pick process
 
