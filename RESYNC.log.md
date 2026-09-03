@@ -1,3 +1,5 @@
+## Upstream Resyncs
+
 | Resync Date | Merge With Upstream Tag/Commit                                                                       | Author      |
 |-------------|------------------------------------------------------------------------------------------------------|-------------|
 | 2026.06.18  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/e2072444df84108bc88f538135e4c7ea968a72d5 | shajmakh     |
@@ -30,3 +32,9 @@
 | 2022.01.21  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/ec632c3d7e04b7b372f9a6f4338b0dbc53ef3d46 | fromanirh   |
 | 2021.12.23  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/7cf6512bd726f0d30b2ab32443af867a0b849da8 | fromanirh   |
 | 2021.12.11  | https://github.com/kubernetes-sigs/scheduler-plugins/commit/b8d13e17a3e1f633d72d71276a3da6fecf89f2e3 | Tal-or      |
+
+## Backported Bug Fixes
+
+| Date       | Bug                                                                                | Upstream PR                                                                  | Author  |
+|------------|------------------------------------------------------------------------------------|------------------------------------------------------------------------------|---------|
+| 2026.09.02 | [OCPBUGS-116282](https://issues.redhat.com/browse/OCPBUGS-116282)                 | https://github.com/kubernetes-sigs/scheduler-plugins/pull/984                | titzhak |
