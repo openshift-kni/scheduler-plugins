@@ -90,3 +90,8 @@ verify-crdgen: update-vendor
 .PHONY: clean
 clean:
 	rm -rf ./bin
+
+.PHONY: build-tools
+build-tools:
+	go build -o bin/verify-commit-message hack-kni/tools/verifycommit/verify-commit-message.go
+	cp hack-kni/tools/verifycommit/config.json bin/
