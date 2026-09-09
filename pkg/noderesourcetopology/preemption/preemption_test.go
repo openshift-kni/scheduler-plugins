@@ -305,7 +305,7 @@ func TestGetNRTPostPodsEviction(t *testing.T) {
 			},
 			numaPlacementInfo:  getTestEncodedInfo10Containers(),
 			expectedUpdatedNRT: getTestNRT(),
-			expectedError:      "no resources to add, cannot process eviction simulation",
+			expectedError:      "invalid NUMA mapping",
 		},
 		{
 			name: "resources release exceeds allocatable",
