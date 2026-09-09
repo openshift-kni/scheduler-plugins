@@ -213,6 +213,8 @@ func (tm *TopologyMatch) Filter(ctx context.Context, cycleState fwk.CycleState, 
 		if numaPlacementInfo != nil && numaPlacementInfo.Containers() != 0 {
 			nodeTopology, err = preemption.GetNRTPostPodsEviction(lh, nodeTopology.DeepCopy(), victims, numaPlacementInfo)
 			if err != nil {
+				// strong enough reason to request a resync
+				tm.nrtCache.NodeMaybeOverReserved(nodeName, pod)
 				return fwk.NewStatus(fwk.Unschedulable, "eviction simulation in NRT is not possible:"+err.Error())
 			}
 			lh.V(4).Info("running with NRT modified by eviction simulation")
