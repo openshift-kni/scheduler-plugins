@@ -109,6 +109,42 @@ func (nrs *nrtStore) GetNUMAPlacementInfoByNodeName(nodeName string) *numaplacem
 	return obj.numaPlacement
 }
 
+// VictimsOutsidePodSnapshot returns victims missing from the pod snapshot stored at the
+// last cache flush for the given node.
+func (nrs *nrtStore) VictimsOutsidePodSnapshot(nodeName string, victims []corev1.Pod) []corev1.Pod {
+	if len(victims) == 0 {
+		return nil
+	}
+
+	obj, ok := nrs.data[nodeName]
+	if !ok {
+		return nil
+	}
+
+	snapshot := make(map[string]struct{}, len(obj.nrtUpdate.pods))
+	for _, pd := range obj.nrtUpdate.pods {
+		snapshot[podSnapshotKey(pd.Namespace, pd.Name)] = struct{}{}
+	}
+
+	var excluded []corev1.Pod
+	for _, victim := range victims {
+		if _, ok := snapshot[podSnapshotKey(victim.Namespace, victim.Name)]; !ok {
+			excluded = append(excluded, victim)
+		}
+	}
+	return excluded
+}
+
+// HasVictimsOutsidePodSnapshot reports whether any victim is missing from the pod snapshot
+// stored at the last cache flush for the given node.
+func (nrs *nrtStore) HasVictimsOutsidePodSnapshot(nodeName string, victims []corev1.Pod) bool {
+	return len(nrs.VictimsOutsidePodSnapshot(nodeName, victims)) > 0
+}
+
+func podSnapshotKey(namespace, name string) string {
+	return namespace + "/" + name
+}
+
 // Update adds or replace the Node Resource Topology associated to a node. Always does a copy.
 // If there is an NRT update, there should also be a NUMAPlacement update with new set of pod data.
 // if pod data is empty, it means that NUMAPlacement is irrelevant for this node.

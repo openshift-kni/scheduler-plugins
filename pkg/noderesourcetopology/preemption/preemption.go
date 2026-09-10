@@ -26,7 +26,6 @@ import (
 	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
 	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
 
-	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/cache"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/resourcerequests"
 	"sigs.k8s.io/scheduler-plugins/pkg/util"
 
@@ -38,7 +37,7 @@ import (
 // GetNRTPostPodsEviction accumulates the exclusive resources of the victim pods and
 // adds them back to the NRT simulating a post-eviction state. Returns an error if
 // eviction simulation cannot be performed.
-func GetNRTPostPodsEviction(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTopology, victims []corev1.Pod, numaPlacementInfo *numaplacement.EncodedInfo) (*topologyv1alpha2.NodeResourceTopology, error) {
+func GetNRTPostPodsEviction(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTopology,nrtResources sets.Set[corev1.ResourceName], victims []corev1.Pod, numaPlacementInfo *numaplacement.EncodedInfo) (*topologyv1alpha2.NodeResourceTopology, error) {
 	if nrt == nil {
 		return nil, fmt.Errorf("NRT not found, cannot process eviction simulation")
 	}
@@ -55,7 +54,6 @@ func GetNRTPostPodsEviction(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTo
 		return nrt, fmt.Errorf("no containers found in numa placement info, cannot process eviction simulation")
 	}
 
-	nrtResources := cache.ResourceNamesFromNRT(nrt)
 	numaToResourcesToAdd, err := accumulateResourcesToAddPerNUMA(lh, victims, numaPlacementInfo, nrtResources)
 	if err != nil {
 		return nrt, err

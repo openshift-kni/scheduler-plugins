@@ -33,9 +33,13 @@ import (
 )
 
 type fakeFilterCache struct {
-	nrt               *topologyv1alpha2.NodeResourceTopology
-	numaPlacement     *numaplacement.EncodedInfo
-	maybeOverReserved []string
+	nrt                *topologyv1alpha2.NodeResourceTopology
+	numaPlacement      *numaplacement.EncodedInfo
+	// snapshotPods is the pod set frozen at the last cache flush. When nil, all
+	// victims are treated as present in the snapshot.
+	snapshotPods       []*v1.Pod
+	snapshotCheckCalls int
+	maybeOverReserved  []string
 }
 
 func (f *fakeFilterCache) GetCachedNRTCopy(_ context.Context, _ string, _ *v1.Pod) (*topologyv1alpha2.NodeResourceTopology, nrtcache.CachedNRTInfo) {
@@ -49,6 +53,24 @@ func (f *fakeFilterCache) GetCachedNUMAPlacementInfo(_ string) *numaplacement.En
 	return f.numaPlacement
 }
 
+func (f *fakeFilterCache) FindVictimsOutsidePodSnapshot(_ string, victims []v1.Pod) []v1.Pod {
+	f.snapshotCheckCalls++
+	if f.snapshotPods == nil {
+		return nil
+	}
+	snapshot := make(map[string]struct{}, len(f.snapshotPods))
+	for _, pod := range f.snapshotPods {
+		snapshot[pod.Namespace+"/"+pod.Name] = struct{}{}
+	}
+	var excluded []v1.Pod
+	for _, victim := range victims {
+		if _, ok := snapshot[victim.Namespace+"/"+victim.Name]; !ok {
+			excluded = append(excluded, victim)
+		}
+	}
+	return excluded
+}
+
 func (f *fakeFilterCache) NodeMaybeOverReserved(nodeName string, _ *v1.Pod) {
 	f.maybeOverReserved = append(f.maybeOverReserved, nodeName)
 }
@@ -58,6 +80,32 @@ func (f *fakeFilterCache) ReserveNodeResources(string, *v1.Pod)   {}
 func (f *fakeFilterCache) UnreserveNodeResources(string, *v1.Pod) {}
 func (f *fakeFilterCache) PostBind(string, *v1.Pod)               {}
 func (f *fakeFilterCache) Close()                                 {}
+
+func makeBurstablePod(namespace, name, containerName string, cpuMilli int64, memory string) *v1.Pod {
+	req := v1.ResourceList{
+		v1.ResourceCPU:    *resource.NewMilliQuantity(cpuMilli, resource.DecimalSI),
+		v1.ResourceMemory: resource.MustParse(memory),
+	}
+	limits := v1.ResourceList{
+		v1.ResourceCPU:    *resource.NewMilliQuantity(cpuMilli*2, resource.DecimalSI),
+		v1.ResourceMemory: resource.MustParse(memory),
+	}
+	return &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: v1.PodSpec{
+			Containers: []v1.Container{{
+				Name: containerName,
+				Resources: v1.ResourceRequirements{
+					Requests: req,
+					Limits:   limits,
+				},
+			}},
+		},
+	}
+}
 
 func makeGuaranteedPod(namespace, name, containerName string, cpu int64, memory string) *v1.Pod {
 	req := v1.ResourceList{
@@ -257,6 +305,67 @@ func TestFilter_PreemptionFlow(t *testing.T) {
 		}
 	})
 
+	t.Run("preemption with no NRT-relevant victims skips snapshot check and eviction simulation", func(t *testing.T) {
+		cache := &fakeFilterCache{nrt: nrt, numaPlacement: numaPlacement, snapshotPods: []*v1.Pod{}}
+		tm := TopologyMatch{nrtCache: cache, preemptionMode: apiconfig.PreemptionEnabled}
+		victim1 := makeBurstablePod("default", "victim1", containerName, 500, "512Mi")
+		victim2 := makeBurstablePod("default", "victim2", containerName, 500, "512Mi")
+		victim3 := makeBurstablePod("default", "victim3", containerName, 500, "512Mi")
+		cycleState := cycleStateWithVictims(t, victim1, victim2, victim3)
+
+		status := tm.Filter(context.Background(), cycleState, preemptor, nodeInfo)
+		if !quasiEqualStatus(status, fwk.NewStatus(fwk.Unschedulable, "cannot align container")) {
+			t.Fatalf("expected normal unschedulable without eviction simulation, got %v", status)
+		}
+		if cache.snapshotCheckCalls != 0 {
+			t.Fatalf("expected snapshot check skipped when no relevant victims, got %d calls", cache.snapshotCheckCalls)
+		}
+		if len(cache.maybeOverReserved) != 0 {
+			t.Fatalf("preemption flow must not mark node over-reserved during this scenario, got %v", cache.maybeOverReserved)
+		}
+	})
+
+	t.Run("preemption with relevant victim outside pod snapshot marks node dirty", func(t *testing.T) {
+		cache := &fakeFilterCache{nrt: nrt, snapshotPods: []*v1.Pod{}}
+		tm := TopologyMatch{nrtCache: cache, preemptionMode: apiconfig.PreemptionEnabled}
+		cycleState := cycleStateWithVictims(t, victim)
+
+		status := tm.Filter(context.Background(), cycleState, preemptor, nodeInfo)
+		if !quasiEqualStatus(status, fwk.NewStatus(fwk.Unschedulable, "victims are outside pod snapshot, resync requested")) {
+			t.Fatalf("expected unschedulable preemptor, got %v", status)
+		}
+		if cache.snapshotCheckCalls != 1 {
+			t.Fatalf("expected snapshot check when relevant victims exist, got %d calls", cache.snapshotCheckCalls)
+		}
+		if len(cache.maybeOverReserved) != 1 || cache.maybeOverReserved[0] != nodeName {
+			t.Fatalf("expected node marked over-reserved, got %v", cache.maybeOverReserved)
+		}
+	})
+
+	t.Run("preemption with one relevant victim outside snapshot among multiple victims requests resync", func(t *testing.T) {
+		victimInSnapshot := makeGuaranteedPod("default", "victim-in", containerName, 4, "1Gi")
+		victimOutsideSnapshot := makeGuaranteedPod("default", "victim-out", containerName, 4, "1Gi")
+		irrelevantVictim := makeBurstablePod("default", "victim-burst", containerName, 500, "512Mi")
+		cache := &fakeFilterCache{
+			nrt:           nrt,
+			numaPlacement: numaPlacement,
+			snapshotPods:  []*v1.Pod{victimInSnapshot},
+		}
+		tm := TopologyMatch{nrtCache: cache, preemptionMode: apiconfig.PreemptionEnabled}
+		cycleState := cycleStateWithVictims(t, victimInSnapshot, victimOutsideSnapshot, irrelevantVictim)
+
+		status := tm.Filter(context.Background(), cycleState, preemptor, nodeInfo)
+		if !quasiEqualStatus(status, fwk.NewStatus(fwk.Unschedulable, "victims are outside pod snapshot, resync requested")) {
+			t.Fatalf("expected resync when a relevant victim is outside snapshot, got %v", status)
+		}
+		if cache.snapshotCheckCalls != 1 {
+			t.Fatalf("expected snapshot check once for relevant victims, got %d calls", cache.snapshotCheckCalls)
+		}
+		if len(cache.maybeOverReserved) != 1 || cache.maybeOverReserved[0] != nodeName {
+			t.Fatalf("expected node marked over-reserved, got %v", cache.maybeOverReserved)
+		}
+	})
+
 	t.Run("preemption with eviction simulation failure results in unschedulable", func(t *testing.T) {
 		cache := &fakeFilterCache{nrt: nrt, numaPlacement: numaPlacement}
 		tm := TopologyMatch{nrtCache: cache, preemptionMode: apiconfig.PreemptionEnabled}
@@ -271,6 +380,23 @@ func TestFilter_PreemptionFlow(t *testing.T) {
 		}
 		if len(cache.maybeOverReserved) == 0 || cache.maybeOverReserved[0] != nodeName {
 			t.Fatalf("preemption flow must mark node over-reserved on failure, got %v", cache.maybeOverReserved)
+		}
+	})
+
+	t.Run("preemption with eviction simulation exceeding NUMA allocatable marks node dirty", func(t *testing.T) {
+		// NUMA 0 has 0 CPU available but allocatable 4; releasing 5 CPUs from the victim
+		// would exceed allocatable and abort the eviction simulation.
+		oversizedVictim := makeGuaranteedPod("default", "victim", containerName, 5, "1Gi")
+		cache := &fakeFilterCache{nrt: nrt, numaPlacement: makeEncodedInfoForPod(oversizedVictim, 0)}
+		tm := TopologyMatch{nrtCache: cache, preemptionMode: apiconfig.PreemptionEnabled}
+		cycleState := cycleStateWithVictims(t, oversizedVictim)
+
+		status := tm.Filter(context.Background(), cycleState, preemptor, nodeInfo)
+		if !quasiEqualStatus(status, fwk.NewStatus(fwk.Unschedulable, "eviction simulation in NRT is not possible:resource release request exceeds NUMA allocatable")) {
+			t.Fatalf("expected unschedulable preemptor, got %v", status)
+		}
+		if len(cache.maybeOverReserved) != 1 || cache.maybeOverReserved[0] != nodeName {
+			t.Fatalf("expected node marked over-reserved, got %v", cache.maybeOverReserved)
 		}
 	})
 
