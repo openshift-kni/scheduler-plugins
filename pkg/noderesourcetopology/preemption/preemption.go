@@ -23,10 +23,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/sets"
+	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
 	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
 
-	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/cache"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/resourcerequests"
+	"sigs.k8s.io/scheduler-plugins/pkg/util"
 
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
 	"github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2/helper/numanode"
@@ -36,7 +37,7 @@ import (
 // GetNRTPostPodsEviction accumulates the exclusive resources of the victim pods and
 // adds them back to the NRT simulating a post-eviction state. Returns an error if
 // eviction simulation cannot be performed.
-func GetNRTPostPodsEviction(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTopology, victims []corev1.Pod, numaPlacementInfo *numaplacement.EncodedInfo) (*topologyv1alpha2.NodeResourceTopology, error) {
+func GetNRTPostPodsEviction(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTopology,nrtResources sets.Set[corev1.ResourceName], victims []corev1.Pod, numaPlacementInfo *numaplacement.EncodedInfo) (*topologyv1alpha2.NodeResourceTopology, error) {
 	if nrt == nil {
 		return nil, fmt.Errorf("NRT not found, cannot process eviction simulation")
 	}
@@ -53,8 +54,7 @@ func GetNRTPostPodsEviction(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTo
 		return nrt, fmt.Errorf("no containers found in numa placement info, cannot process eviction simulation")
 	}
 
-	nrtResources := cache.ResourceNamesFromNRT(nrt)
-	numaToResourcesToAdd, err := accumulateResourcesToAddPerNUMA(victims, numaPlacementInfo, nrtResources)
+	numaToResourcesToAdd, err := accumulateResourcesToAddPerNUMA(lh, victims, numaPlacementInfo, nrtResources)
 	if err != nil {
 		return nrt, err
 	}
@@ -64,48 +64,56 @@ func GetNRTPostPodsEviction(lh logr.Logger, nrt *topologyv1alpha2.NodeResourceTo
 	return addResourcesToNodeResourcesTopology(lh, nrt, numaToResourcesToAdd)
 }
 
-func accumulateResourcesToAddPerNUMA(victims []corev1.Pod, numaPlacementInfo *numaplacement.EncodedInfo, nrtResources sets.Set[corev1.ResourceName]) (map[int]corev1.ResourceList, error) {
+func accumulateResourcesToAddPerNUMA(lh logr.Logger, victims []corev1.Pod, numaPlacementInfo *numaplacement.EncodedInfo, nrtResources sets.Set[corev1.ResourceName]) (map[int]corev1.ResourceList, error) {
 	numaToResourcesToAdd := make(map[int]corev1.ResourceList) // numaID -> resource list
 	for _, victim := range victims {
+		lh := lh.WithValues("namespace", victim.Namespace, "name", victim.Name)
+
 		// pod level filtering - exit early
 		pQos := v1qos.GetPodQOS(&victim)
 		if pQos != corev1.PodQOSGuaranteed && !resourcerequests.IncludeNonNative(&victim) {
+			lh.V(6).Info("victim skipped because pod is irrelevant for NRT")
 			continue
 		}
 
-		for _, container := range victim.Spec.Containers {
-			containerID := numaplacement.ContainerID{
+		for container, containerType := range podutil.ContainerIter(&victim.Spec, podutil.InitContainers|podutil.Containers) {
+			lh := lh.WithValues("container", container.Name)
+
+			if containerType == podutil.InitContainers && !util.IsSidecarInitContainer(container) {
+				lh.V(6).Info("victim container skipped: non-restartable init container")
+				continue
+			}
+
+			exclusiveResources := resourcerequests.GetExclusive(pQos, *container, nrtResources)
+			if len(exclusiveResources) == 0 {
+				lh.V(6).Info("victim container skipped: no exclusive resources")
+				continue
+			}
+
+			numaID, err := numaPlacementInfo.NUMAAffinity(numaplacement.ContainerID{
 				Namespace:     victim.Namespace,
 				PodName:       victim.Name,
 				ContainerName: container.Name,
+			})
+
+			if len(exclusiveResources) > 0 && (err != nil || numaID == -1) {
+				lh.V(6).Info("victim container failed mapping to NUMA ID", "error", err)
+				return nil, fmt.Errorf("invalid NUMA mapping")
 			}
-			numaID, err := numaPlacementInfo.NUMAAffinity(containerID)
-			if err != nil {
+
+			numaResources, ok := numaToResourcesToAdd[numaID]
+			if !ok {
+				numaToResourcesToAdd[numaID] = exclusiveResources
 				continue
 			}
-			if numaID != -1 {
-				for resName, resQty := range container.Resources.Requests {
-					// resource-level filtering: only add back the exclusive resources
-					if !resourcerequests.IsExclusive(pQos, resName, resQty, nrtResources) {
-						continue
-					}
 
-					numaResources, ok := numaToResourcesToAdd[numaID]
-					if !ok {
-						numaToResourcesToAdd[numaID] = corev1.ResourceList{
-							resName: resQty,
-						}
-						continue
-
-					}
-
-					currentQty, ok := numaResources[resName]
-					if !ok {
-						currentQty = resource.Quantity{}
-					}
-					currentQty.Add(resQty)
-					numaToResourcesToAdd[numaID][resName] = currentQty
+			for resName, resQty := range exclusiveResources {
+				currentQty, ok := numaResources[resName]
+				if !ok {
+					currentQty = resource.Quantity{}
 				}
+				currentQty.Add(resQty)
+				numaToResourcesToAdd[numaID][resName] = currentQty
 			}
 		}
 	}

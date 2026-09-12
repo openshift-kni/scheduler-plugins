@@ -160,6 +160,12 @@ func (ov *OverReserve) GetCachedNUMAPlacementInfo(nodeName string) *numaplacemen
 	return ov.nrts.GetNUMAPlacementInfoByNodeName(nodeName)
 }
 
+func (ov *OverReserve) FindVictimsOutsidePodSnapshot(nodeName string, victims []corev1.Pod) []corev1.Pod {
+	ov.lock.Lock()
+	defer ov.lock.Unlock()
+	return ov.nrts.VictimsOutsidePodSnapshot(nodeName, victims)
+}
+
 func (ov *OverReserve) NodeMaybeOverReserved(nodeName string, pod *corev1.Pod) {
 	ov.lock.Lock()
 	defer ov.lock.Unlock()

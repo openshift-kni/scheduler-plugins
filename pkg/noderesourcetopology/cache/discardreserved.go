@@ -80,6 +80,9 @@ func (pt *DiscardReserved) GetCachedNUMAPlacementInfo(nodeName string) *numaplac
 	// TODO: implement this to support the preemption feature for this cache
 	return nil
 }
+
+func (pt *DiscardReserved) FindVictimsOutsidePodSnapshot(string, []corev1.Pod) []corev1.Pod { return nil }
+
 func (pt *DiscardReserved) NodeMaybeOverReserved(nodeName string, pod *corev1.Pod) {}
 func (pt *DiscardReserved) NodeHasForeignPods(nodeName string, pod *corev1.Pod)    {}
 
