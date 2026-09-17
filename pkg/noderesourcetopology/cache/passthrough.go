@@ -57,6 +57,8 @@ func (pt Passthrough) GetCachedNUMAPlacementInfo(nodeName string) *numaplacement
 	return nil
 }
 
+func (pt Passthrough) FindVictimsOutsidePodSnapshot(string, []corev1.Pod) []corev1.Pod { return nil }
+
 func (pt Passthrough) NodeMaybeOverReserved(nodeName string, pod *corev1.Pod)  {}
 func (pt Passthrough) NodeHasForeignPods(nodeName string, pod *corev1.Pod)     {}
 func (pt Passthrough) ReserveNodeResources(nodeName string, pod *corev1.Pod)   {}

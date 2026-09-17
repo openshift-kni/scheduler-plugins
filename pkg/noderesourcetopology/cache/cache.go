@@ -108,6 +108,10 @@ type Interface interface {
 	// It will be used to get the NUMAPlacement info for the given node.
 	GetCachedNUMAPlacementInfo(nodeName string) *numaplacement.EncodedInfo
 
+	// FindVictimsOutsidePodSnapshot reports whether any victim is absent from the pod
+	// snapshot frozen at the last cache flush for the given node.
+	FindVictimsOutsidePodSnapshot(nodeName string, victims []corev1.Pod) []corev1.Pod
+
 	// NodeMaybeOverReserved declares a node was filtered out for not enough resources available.
 	// This means this node is eligible for a resync. When a node is marked discarded (dirty), it matters not
 	// if it is so because pessimistic overallocation or because the node truly cannot accomodate the request;

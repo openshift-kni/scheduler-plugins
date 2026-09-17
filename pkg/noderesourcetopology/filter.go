@@ -22,6 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/klog/v2"
 	fwk "k8s.io/kube-scheduler/framework"
 	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
@@ -29,6 +30,7 @@ import (
 	bm "k8s.io/kubernetes/pkg/kubelet/cm/topologymanager/bitmask"
 
 	apiconfig "sigs.k8s.io/scheduler-plugins/apis/config"
+	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/cache"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/logging"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/nodeconfig"
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology/preemption"
@@ -209,13 +211,25 @@ func (tm *TopologyMatch) Filter(ctx context.Context, cycleState fwk.CycleState, 
 	isPreemptionFlow := len(victims) > 0
 	if isPreemptionFlow {
 		lh.V(4).Info("preemption flow detected", "victimsCount", len(victims))
-		numaPlacementInfo := tm.nrtCache.GetCachedNUMAPlacementInfo(nodeName)
-		if numaPlacementInfo != nil && numaPlacementInfo.Containers() != 0 {
-			nodeTopology, err = preemption.GetNRTPostPodsEviction(lh, nodeTopology.DeepCopy(), victims, numaPlacementInfo)
-			if err != nil {
-				return fwk.NewStatus(fwk.Unschedulable, "eviction simulation in NRT is not possible:"+err.Error())
+		nrtResources := cache.ResourceNamesFromNRT(nodeTopology)
+		relevantVictims := getRelevantForEviction(victims, nrtResources)
+		if len(relevantVictims) > 0 {
+			if excluded := tm.nrtCache.FindVictimsOutsidePodSnapshot(nodeName, relevantVictims); len(excluded) > 0 {
+				lh.V(2).Info("found NRT relevant victims outside currentpod snapshot, resync requested", "excludedVictims", excluded)
+				tm.nrtCache.NodeMaybeOverReserved(nodeName, pod)
+				return fwk.NewStatus(fwk.Unschedulable, "victims are outside pod snapshot, resync requested")
 			}
-			lh.V(4).Info("running with NRT modified by eviction simulation")
+
+			numaPlacementInfo := tm.nrtCache.GetCachedNUMAPlacementInfo(nodeName)
+			if numaPlacementInfo != nil && numaPlacementInfo.Containers() != 0 {
+				nodeTopology, err = preemption.GetNRTPostPodsEviction(lh, nodeTopology.DeepCopy(), nrtResources, relevantVictims, numaPlacementInfo)
+				if err != nil {
+					// should never happen if the NRT cache resources are fresh
+					tm.nrtCache.NodeMaybeOverReserved(nodeName, pod)
+					return fwk.NewStatus(fwk.Unschedulable, "eviction simulation in NRT is not possible:"+err.Error())
+				}
+				lh.V(4).Info("running with NRT modified by eviction simulation")
+			}
 		}
 	}
 
@@ -267,4 +281,15 @@ func getVictimPods(cycleState fwk.CycleState, preemptionMode apiconfig.Preemptio
 		return nil, err
 	}
 	return ps.GetPods(), nil
+}
+
+func getRelevantForEviction(victims []v1.Pod, nrtResources sets.Set[v1.ResourceName]) []v1.Pod {
+	relevant := []v1.Pod{}
+	for _, victim := range victims {
+		if !resourcerequests.AreExclusiveForPod(&victim, nrtResources) {
+			continue
+		}
+		relevant = append(relevant, victim)
+	}
+	return relevant
 }

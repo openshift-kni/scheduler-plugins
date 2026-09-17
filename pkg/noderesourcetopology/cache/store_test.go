@@ -1172,3 +1172,47 @@ func (fpnl *fakePodNamespaceLister) List(selector labels.Selector) ([]*corev1.Po
 func (fpnl *fakePodNamespaceLister) Get(name string) (*corev1.Pod, error) {
 	return nil, fmt.Errorf("not yet implemented")
 }
+
+func TestHasVictimsOutsidePodSnapshot(t *testing.T) {
+	nrt := makeTestNRT("node-1")
+	snapshotPods := []podData{
+		{Namespace: "ns-a", Name: "pod-high", PinnedContainers: []string{"cnt"}},
+	}
+
+	ns := newNrtStore(klog.Background(), nil)
+	ns.Update(nrtUpdate{
+		nrt:  nrt,
+		pods: snapshotPods,
+	})
+
+	victimInSnapshot := corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{Namespace: "ns-a", Name: "pod-high"},
+	}
+	victimOutsideSnapshot := corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{Namespace: "ns-a", Name: "pod-low"},
+	}
+
+	t.Run("no victims", func(t *testing.T) {
+		if ns.HasVictimsOutsidePodSnapshot("node-1", nil) {
+			t.Fatal("expected false for empty victims")
+		}
+	})
+
+	t.Run("victim in snapshot", func(t *testing.T) {
+		if ns.HasVictimsOutsidePodSnapshot("node-1", []corev1.Pod{victimInSnapshot}) {
+			t.Fatal("expected false when victim is in snapshot")
+		}
+	})
+
+	t.Run("victim outside snapshot", func(t *testing.T) {
+		if !ns.HasVictimsOutsidePodSnapshot("node-1", []corev1.Pod{victimOutsideSnapshot}) {
+			t.Fatal("expected true when victim is outside snapshot")
+		}
+	})
+
+	t.Run("missing node", func(t *testing.T) {
+		if ns.HasVictimsOutsidePodSnapshot("missing-node", []corev1.Pod{victimOutsideSnapshot}) {
+			t.Fatal("expected false when node is not cached")
+		}
+	})
+}
