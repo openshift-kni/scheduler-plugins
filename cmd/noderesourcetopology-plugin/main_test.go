@@ -34,8 +34,6 @@ import (
 	"k8s.io/kubernetes/cmd/kube-scheduler/app/options"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config"
 	"k8s.io/kubernetes/pkg/scheduler/apis/config/testing/defaults"
-	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/names"
-	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/schedulinggates"
 
 	"sigs.k8s.io/scheduler-plugins/pkg/noderesourcetopology"
 )
@@ -153,16 +151,17 @@ profiles:
 			registryOptions: []app.Option{app.WithPlugin(noderesourcetopology.Name, noderesourcetopology.New)},
 			wantPlugins: map[string]*config.Plugins{
 				"default-scheduler": {
-					PreEnqueue: config.PluginSet{Enabled: []config.Plugin{{Name: schedulinggates.Name}, {Name: names.DynamicResources}, {Name: names.DefaultPreemption}}},
-					QueueSort:  defaults.ExpandedPluginsV1.QueueSort,
-					Bind:       defaults.ExpandedPluginsV1.Bind,
-					PreFilter:  defaults.ExpandedPluginsV1.PreFilter,
-					Filter:     config.PluginSet{Enabled: []config.Plugin{{Name: noderesourcetopology.Name}}},
-					PostFilter: defaults.ExpandedPluginsV1.PostFilter,
-					PreScore:   defaults.ExpandedPluginsV1.PreScore,
-					Score:      config.PluginSet{Enabled: []config.Plugin{{Name: noderesourcetopology.Name, Weight: 1}}},
-					Reserve:    defaults.ExpandedPluginsV1.Reserve,
-					PreBind:    defaults.ExpandedPluginsV1.PreBind,
+					PreEnqueue:     defaults.ExpandedPluginsV1.PreEnqueue,
+					QueueSort:      defaults.ExpandedPluginsV1.QueueSort,
+					Bind:           defaults.ExpandedPluginsV1.Bind,
+					PreFilter:      defaults.ExpandedPluginsV1.PreFilter,
+					Filter:         config.PluginSet{Enabled: []config.Plugin{{Name: noderesourcetopology.Name}}},
+					PostFilter:     defaults.ExpandedPluginsV1.PostFilter,
+					PreScore:       defaults.ExpandedPluginsV1.PreScore,
+					Score:          config.PluginSet{Enabled: []config.Plugin{{Name: noderesourcetopology.Name, Weight: 1}}},
+					Reserve:        defaults.ExpandedPluginsV1.Reserve,
+					PreBind:        defaults.ExpandedPluginsV1.PreBind,
+					PlacementScore: defaults.ExpandedPluginsV1.PlacementScore,
 				},
 			},
 		},
