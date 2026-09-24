@@ -1,0 +1,70 @@
+name: Verify Commits
+
+on:
+  push:
+    branches: [ "master", "release-4.*" ]
+  pull_request:
+    branches: [ "master", "release-4.*" ]
+
+jobs:
+  commit-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up golang
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.24
+
+      - name: Get branch names (pull request)
+        shell: bash
+        run: |
+          echo "SOURCE_BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+          echo "TARGET_BRANCH_NAME=$(echo ${GITHUB_BASE_REF} | tr / -)" >> $GITHUB_ENV
+
+      - name: Debug
+        run: |
+          echo ${{ env.SOURCE_BRANCH_NAME }}
+          echo ${{ env.TARGET_BRANCH_NAME }}
+
+      - name: Setup git remote
+        run: 
+          git remote add upstream https://github.com/kubernetes-sigs/scheduler-plugins.git
+
+      - name: Build verification tool
+        run: |
+          make -f Makefile.kni build-tools
+
+      - name: Verify commits
+        run: |
+          cd bin
+          ./verify-commit-message -n ${{ github.event.pull_request.commits }} 
+
+  unit-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up golang
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.24
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/kubernetes-sigs/scheduler-plugins.git
+
+      - name: Build verification tool
+        run: |
+          make -f Makefile.kni build-tools
+
+      - name: Run unit tests
+        run:
+          go test -v ./hack-kni/tools/verifycommit
