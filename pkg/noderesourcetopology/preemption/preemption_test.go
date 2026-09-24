@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
+	"k8s.io/utils/ptr"
 
 	"github.com/google/go-cmp/cmp"
 	topologyv1alpha2 "github.com/k8stopologyawareschedwg/noderesourcetopology-api/pkg/apis/topology/v1alpha2"
@@ -44,7 +45,7 @@ func TestGetNRTPostPodsEviction(t *testing.T) {
 			victims:            []corev1.Pod{},
 			expectedUpdatedNRT: getTestNRT(),
 			numaPlacementInfo:  getTestEncodedInfo10Containers(),
-			expectedError:      "no victims found, cannot process eviction simulation",
+			expectedError:      "no victims found",
 		},
 		{
 			name: "empty numa placement info with victims",
@@ -74,7 +75,7 @@ func TestGetNRTPostPodsEviction(t *testing.T) {
 				},
 			},
 			expectedUpdatedNRT: getTestNRT(),
-			expectedError:      "numa placement info not found, cannot process eviction simulation",
+			expectedError:      "numa placement info not found",
 		},
 		{
 			name: "victims with non-exclusive resources",
@@ -98,7 +99,6 @@ func TestGetNRTPostPodsEviction(t *testing.T) {
 			},
 			numaPlacementInfo:  getTestEncodedInfo10Containers(),
 			expectedUpdatedNRT: getTestNRT(),
-			expectedError:      "no resources to add, cannot process eviction simulation",
 		},
 		{
 			name: "mixed victims with exclusive resources",
@@ -305,7 +305,67 @@ func TestGetNRTPostPodsEviction(t *testing.T) {
 			},
 			numaPlacementInfo:  getTestEncodedInfo10Containers(),
 			expectedUpdatedNRT: getTestNRT(),
-			expectedError:      "no resources to add, cannot process eviction simulation",
+			expectedError:      "missing NUMA mapping",
+		},
+		{
+			name: "mixed victims with non-exclusive pods and exclusive pod with missing NUMA mapping",
+			nrt:  getTestNRT(),
+			victims: []corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "non-exclusive-0",
+						Namespace: "ns-a",
+					},
+					Status: corev1.PodStatus{
+						QOSClass: corev1.PodQOSBestEffort,
+					},
+					Spec: corev1.PodSpec{
+						Containers: []corev1.Container{
+							{Name: "container-0"},
+						},
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "non-exclusive-1",
+						Namespace: "ns-a",
+					},
+					Status: corev1.PodStatus{
+						QOSClass: corev1.PodQOSBestEffort,
+					},
+					Spec: corev1.PodSpec{
+						Containers: []corev1.Container{
+							{Name: "container-0"},
+						},
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "newpod",
+						Namespace: "ns-a",
+					},
+					Status: corev1.PodStatus{
+						QOSClass: corev1.PodQOSGuaranteed,
+					},
+					Spec: corev1.PodSpec{
+						Containers: []corev1.Container{
+							{
+								Name: "cnt-0",
+								Resources: corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										"cpu":                        resource.MustParse("1"),
+										"memory":                     resource.MustParse("100Mi"),
+										"example-device.com/deviceA": resource.MustParse("1"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			numaPlacementInfo:  getTestEncodedInfo10Containers(),
+			expectedUpdatedNRT: getTestNRT(),
+			expectedError:      "missing NUMA mapping",
 		},
 		{
 			name: "resources release exceeds allocatable",
@@ -351,7 +411,210 @@ func TestGetNRTPostPodsEviction(t *testing.T) {
 				},
 			},
 			expectedUpdatedNRT: getTestNRT(),
-			expectedError:      "no containers found in numa placement info, cannot process eviction simulation",
+			expectedError:      "zero containers in numa placement info",
+		},
+		{
+			name: "victim with restartable init container exclusive resources",
+			nrt:  getTestNRT(),
+			victims: []corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "ns-a",
+						Name:      "pod-0",
+					},
+					Spec: corev1.PodSpec{
+						InitContainers: []corev1.Container{
+							{
+								Name:          "cnt-0",
+								RestartPolicy: ptr.To(corev1.ContainerRestartPolicyAlways),
+								Resources: corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										"cpu":                        resource.MustParse("1"),
+										"memory":                     resource.MustParse("100Mi"),
+										"example-device.com/deviceA": resource.MustParse("1"),
+									},
+									Limits: corev1.ResourceList{
+										"cpu":                        resource.MustParse("1"),
+										"memory":                     resource.MustParse("100Mi"),
+										"example-device.com/deviceA": resource.MustParse("1"),
+									},
+								},
+							},
+						},
+						Containers: []corev1.Container{
+							{
+								Name: "cnt-1",
+								Resources: corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										"cpu":    resource.MustParse("1"),
+										"memory": resource.MustParse("100Mi"),
+									},
+									Limits: corev1.ResourceList{
+										"cpu":    resource.MustParse("1"),
+										"memory": resource.MustParse("100Mi"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			numaPlacementInfo: getTestEncodedInfo10Containers(),
+			expectedUpdatedNRT: &topologyv1alpha2.NodeResourceTopology{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "node-0",
+				},
+				Zones: []topologyv1alpha2.Zone{
+					{
+						Name: "node-0",
+						Resources: []topologyv1alpha2.ResourceInfo{
+							{
+								Name:        "cpu",
+								Capacity:    resource.MustParse("10"),
+								Allocatable: resource.MustParse("10"),
+								Available:   resource.MustParse("3"),
+							},
+							{
+								Name:        "memory",
+								Capacity:    resource.MustParse("500Mi"),
+								Allocatable: resource.MustParse("500Mi"),
+								Available:   resource.MustParse("300Mi"),
+							},
+							{
+								Name:        "example-device.com/deviceA",
+								Capacity:    resource.MustParse("8"),
+								Allocatable: resource.MustParse("8"),
+								Available:   resource.MustParse("2"),
+							},
+						},
+					},
+					{
+						Name: "node-1",
+						Resources: []topologyv1alpha2.ResourceInfo{
+							{
+								Name:        "cpu",
+								Capacity:    resource.MustParse("10"),
+								Allocatable: resource.MustParse("10"),
+								Available:   resource.MustParse("1"),
+							},
+							{
+								Name:        "memory",
+								Capacity:    resource.MustParse("500Mi"),
+								Allocatable: resource.MustParse("500Mi"),
+								Available:   resource.MustParse("100Mi"),
+							},
+							{
+								Name:        "example-device.com/deviceB",
+								Capacity:    resource.MustParse("8"),
+								Allocatable: resource.MustParse("8"),
+								Available:   resource.MustParse("2"),
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "non-restartable init container resources are not accumulated",
+			nrt:  getTestNRT(),
+			victims: []corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "ns-a",
+						Name:      "pod-0",
+					},
+					Spec: corev1.PodSpec{
+						InitContainers: []corev1.Container{
+							{
+								Name: "init-once",
+								Resources: corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										"cpu":                        resource.MustParse("5"),
+										"memory":                     resource.MustParse("400Mi"),
+										"example-device.com/deviceA": resource.MustParse("5"),
+									},
+									Limits: corev1.ResourceList{
+										"cpu":                        resource.MustParse("5"),
+										"memory":                     resource.MustParse("400Mi"),
+										"example-device.com/deviceA": resource.MustParse("5"),
+									},
+								},
+							},
+						},
+						Containers: []corev1.Container{
+							{
+								Name: "cnt-0",
+								Resources: corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										"cpu":                        resource.MustParse("1"),
+										"memory":                     resource.MustParse("100Mi"),
+										"example-device.com/deviceA": resource.MustParse("1"),
+									},
+									Limits: corev1.ResourceList{
+										"cpu":                        resource.MustParse("1"),
+										"memory":                     resource.MustParse("100Mi"),
+										"example-device.com/deviceA": resource.MustParse("1"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			numaPlacementInfo: getTestEncodedInfo10Containers(),
+			expectedUpdatedNRT: &topologyv1alpha2.NodeResourceTopology{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "node-0",
+				},
+				Zones: []topologyv1alpha2.Zone{
+					{
+						Name: "node-0",
+						Resources: []topologyv1alpha2.ResourceInfo{
+							{
+								Name:        "cpu",
+								Capacity:    resource.MustParse("10"),
+								Allocatable: resource.MustParse("10"),
+								Available:   resource.MustParse("2"),
+							},
+							{
+								Name:        "memory",
+								Capacity:    resource.MustParse("500Mi"),
+								Allocatable: resource.MustParse("500Mi"),
+								Available:   resource.MustParse("200Mi"),
+							},
+							{
+								Name:        "example-device.com/deviceA",
+								Capacity:    resource.MustParse("8"),
+								Allocatable: resource.MustParse("8"),
+								Available:   resource.MustParse("2"),
+							},
+						},
+					},
+					{
+						Name: "node-1",
+						Resources: []topologyv1alpha2.ResourceInfo{
+							{
+								Name:        "cpu",
+								Capacity:    resource.MustParse("10"),
+								Allocatable: resource.MustParse("10"),
+								Available:   resource.MustParse("1"),
+							},
+							{
+								Name:        "memory",
+								Capacity:    resource.MustParse("500Mi"),
+								Allocatable: resource.MustParse("500Mi"),
+								Available:   resource.MustParse("100Mi"),
+							},
+							{
+								Name:        "example-device.com/deviceB",
+								Capacity:    resource.MustParse("8"),
+								Allocatable: resource.MustParse("8"),
+								Available:   resource.MustParse("2"),
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 
