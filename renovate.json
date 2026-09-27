@@ -21,7 +21,9 @@
             "ignoreTests": false,
             "matchDatasources": ["docker"],
             "matchManagers": ["dockerfile"],
-            "matchPaths": ["build/noderesourcetopology-plugin/konflux.Dockerfile"],
+            "matchFileNames": [
+                "build/noderesourcetopology-plugin/konflux.Dockerfile"
+            ],
             "matchUpdateTypes": ["digest"],
             "platformAutomerge": true
         }
@@ -30,9 +32,9 @@
     "pruneBranchAfterAutomerge": true,
     "tekton": {
         "enabled": true,
-        "fileMatch": [
-            "\\.yaml$",
-            "\\.yml$"
+        "managerFilePatterns": [
+            "/\\.yaml$/",
+            "/\\.yml$/"
         ],
         "ignoreTests": false,
         "includePaths": [
