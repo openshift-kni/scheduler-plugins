@@ -50,7 +50,7 @@ The following table lists the configurable parameters of the as-a-second-schedul
 | Parameter                      | Description                  | Default                                                                                         |
 |--------------------------------|------------------------------|-------------------------------------------------------------------------------------------------|
 | `scheduler.name`               | Scheduler name               | `scheduler-plugins-scheduler`                                                                   |
-| `scheduler.image`              | Scheduler image              | `registry.k8s.io/scheduler-plugins/kube-scheduler:v0.34.7`                                      |
+| `scheduler.image`              | Scheduler image              | `registry.k8s.io/scheduler-plugins/kube-scheduler:v0.35.7`                                      |
 | `scheduler.command`            | Scheduler command            | `["/bin/kube-scheduler"]`                                                                       |
 | `scheduler.leaderElect`        | Scheduler leaderElection     | `false`                                                                                         |
 | `scheduler.replicaCount`       | Scheduler replicaCount       | `1`                                                                                             |
@@ -60,7 +60,7 @@ The following table lists the configurable parameters of the as-a-second-schedul
 | `scheduler.affinity`           | Scheduler affinity           | `{}`                                                                                            |
 | `scheduler.tolerations`        | Scheduler tolerations        | `[]`                                                                                            |
 | `controller.name`              | Controller name              | `scheduler-plugins-controller`                                                                  |
-| `controller.image`             | Controller image             | `registry.k8s.io/scheduler-plugins/controller:v0.29.7`                                          |
+| `controller.image`             | Controller image             | `registry.k8s.io/scheduler-plugins/controller:v0.35.7`                                          |
 | `controller.replicaCount`      | Controller replicaCount      | `1`                                                                                             |
 | `controller.priorityClassName` | Controller priorityClassName | `""`                                                                                            |
 | `controller.resources`         | Controller resources         | `{}`                                                                                            |
