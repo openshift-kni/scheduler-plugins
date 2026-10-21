@@ -4,17 +4,18 @@ metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/openshift-kni/scheduler-plugins?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
+    build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
-    pipelinesascode.tekton.dev/cancel-in-progress: "false"
+    pipelinesascode.tekton.dev/cancel-in-progress: "true"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "release-5.0"
+    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
+      == "release-4.23"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: noderesourcetopology-scheduler-5-0
-    appstudio.openshift.io/component: noderesourcetopology-scheduler-5-0
+    appstudio.openshift.io/application: noderesourcetopology-scheduler-4-23
+    appstudio.openshift.io/component: noderesourcetopology-scheduler-4-23
     pipelines.appstudio.openshift.io/type: build
-  name: noderesourcetopology-scheduler-5-0-on-push
+  name: noderesourcetopology-scheduler-4-23-on-pull-request
   namespace: telco-5g-tenant
 spec:
   params:
@@ -23,7 +24,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/telco-5g-tenant/noderesourcetopology-scheduler-5-0:{{revision}}
+    value: quay.io/redhat-user-workloads/telco-5g-tenant/noderesourcetopology-scheduler-4-23:on-pr-{{revision}}
+  - name: image-expires-after
+    value: 5d
   - name: build-platforms
     value:
     - linux/x86_64
@@ -38,7 +41,7 @@ spec:
   pipelineRef:
     name: build-pipeline
   taskRunTemplate:
-    serviceAccountName: build-pipeline-noderesourcetopology-scheduler-5-0
+    serviceAccountName: build-pipeline-noderesourcetopology-scheduler-4-23
   workspaces:
   - name: git-auth
     secret:
