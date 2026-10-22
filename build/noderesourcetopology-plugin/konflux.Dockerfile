@@ -1,5 +1,5 @@
 # follow https://brewweb.engineering.redhat.com/brew/packageinfo?packageID=70135
-FROM registry.redhat.io/openshift/golang-builder:golang-builder-v1.26-rhel9@sha256:56e4f92857c4662bb2151cbb7aa55aa8b1e790126adc64dacd835dfed02dfca4 as builder
+FROM registry.redhat.io/openshift/golang-builder:golang-builder-v1.26-rhel9@sha256:cdb2b291b842dc836be849d735d47a80c13a910bdd61a95933167bbaff6b8bc3 as builder
 
 ARG COMMIT_SHA
 ARG OCP_MAJOR_VERSION=5
