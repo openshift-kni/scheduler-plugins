@@ -12,6 +12,7 @@
 #   - .tekton/                     (Tekton / Konflux pipeline definitions)
 #   - renovate.json                (Renovate config)
 #   - .konflux/                    (Konflux config)
+#   - build/noderesourcetopology-plugin/konflux.Dockerfile (Konflux build file)
 #
 # If a PR touches BOTH excluded and non-excluded files, the cherry-pick
 # IS triggered — code changes are present alongside infra changes.
@@ -80,6 +81,7 @@ jobs:
             //   - anything under .tekton/           (Tekton pipelines)
             //   - renovate.json                     (Renovate config)
             //   - anything under .konflux/           (Konflux config)
+            //   - the Konflux-specific build Dockerfile in the plugin directory
             // ---------------------------------------------------------------
             const excludedPatterns = [
               /^go\.(mod|sum)$/,
@@ -87,6 +89,7 @@ jobs:
               /^\.tekton\//,
               /^renovate\.json$/,
               /^\.konflux\//,
+              /^build\/noderesourcetopology-plugin\/konflux\.Dockerfile$/,
             ];
 
             function isExcluded(filePath) {
