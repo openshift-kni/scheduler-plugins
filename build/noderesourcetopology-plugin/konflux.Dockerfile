@@ -1,4 +1,4 @@
-FROM registry.redhat.io/openshift/golang-builder:golang-builder-v1.21-rhel9@sha256:d52999a7c2222c83ba488e5fb814a12d226c4b9e6de1c22abb647da7f552a028 as builder
+FROM registry.redhat.io/openshift/golang-builder:golang-builder-v1.21-rhel9@sha256:1fbd22a7bac8c8c29f28b993d934a9a33d38eb91438bf2f15812ea5a608d6951 as builder
 
 ARG COMMIT_SHA
 ARG OCP_MAJOR_VERSION=4
