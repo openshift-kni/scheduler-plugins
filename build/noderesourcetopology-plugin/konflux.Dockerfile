@@ -1,8 +1,8 @@
 FROM registry.redhat.io/openshift/golang-builder:golang-builder-v1.26-rhel9@sha256:78bd08b0aa5520dec6f388f5d17c5da6e44ee9b8f826aebc8f3264738e9532e2 as builder
 
 ARG COMMIT_SHA
-ARG OCP_MAJOR_VERSION=5
-ARG OCP_MINOR_VERSION=0
+ARG OCP_MAJOR_VERSION=4
+ARG OCP_MINOR_VERSION=23
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ WORKDIR /bin
 CMD ["kube-scheduler"]
 
 LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
-      name="openshift5/noderesourcetopology-scheduler-rhel9" \
+      name="openshift4/noderesourcetopology-scheduler-rhel9" \
       summary="node resource topology aware scheduler" \
       io.openshift.expose-services="" \
       io.openshift.tags="numa,topology,scheduler" \
@@ -27,5 +27,5 @@ LABEL com.redhat.component="noderesourcetopology-scheduler-container" \
       io.openshift.maintainer.component="Node Resource Topology aware Scheduler" \
       io.openshift.maintainer.product="OpenShift Container Platform" \
       io.k8s.description="Node Resource Topology aware Scheduler" \
-      cpe="cpe:/a:redhat:openshift:5.0::el9" \
+      cpe="cpe:/a:redhat:openshift:4.23::el9" \
       url="https://github.com/openshift-kni/scheduler-plugins"
